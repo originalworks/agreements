@@ -1,0 +1,12 @@
+{
+  "deployer": "0x226a0A062cf1A5Ec2384c029a6AF8C65bb1A9AfA",
+  "lender": "0xb739BD40E3324303DeEb5a70600FEb3694687513",
+  "agreementImplementation": "0x816d2d761ff345ab42e522ea4dfb2337e55964e1",
+  "lendingContract": "0x76bbBCc89d8764040C3a02e503dFc3A7C7470dD8",
+  "cyclePreventionRegistry": "0x0880037908158964b2C2d92Db1224E97aCdc360a",
+  "feeManager": "0xf63e88cfC2e741039c433952491B9504A16aE781",
+  "feeManagerImplementation": "0xc610d5695dA950740D14E93D4c9af9C712a746Ae",
+  "agreementFactory": "0x4278D82Ca2605C2F41248FF862217f05105384d7",
+  "agreementFactoryImplementation": "0xafdF96527759F3B7f293cb3ffeb50f779b3f4565",
+  "trackedToken": "0x5861f16FABfc0e6a2Eff34c265997c5cd4CaFA3B"
+}

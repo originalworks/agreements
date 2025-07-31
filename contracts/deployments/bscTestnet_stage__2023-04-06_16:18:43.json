@@ -1,0 +1,96 @@
+{
+  "deployer": "0x226a0A062cf1A5Ec2384c029a6AF8C65bb1A9AfA",
+  "agreementERC20ImplementationV1": "0xDe5E07B56A38335832A159c46Cf0a54A15546Bc4",
+  "agreementERC1155ImplementationV1": "0x967c8176e4678F1e82Be27f786307C0C9D9fd7A2",
+  "agreementERC20ImplementationV2": "0xf420A4fF40147A74Fc5376B1d92CcD1250c59428",
+  "agreementERC1155ImplementationV2": "0x02768443e5D5324151E87ef2491045d1160d55B8",
+  "agreementERC20Implementation": "0x34A4216b94Ae3BFb3447cdeabE402DD0aB1AC13a",
+  "agreementERC1155Implementation": "0x4e4F43591E88F9954263763544A26288E9d051A1",
+  "lendingContract": "0x5e409EbD975585fbd654299AfD3Eb3D52e1CFF4A",
+  "agreementRelationsRegistry": "0xcd94F873BACab9Bc17dB23cea67c2a9072f10780",
+  "fallbackVault": "0xA5336DDD220CBe7158e97773a1d5d3D78C600Af6",
+  "splitCurrencyListManager": "0x1635377aA0D85f1BAE81da3F1007a9a70AFCba7D",
+  "feeManager": "0x53992E0Cf7539130982f057b2ACb7EFE8dcf067B",
+  "agreementFactory": "0x1f349F5B9233087E56B2EA9FE6f10e305358c55B",
+  "splitCurrencies": [
+    {
+      "name": "USD Coin",
+      "symbol": "USDC",
+      "decimals": 6,
+      "lendingCurrency": true,
+      "nativeCoin": false,
+      "address": "0x8021cd0dFbE5BFfAC9fBc9904293b7a85253f337"
+    },
+    {
+      "name": "Tether",
+      "symbol": "USDT",
+      "decimals": 6,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0x703809cCf6f6abA886B6da7f264B51F3bFD5AA55"
+    },
+    {
+      "name": "Wrapped Ether",
+      "symbol": "WETH",
+      "decimals": 18,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0x90537BaD18d7855F949094c5113605A7342b9B9e"
+    },
+    {
+      "name": "Dai Stablecoin",
+      "symbol": "DAI",
+      "decimals": 18,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0x24164850b3063DD6d569d158512B51Aa5F5D39d4"
+    },
+    {
+      "name": "Avalanche Token",
+      "symbol": "AVAX",
+      "decimals": 18,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0xE30059a5A95F1708253A3c73884b289F7053E1ed"
+    },
+    {
+      "name": "BUSD Token",
+      "symbol": "BUSD",
+      "decimals": 18,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0x59C1E507d37739aBB075B4Bb54F3B81260048456"
+    },
+    {
+      "name": "Wrapped BTC",
+      "symbol": "WBTC",
+      "decimals": 8,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0x936B97a62eA6183290bEaAE7A4CAa659ca0d2Ef2"
+    },
+    {
+      "name": "Cosmos",
+      "symbol": "ATOM",
+      "decimals": 6,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0x2d6Fe41915a5594808Ae686ba7aCfDeD63605ECB"
+    },
+    {
+      "name": "native coin",
+      "symbol": "ETH",
+      "decimals": 18,
+      "lendingCurrency": false,
+      "nativeCoin": true,
+      "address": "0x0000000000000000000000000000000000000000"
+    }
+  ],
+  "lenders": [
+    "0x02bE2288d84cD2682AdbbD2Cc62476a9E1d16ba7"
+  ],
+  "feeManagerImplementation": "0x8871bE872d0f39B01d59f82C38D6b5c15Ed4a392",
+  "agreementFactoryImplementation": "0x83371c53DedCE7E5CDc691FDDfE53769ed65Bbfa",
+  "lendingContractImplementation": "0x94dC4c3abd81Ac011f696069867F010C7a456aCe",
+  "fallbackVaultImplementation": "0x5Ea1697f7379A29BFaEE607e9C4b1784AC84B9e6"
+}

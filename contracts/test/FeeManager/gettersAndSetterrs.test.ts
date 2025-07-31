@@ -1,0 +1,93 @@
+import { expect } from 'chai'
+import { Wallet } from 'ethers'
+import { ethers } from 'hardhat'
+import { deployInitialSetup } from '../helpers/deployments'
+
+describe('FeeManager getters and setters', () => {
+  describe('get & set owner', () => {
+    it('returns original owner', async () => {
+      const { feeManager, deployer } = await deployInitialSetup()
+      expect(await feeManager.owner()).to.equal(deployer.address)
+    })
+
+    it('can change owner', async () => {
+      const { feeManager } = await deployInitialSetup()
+      const newOwner = Wallet.createRandom().address
+      await feeManager.transferOwnership(newOwner)
+      expect(await feeManager.owner()).to.equal(newOwner)
+    })
+
+    it('can only be called by owner', async () => {
+      const [, , , notOwner] = await ethers.getSigners()
+      const { feeManager } = await deployInitialSetup()
+      await expect(
+        feeManager
+          .connect(notOwner)
+          .transferOwnership(Wallet.createRandom().address),
+      ).to.be.revertedWith('Ownable: caller is not the owner')
+    })
+
+    it('cannot be set to zero', async () => {
+      const { feeManager } = await deployInitialSetup()
+      await expect(
+        feeManager.transferOwnership(ethers.constants.AddressZero),
+      ).to.be.revertedWith('Ownable: new owner is the zero address')
+    })
+  })
+
+  describe('get & set creation fee', () => {
+    it('returns original creation fee', async () => {
+      const creationFee = ethers.utils.parseEther('0.001')
+      const { feeManager } = await deployInitialSetup({ creationFee })
+      expect(await feeManager.creationFee()).to.equal(creationFee)
+    })
+
+    it('can change creation fee', async () => {
+      const { feeManager } = await deployInitialSetup()
+      await feeManager.setCreationFee(69)
+      expect(await feeManager.creationFee()).to.equal(69)
+    })
+
+    it('can change creation fee to 0', async () => {
+      const { feeManager } = await deployInitialSetup()
+      await feeManager.setCreationFee(0)
+      expect(await feeManager.creationFee()).to.equal(0)
+    })
+
+    it('can only be called by owner', async () => {
+      const [, , , notOwner] = await ethers.getSigners()
+      const { feeManager } = await deployInitialSetup()
+      await expect(
+        feeManager.connect(notOwner).setCreationFee(123),
+      ).to.be.revertedWith('Ownable: caller is not the owner')
+    })
+  })
+  describe('get & set payment fee', () => {
+    it('returns original payment fee', async () => {
+      const paymentFee = ethers.utils.parseEther('0.015')
+
+      const { feeManager } = await deployInitialSetup({ paymentFee })
+      expect(await feeManager.paymentFee()).to.equal(paymentFee)
+    })
+
+    it('can change payment fee', async () => {
+      const { feeManager } = await deployInitialSetup()
+      await feeManager.setPaymentFee(69)
+      expect(await feeManager.paymentFee()).to.equal(69)
+    })
+
+    it('can change payment fee to 0', async () => {
+      const { feeManager } = await deployInitialSetup()
+      await feeManager.setPaymentFee(0)
+      expect(await feeManager.paymentFee()).to.equal(0)
+    })
+
+    it('can only be called by owner', async () => {
+      const [, , , notOwner] = await ethers.getSigners()
+      const { feeManager } = await deployInitialSetup()
+      await expect(
+        feeManager.connect(notOwner).setPaymentFee(123),
+      ).to.be.revertedWith('Ownable: caller is not the owner')
+    })
+  })
+})

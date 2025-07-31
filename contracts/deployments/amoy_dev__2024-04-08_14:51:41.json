@@ -1,0 +1,50 @@
+{
+  "deployer": "0x226a0A062cf1A5Ec2384c029a6AF8C65bb1A9AfA",
+  "agreementERC20ImplementationV10": "0xbDC839E203Da84Cf462B820E694f8406Fb366d24",
+  "agreementERC1155ImplementationV10": "0x823a7BfEb4ac2b4d1849B419c64939fe2e067855",
+  "agreementERC20Implementation": "0x8871bE872d0f39B01d59f82C38D6b5c15Ed4a392",
+  "agreementERC1155Implementation": "0xBDAE192864B45A714D6eb8de059D1C2744B5FB06",
+  "agreementRelationsRegistry": "0xF25cCA5c883b2FCD94f3ff866D12FeC31CBbe50D",
+  "fallbackVault": "0xD070226aA57D712A1343baAdcc7bBeE471B549b4",
+  "splitCurrencyListManager": "0x8c05fc29DBF636bcC8184974d2A9A5aC75C1953c",
+  "feeManager": "0x570D75E0453F2584675276265f68Dc16Af3Ce0Be",
+  "agreementFactory": "0x5285eB0976dDc80D2A7154c727fa3aD5826722E4",
+  "namespaceRegistry": "0x86214F8b29A76d21242b8a40a23d5b01C3d6F8D8",
+  "splitCurrencies": [
+    {
+      "name": "USD Coin",
+      "symbol": "USDC",
+      "decimals": 6,
+      "lendingCurrency": true,
+      "nativeCoin": false,
+      "address": "0xd76eA12DDa2A29329808d183a11CAA5fcfE09E72"
+    },
+    {
+      "name": "Tether",
+      "symbol": "USDT",
+      "decimals": 6,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0x626Eed4eAbB19c5233142a64C9935D5df9dCe604"
+    },
+    {
+      "name": "Dai Stablecoin",
+      "symbol": "DAI",
+      "decimals": 18,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0x338d2638A9Ee8eBc04698ee6FB7Fd4c76f2338C3"
+    },
+    {
+      "name": "native coin",
+      "symbol": "ETH",
+      "decimals": 18,
+      "lendingCurrency": false,
+      "nativeCoin": true,
+      "address": "0x0000000000000000000000000000000000000000"
+    }
+  ],
+  "feeManagerImplementation": "0x2497bbdFc4b652f537238118BA5A243cAAd97F30",
+  "agreementFactoryImplementation": "0x30be25eA48fE23D0dB1EF98Ad9aBAD19Ab2C10b5",
+  "fallbackVaultImplementation": "0xE3dA604814cDF2b782F3a1A56A535afeA3B22C95"
+}

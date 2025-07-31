@@ -1,0 +1,105 @@
+{
+  "deployer": "0x226a0A062cf1A5Ec2384c029a6AF8C65bb1A9AfA",
+  "agreementERC20ImplementationV1": "0x7a91AB55e468518cCA568e9D1bf99d95C2F316dF",
+  "agreementERC1155ImplementationV1": "0xf302366EBa067375FB3480995f3EE6C121D7192D",
+  "agreementERC20ImplementationV2": "0xa833Cfd2AFF0EbE6d8f15DC91a01Af94D2EE1Ded",
+  "agreementERC1155ImplementationV2": "0x52952801C151246c927836d53A8aea68f63eF42B",
+  "agreementERC20ImplementationV3": "0x3969aB0C05d194B8FAC26bBb0f8C13Deacb7Ba09",
+  "agreementERC1155ImplementationV3": "0xB60cfF71a55Eb2bCB64F49518949Cd10E4DBF755",
+  "agreementERC20ImplementationV4": "0xF4c9DfEc5Ee8d6c8b1D66eEE8cE9D79f2241Ef8A",
+  "agreementERC1155ImplementationV4": "0x01bEfE49e43B7f681aD64d0Bd9397c36AB110204",
+  "agreementERC20ImplementationV5": "0x59542f3d7de5E5e4cEbA02dA57bB73Caed84FAb6",
+  "agreementERC1155ImplementationV5": "0xfb6fE51613630c13Be612CC36bdeA38774235392",
+  "agreementERC20ImplementationV6": "0x38C82DBc8d49F58E17dc1cd03c92d00c2D9Aef17",
+  "agreementERC1155ImplementationV6": "0xB878631B539CE1295F9deFaF51568E87083D9F48",
+  "agreementERC20Implementation": "0xb269fB3C1099230ca27c42993a0AC192f2Dd1C5f",
+  "agreementERC1155Implementation": "0x9290686271a11405642569B7B686ed50778A1cC6",
+  "lendingContract": "0x9d8b0E7622c452C03DD2432B4b5009B6e738AF00",
+  "agreementRelationsRegistry": "0xc6AC8F1ac2CE70809E586eEe21111e7A38a484EB",
+  "fallbackVault": "0xdFA0520F169b1387A9C48Ab46AF709ce91d5A8F6",
+  "splitCurrencyListManager": "0x42C893836D4A5B0B149FCf878fFCfBfe6417F866",
+  "feeManager": "0xd8460bbaF6D045d5b06D127Ff1B52859b332fa16",
+  "agreementFactory": "0xC9F00A2300b53f8DccF447e5d96c08aEcA133bE9",
+  "namespaceRegistry": "0x3F6061Cab23f51291a1556735b4c36AB4fa19f45",
+  "splitCurrencies": [
+    {
+      "name": "USD Coin",
+      "symbol": "USDC",
+      "decimals": 6,
+      "lendingCurrency": true,
+      "nativeCoin": false,
+      "address": "0xC85A28f0fbE6110Dc311DF5adD82488C53BB7a7a"
+    },
+    {
+      "name": "Tether",
+      "symbol": "USDT",
+      "decimals": 6,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0x3823Bc8E465785A72E713282952f4500d2dc3939"
+    },
+    {
+      "name": "Wrapped Ether",
+      "symbol": "WETH",
+      "decimals": 18,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0xfFd755EAb4e31514db3a60Ef07db592034702749"
+    },
+    {
+      "name": "Dai Stablecoin",
+      "symbol": "DAI",
+      "decimals": 18,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0x274aFCA55500eDCa1E87F6Ab32451FCCED974637"
+    },
+    {
+      "name": "Avalanche Token",
+      "symbol": "AVAX",
+      "decimals": 18,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0x1ecAc0971E52bc47900965d73768b1e7A658B9De"
+    },
+    {
+      "name": "BUSD Token",
+      "symbol": "BUSD",
+      "decimals": 18,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0x6Aa66D7C7049e76f85e790dC2589BAe4b65C04cC"
+    },
+    {
+      "name": "Wrapped BTC",
+      "symbol": "WBTC",
+      "decimals": 8,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0x797d9C36205aAC7c45a7540CBeA1a6919185C01c"
+    },
+    {
+      "name": "Cosmos",
+      "symbol": "ATOM",
+      "decimals": 6,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0x8ac2B72A7d8682002C12E3Ca245DDeF8DcE06a6b"
+    },
+    {
+      "name": "native coin",
+      "symbol": "ETH",
+      "decimals": 18,
+      "lendingCurrency": false,
+      "nativeCoin": true,
+      "address": "0x0000000000000000000000000000000000000000"
+    }
+  ],
+  "lenders": [
+    "0x1B634466378353f0709681b94Bd7C0aa8e2bA0dD"
+  ],
+  "feeManagerImplementation": "0x42098549F2443db09694718cf4437DEd6857256F",
+  "agreementFactoryImplementation": "0xa97fcAc6478b388AAADBEE5554AF1B5443e8F543",
+  "lendingContractImplementation": "0xC7c43783FA19047F35B5DFB742b3D6d7B22FcDD2",
+  "fallbackVaultImplementation": "0xD8d7C418061a3DfE44FdDCC49842c95F3d5b868B"
+}

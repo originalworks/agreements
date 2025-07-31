@@ -1,0 +1,6 @@
+cache
+artifacts
+typechain
+
+.openzeppelin/unknown-31337.json
+deployments/unknown__*.json

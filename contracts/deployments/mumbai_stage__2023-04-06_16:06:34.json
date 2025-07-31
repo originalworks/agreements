@@ -1,0 +1,111 @@
+{
+  "deployer": "0x226a0A062cf1A5Ec2384c029a6AF8C65bb1A9AfA",
+  "agreementERC20ImplementationV1": "0x7eF8EeACBEF9010c6484cA152B6c1bE77e2d0dC9",
+  "agreementERC1155ImplementationV1": "0x86f81Cadd1cD6B0BDEdb902BAe6FCf3a9C7e574c",
+  "agreementERC20ImplementationV2": "0xD5496D1003ED95f5E7D4Fea89C081945A303A8ac",
+  "agreementERC1155ImplementationV2": "0xd1D27d76509f236463f0C2F9e0441AA79a15C6f3",
+  "agreementERC20ImplementationV3": "0x3657A329060e38EFf2D84248249ed187A3C0cb67",
+  "agreementERC1155ImplementationV3": "0x562cb74D8bF0DA84af541752a9e292991e75626B",
+  "agreementERC20ImplementationV4": "0xC3CdeAfDf35E263420b8f3D2b408509c18c338Bd",
+  "agreementERC1155ImplementationV4": "0x11F4F784Ce74069Adee399258e7D166A6AE62873",
+  "agreementERC20ImplementationV5": "0xb9851eE559Ca3f48C64D1d7EdB31AF18c5Ea961A",
+  "agreementERC1155ImplementationV5": "0xBD26FF6F51a6D0Ed0fC8bE3D538E031db813A879",
+  "agreementERC20ImplementationV6": "0x171C21a5DF353568B5961Dd422662b0A59Ac35f2",
+  "agreementERC1155ImplementationV6": "0x577424afB52e45bc2eea5d8Ca92E412c43E960D8",
+  "agreementERC20ImplementationV7": "0x0246F8A768adB7b3AD5d3C7134DADf602B1037CA",
+  "agreementERC1155ImplementationV7": "0x5E57f569b1C1ef14FbAd33b7db6D65786eFAF4Ae",
+  "agreementERC20ImplementationV8": "0x2C0232B53eC6FfdDA7F2C27D9E8846cFd8cD0d7A",
+  "agreementERC1155ImplementationV8": "0xAD08701668c113D739B03794E84F637D4600BEf0",
+  "agreementERC20ImplementationV9": "0xC24cd572a754e982248d7C27dAE5F7738920A894",
+  "agreementERC1155ImplementationV9": "0x82E6753634f273f7B21a8091660fD67d75F82091",
+  "agreementERC20Implementation": "0x004D6652663F2048c906E5fEAac18E54f1749303",
+  "agreementERC1155Implementation": "0xc24ae0e967Fbb98eB261774f21358F8174f0561A",
+  "lendingContract": "0x1f349F5B9233087E56B2EA9FE6f10e305358c55B",
+  "agreementRelationsRegistry": "0x02768443e5D5324151E87ef2491045d1160d55B8",
+  "fallbackVault": "0xf420A4fF40147A74Fc5376B1d92CcD1250c59428",
+  "splitCurrencyListManager": "0xbfFBBc78C3e06222B0019A8444629bD03b144f0b",
+  "feeManager": "0x77BD32a04088fF0c08e7Ceb22a6Ab60Fc59db12D",
+  "agreementFactory": "0x3438fAEFA0F9f670AB7784C379f129D680C6Feaa",
+  "namespaceRegistry": "0x5198Ae47b60C4BE8Ac16870A206b50923D6689B0",
+  "splitCurrencies": [
+    {
+      "name": "USD Coin",
+      "symbol": "USDC",
+      "decimals": 6,
+      "lendingCurrency": true,
+      "nativeCoin": false,
+      "address": "0xb8D1c59aDd003Fe681B0F9457dcB02Bb3B18EA05"
+    },
+    {
+      "name": "Tether",
+      "symbol": "USDT",
+      "decimals": 6,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0xD9d8b29A536794F150990E0bEE479D4437391155"
+    },
+    {
+      "name": "Wrapped Ether",
+      "symbol": "WETH",
+      "decimals": 18,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0xE6EA01f959D43C31B220F8b6DaA59C7C900335F3"
+    },
+    {
+      "name": "Dai Stablecoin",
+      "symbol": "DAI",
+      "decimals": 18,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0x940B75925ee29D5c7C1EbEa36aEf1e8DEEfDf52c"
+    },
+    {
+      "name": "Avalanche Token",
+      "symbol": "AVAX",
+      "decimals": 18,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0x5FC0Dea4015568884F7ec5112a315bf8d7dCAB02"
+    },
+    {
+      "name": "BUSD Token",
+      "symbol": "BUSD",
+      "decimals": 18,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0x895e28aaEf330e909f2f005788B2464e82201a77"
+    },
+    {
+      "name": "Wrapped BTC",
+      "symbol": "WBTC",
+      "decimals": 8,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0x53DF8b594a499928B881b3974fA0DA6415d04f95"
+    },
+    {
+      "name": "Cosmos",
+      "symbol": "ATOM",
+      "decimals": 6,
+      "lendingCurrency": false,
+      "nativeCoin": false,
+      "address": "0xa6DF2FCaE95Ec7e634b8A1bb1CF4A23797dB1a71"
+    },
+    {
+      "name": "native coin",
+      "symbol": "ETH",
+      "decimals": 18,
+      "lendingCurrency": false,
+      "nativeCoin": true,
+      "address": "0x0000000000000000000000000000000000000000"
+    }
+  ],
+  "lenders": [
+    "0x579e95A3A401b4f3824dB81457574E4aDDB7De7c"
+  ],
+  "feeManagerImplementation": "0xd48ba7FC30DCBD6aE139eb6A0465040376156eC1",
+  "agreementFactoryImplementation": "0x5077aEEc72a95560292eef7d627f02f777819435",
+  "lendingContractImplementation": "0x59C1E507d37739aBB075B4Bb54F3B81260048456",
+  "fallbackVaultImplementation": "0x5080cF81C9bd7d37Ec8E77BF1585e42663655fa9"
+}

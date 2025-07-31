@@ -1,0 +1,13 @@
+{
+  "deployer": "0x226a0A062cf1A5Ec2384c029a6AF8C65bb1A9AfA",
+  "lender": "0x3070c92747f02E0A67dAfbF5445E05E61225095c",
+  "agreementERC20Implementation": "0x338d2638A9Ee8eBc04698ee6FB7Fd4c76f2338C3",
+  "agreementERC1155Implementation": "0x66170011DD76f46475B9ce5beDf3b2B72E454C58",
+  "lendingContract": "0x570D75E0453F2584675276265f68Dc16Af3Ce0Be",
+  "cyclePreventionRegistry": "0x823a7BfEb4ac2b4d1849B419c64939fe2e067855",
+  "feeManager": "0xE3dA604814cDF2b782F3a1A56A535afeA3B22C95",
+  "feeManagerImplementation": "0xF25cCA5c883b2FCD94f3ff866D12FeC31CBbe50D",
+  "agreementFactory": "0x75b6AC25892b1F13fCeA91426C1f061f52CF7B05",
+  "agreementFactoryImplementation": "0xEdCe1f89bD6346FB46e94a2ff443Bf6150da137B",
+  "trackedToken": "0x643aa2BBeB6a83d55F29b0a7319eB8083545b958"
+}
