@@ -22,7 +22,7 @@ contract AgreementERC20 is
   ERC1155HolderUpgradeable,
   IAgreementERC20
 {
-  using SafeERC20 for IERC20Upgradeable;
+  using SafeERC20 for IERC20;
 
   ISplitCurrencyListManager private splitCurrencyListManager;
   IFeeManager private feeManager;
@@ -137,7 +137,7 @@ contract AgreementERC20 is
             fallbackVault.registerIncomingFunds{value: amount}(holder);
           }
         } else {
-          IERC20Upgradeable(currency).safeTransfer(holder, amount);
+          IERC20(currency).safeTransfer(holder, amount);
         }
         emit HolderFundsClaimed(holder, amount, currency);
       }
@@ -165,13 +165,13 @@ contract AgreementERC20 is
         );
       }
     } else {
-      IERC20Upgradeable(currency).safeTransfer(msg.sender, availableFee);
+      IERC20(currency).safeTransfer(msg.sender, availableFee);
     }
     emit FeeCollected(availableFee, currency);
   }
 
   function transferOwnedERC20Shares(
-    IERC20Upgradeable agreement,
+    IERC20 agreement,
     address recipient,
     uint256 amount
   ) public onlyAdmin {
@@ -268,15 +268,11 @@ contract AgreementERC20 is
     IAgreementProxy(address(this)).upgradeTo(implementation);
   }
 
-  function _beforeTokenTransfer(
-    address from,
-    address to,
-    uint256 amount
-  ) internal override {
-    if (balanceOf(to) == 0 && Address.isContract(to)) {
+  function _update(address from, address to, uint256 amount) internal override {
+    if (balanceOf(to) == 0 && to.code.length > 0) {
       agreementRelationsRegistry.registerChildParentRelation(to);
     }
-    if (balanceOf(from) == amount && Address.isContract(from)) {
+    if (balanceOf(from) == amount && from.code.length > 0) {
       agreementRelationsRegistry.removeChildParentRelation(from);
     }
     if (from != address(0)) {
@@ -299,6 +295,7 @@ contract AgreementERC20 is
         ];
       }
     }
+    super._update(from, to, amount);
   }
 
   function _calculateClaimableAmount(
@@ -321,7 +318,7 @@ contract AgreementERC20 is
     if (currency == address(0)) {
       return address(this).balance;
     } else {
-      return IERC20Upgradeable(currency).balanceOf(address(this));
+      return IERC20(currency).balanceOf(address(this));
     }
   }
 
@@ -342,8 +339,7 @@ contract AgreementERC20 is
         receivedFunds[currency];
     } else {
       newIncome =
-        (withdrawnFunds[currency] +
-          IERC20Upgradeable(currency).balanceOf(address(this))) -
+        (withdrawnFunds[currency] + IERC20(currency).balanceOf(address(this))) -
         receivedFunds[currency];
     }
     uint256 newFee = (newIncome * paymentFee) / paymentFeeDenominator;
@@ -387,8 +383,7 @@ contract AgreementERC20 is
         (withdrawnFunds[currency] + address(this).balance));
     } else {
       return (receivedFunds[currency] <
-        (withdrawnFunds[currency] +
-          IERC20Upgradeable(currency).balanceOf(address(this))));
+        (withdrawnFunds[currency] + IERC20(currency).balanceOf(address(this))));
     }
   }
 
@@ -400,7 +395,7 @@ contract AgreementERC20 is
     if (currency == address(0)) {
       newlyReceivedFunds = address(this).balance;
     } else {
-      newlyReceivedFunds = IERC20Upgradeable(currency).balanceOf(address(this));
+      newlyReceivedFunds = IERC20(currency).balanceOf(address(this));
     }
     receivedFunds[currency] = withdrawnFunds[currency] + newlyReceivedFunds;
     emit ERC20IncomeRegistered(currency, newlyReceivedFunds);
