@@ -1,5 +1,5 @@
-import { providers } from 'ethers'
-import { ethers } from 'hardhat'
+import { JsonRpcProvider } from 'ethers';
+import { ethers } from 'hardhat';
 
 // Due to fact that sepolia has empty mined blocks, gas fee estimations are failing.
 // It creates the situation where tx has 0 gasPrice therefore it won't be mined.
@@ -17,43 +17,43 @@ import { ethers } from 'hardhat'
 // To make it work make sure that provider has always good gas price (set manually)
 // and nonce getter is set to 'latest', not 'pending'
 
-const RPC_URL = ''
+const RPC_URL = '';
 
 async function main() {
-  const [deployer] = await ethers.getSigners()
-  const provider = new providers.JsonRpcProvider(RPC_URL)
+  const [deployer] = await ethers.getSigners();
+  const provider = new JsonRpcProvider(RPC_URL);
 
   const checkNonces = async () => {
     const pendingNonce = await provider.send('eth_getTransactionCount', [
       deployer.address,
       'pending',
-    ])
+    ]);
     const latestNonce = await provider.send('eth_getTransactionCount', [
       deployer.address,
       'latest',
-    ])
-    console.log({ pendingNonce, latestNonce })
-    return { pendingNonce, latestNonce }
-  }
-  // eslint-disable-next-line
+    ]);
+    console.log({ pendingNonce, latestNonce });
+    return { pendingNonce, latestNonce };
+  };
+
   while (true) {
-    const { latestNonce, pendingNonce } = await checkNonces()
+    const { latestNonce, pendingNonce } = await checkNonces();
 
     if (latestNonce === pendingNonce) {
-      console.log('Nonces are synced')
-      return
+      console.log('Nonces are synced');
+      return;
     }
 
     // This tx will hop on the place of first jammed tx.
     const tx = await deployer.sendTransaction({
       to: deployer.address,
       value: '1',
-    })
-    await tx.wait()
+    });
+    await tx.wait();
   }
 }
 
 main().catch((error) => {
-  console.error(error)
-  process.exitCode = 1
-})
+  console.error(error);
+  process.exitCode = 1;
+});

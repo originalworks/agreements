@@ -1,5 +1,5 @@
-import { ethers, upgrades } from 'hardhat'
-import { SplitCurrencyListManager } from '../../typechain'
+import { ethers, upgrades } from 'hardhat';
+import { SplitCurrencyListManager } from '../../typechain';
 
 export async function deploySplitCurrencyListManager(
   splitCurrencies: string[],
@@ -7,14 +7,14 @@ export async function deploySplitCurrencyListManager(
 ): Promise<SplitCurrencyListManager> {
   const SplitCurrencyListManager = await ethers.getContractFactory(
     'SplitCurrencyListManager',
-  )
+  );
 
   const splitCurrencyListManager = (await upgrades.deployProxy(
     SplitCurrencyListManager,
     [splitCurrencies, lendingToken],
     { kind: 'uups' },
-  )) as SplitCurrencyListManager
+  )) as SplitCurrencyListManager;
 
-  await splitCurrencyListManager.deployed()
-  return splitCurrencyListManager
+  await splitCurrencyListManager.waitForDeployment();
+  return splitCurrencyListManager;
 }

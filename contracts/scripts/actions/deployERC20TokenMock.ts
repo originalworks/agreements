@@ -1,31 +1,31 @@
-import { parseUnits } from 'ethers/lib/utils'
-import { ethers } from 'hardhat'
-import { ERC20TokenMock } from '../../typechain'
-import { deployProxy } from '../../tests-deployment-scripts'
+import { ethers } from 'hardhat';
+import { ERC20TokenMock } from '../../typechain';
+import { deployProxy, getRunnerAddress } from '../../tests-deployment-scripts';
+import { parseUnits } from 'ethers';
 
 export async function deployERC20TokenMock(
   name: string,
   symbol: string,
   decimals: number,
 ): Promise<ERC20TokenMock> {
-  console.log({ name, symbol, decimals })
+  console.log({ name, symbol, decimals });
 
-  const TokenContract = await ethers.getContractFactory('ERC20TokenMock')
+  const TokenContract = await ethers.getContractFactory('ERC20TokenMock');
   const tokenContract = await deployProxy(TokenContract, [
     name,
     symbol,
     decimals,
-  ])
+  ]);
 
-  await tokenContract.deployed()
+  await tokenContract.waitForDeployment();
 
   await (
     await tokenContract.mintTo(
-      await TokenContract.signer.getAddress(),
+      await getRunnerAddress(TokenContract),
       parseUnits('10000000', decimals),
     )
-  ).wait()
-  console.log({ ERC20_address: tokenContract.address })
+  ).wait();
+  console.log({ ERC20_address: await tokenContract.getAddress() });
 
-  return tokenContract
+  return tokenContract;
 }

@@ -1,41 +1,36 @@
-import { ContractFactory } from 'ethers'
-import { ERC1967Proxy__factory } from '../typechain'
+import { BaseContract, ContractFactory } from 'ethers';
+import { ERC1967Proxy__factory } from '../typechain';
+import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 
-/**
- * Helper for deploying proxy contracts as with `upgrades` package.
- * Return type is inferred from the factory & initialize args are typechecked.
- * Works only for initializers with name `initialize`.
- *
- * @example
- *
- * const market = await deployProxy(
- *    new Market__factory(deployerWallet),
- *    [feeReceiverAddress, revCreditsAddress, ...]
- * )
- */
-
-export const deployProxy = async <Factory extends ContractFactory>(
-  implementationFactory: Factory,
-  initializeArgs: Parameters<
-    Awaited<ReturnType<Factory['deploy']>>['populateTransaction']['initialize']
-  >,
+export const deployProxy = async <T extends ContractFactory>(
+  factory: T,
+  initArgs: any[],
 ) => {
-  const signer = implementationFactory.signer
-  const ERC1967Proxy = new ERC1967Proxy__factory(signer)
+  const implementation = await factory.deploy();
+  const encodedInitArgs = // @ts-expect-error fk ethers v6
+    (await implementation.initialize.populateTransaction(...initArgs)).data;
+  const proxy = await (
+    await new ERC1967Proxy__factory(
+      implementation.runner as unknown as SignerWithAddress,
+    ).deploy(await implementation.getAddress(), encodedInitArgs)
+  ).waitForDeployment();
 
-  const implementation = await implementationFactory.deploy()
-  const implementationData = await implementation.populateTransaction[
-    'initialize'
-  ](...initializeArgs)
+  return implementation.attach(await proxy.getAddress()) as ReturnType<
+    T['deploy']
+  >;
+};
 
-  const proxy = await ERC1967Proxy.deploy(
-    implementation.address,
-    implementationData.data as any,
-  )
+export const getRunnerAddress = async (
+  factory: ContractFactory | BaseContract,
+) => {
+  if (
+    factory.runner &&
+    'getAddress' in factory.runner &&
+    typeof factory.runner.getAddress === 'function'
+  ) {
+    const address = await factory.runner.getAddress();
+    return address;
+  }
 
-  const contract = implementationFactory.attach(proxy.address) as Awaited<
-    ReturnType<Factory['deploy']>
-  >
-
-  return contract
-}
+  throw new Error('Unable to get runner address');
+};

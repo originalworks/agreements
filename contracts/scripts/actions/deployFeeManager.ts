@@ -1,19 +1,19 @@
-import { BigNumber } from 'ethers'
-import { ethers, upgrades } from 'hardhat'
-import { FeeManager } from '../../typechain'
+import { ethers, upgrades } from 'hardhat';
+import { FeeManager } from '../../typechain';
+import { BigNumberish } from 'ethers';
 
 export async function deployFeeManager(
-  creationFee: BigNumber,
-  paymentFee: BigNumber,
+  creationFee: BigNumberish,
+  paymentFee: BigNumberish,
 ): Promise<FeeManager> {
-  const FeeManager = await ethers.getContractFactory('FeeManager')
+  const FeeManager = await ethers.getContractFactory('FeeManager');
   const feeManager = (await upgrades.deployProxy(
     FeeManager,
     [creationFee, paymentFee],
     { kind: 'uups' },
-  )) as FeeManager
+  )) as FeeManager;
 
-  await feeManager.deployed()
+  await feeManager.waitForDeployment();
 
-  return feeManager
+  return feeManager;
 }

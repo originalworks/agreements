@@ -1,5 +1,5 @@
-import { ethers } from 'hardhat'
-import { SplitCurrency, SplitCurrencyDefinition } from '../../types'
+import { ethers } from 'hardhat';
+import { SplitCurrency, SplitCurrencyDefinition } from '../../types';
 
 // edit this file before using 'scripts/execute/deployAll/index.ts'!
 
@@ -81,9 +81,9 @@ export const PREDEFINED_SPLIT_CURRENCIES: SplitCurrency[] = [
     decimals: 18,
     lendingCurrency: false,
     nativeCoin: true,
-    address: ethers.constants.AddressZero,
+    address: ethers.ZeroAddress,
   },
-]
+];
 
 export const SPLIT_CURRENCIES_DEFINITIONS: SplitCurrencyDefinition[] = [
   {
@@ -149,4 +149,4 @@ export const SPLIT_CURRENCIES_DEFINITIONS: SplitCurrencyDefinition[] = [
     lendingCurrency: false,
     nativeCoin: true,
   },
-]
+];

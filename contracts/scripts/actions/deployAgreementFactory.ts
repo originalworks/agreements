@@ -1,11 +1,11 @@
-import { ethers, upgrades } from 'hardhat'
-import { AgreementFactory } from '../../typechain'
-import { AgreementFactoryDeploymentInput } from '../types'
+import { ethers, upgrades } from 'hardhat';
+import { AgreementFactory } from '../../typechain';
+import { AgreementFactoryDeploymentInput } from '../types';
 
 export async function deployAgreementFactory(
   input: AgreementFactoryDeploymentInput,
 ) {
-  const AgreementFactory = await ethers.getContractFactory('AgreementFactory')
+  const AgreementFactory = await ethers.getContractFactory('AgreementFactory');
   const agreementFactory = (await upgrades.deployProxy(
     AgreementFactory,
     [
@@ -18,9 +18,9 @@ export async function deployAgreementFactory(
       input.namespaceRegistry,
     ],
     { kind: 'uups' },
-  )) as AgreementFactory
+  )) as AgreementFactory;
 
-  await agreementFactory.deployed()
+  await agreementFactory.waitForDeployment();
 
-  return agreementFactory
+  return agreementFactory;
 }
