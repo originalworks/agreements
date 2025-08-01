@@ -6,7 +6,7 @@ import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
-import '../../contracts-shared/contracts/CallHelpers/CallHelpers.sol';
+import './shared/CallHelpers/CallHelpers.sol';
 import './interfaces/IFallbackVault.sol';
 
 contract FallbackVault is

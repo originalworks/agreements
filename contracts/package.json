@@ -15,6 +15,12 @@
   "dependencies": {},
   "nx": {
     "targets": {
+      "prepare": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "ts-node libs/scripts/symlink-shared.ts"
+        }
+      },
       "test": {
         "executor": "nx:run-commands",
         "options": {
@@ -23,6 +29,9 @@
         }
       },
       "compile": {
+        "dependsOn": [
+          "prepare"
+        ],
         "executor": "nx:run-commands",
         "options": {
           "command": "npx hardhat compile",

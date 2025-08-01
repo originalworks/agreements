@@ -110,7 +110,7 @@ contract AgreementFactory is
       'AgreementFactory: Wrong interface at NamespaceRegistry address'
     );
 
-    __Ownable_init();
+    __Ownable_init(msg.sender);
     setAgreementImplementation(
       _agreementERC20Implementation,
       TokenStandard.ERC20
@@ -147,7 +147,7 @@ contract AgreementFactory is
       'AgreementFactory: agreement address cannot be 0'
     );
     require(
-      Address.isContract(newImplementation),
+      newImplementation.code.length > 0,
       'AgreementFactory: agreement implementation must be a contract'
     );
     if (tokenStandard == TokenStandard.ERC20) {
