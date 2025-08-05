@@ -40,7 +40,7 @@ export interface InitialSetup {
 
 export interface Holder {
   account: string;
-  balance: string;
+  balance: bigint;
   isAdmin: boolean;
 }
 

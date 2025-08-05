@@ -1,41 +1,41 @@
-import { expect } from 'chai'
+import { expect } from 'chai';
 import {
   deployAgreementERC20,
   deployInitialSetup,
-} from '../../helpers/deployments'
+} from '../../helpers/deployments';
 
 describe('AgreementERC20.setDataHash', () => {
   it('fails if sender is not an admin', async () => {
-    const newDataHash = `0x${'fb'.repeat(32)}`
+    const newDataHash = `0x${'fb'.repeat(32)}`;
 
-    const initialSetup = await deployInitialSetup()
+    const initialSetup = await deployInitialSetup();
     const { agreement, holders } = await deployAgreementERC20({
       initialSetup,
-      shares: [500, 500],
-    })
-    const nonAdminHolder = holders[1]
-    expect(await agreement.isAdmin(nonAdminHolder.account)).to.be.false
+      shares: [500n, 500n],
+    });
+    const nonAdminHolder = holders[1];
+    expect(await agreement.isAdmin(nonAdminHolder.account)).to.equal(false);
     await expect(
       agreement.connect(nonAdminHolder.wallet).setDataHash(newDataHash),
-    ).to.be.reverted
-  })
+    ).to.be.reverted;
+  });
   it('sets data hash if sender is an admin', async () => {
-    const newDataHash = `0x${'fb'.repeat(32)}`
+    const newDataHash = `0x${'fb'.repeat(32)}`;
 
-    const initialSetup = await deployInitialSetup()
+    const initialSetup = await deployInitialSetup();
     const { agreement, holders } = await deployAgreementERC20({
       initialSetup,
-      shares: [500, 500],
-    })
-    const adminHolder = holders[0]
-    expect(await agreement.isAdmin(adminHolder.account)).to.be.true
+      shares: [500n, 500n],
+    });
+    const adminHolder = holders[0];
+    expect(await agreement.isAdmin(adminHolder.account)).to.equal(true);
     const tx = await agreement
       .connect(adminHolder.wallet)
-      .setDataHash(newDataHash)
+      .setDataHash(newDataHash);
 
-    expect(await agreement.dataHash()).to.equal(newDataHash)
+    expect(await agreement.dataHash()).to.equal(newDataHash);
     await expect(Promise.resolve(tx))
       .to.emit(agreement, 'DataHashChanged')
-      .withArgs(newDataHash)
-  })
-})
+      .withArgs(newDataHash);
+  });
+});

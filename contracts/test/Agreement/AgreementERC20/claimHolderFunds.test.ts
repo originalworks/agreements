@@ -27,46 +27,46 @@ describe('AgreementERC20.claimHolderFunds', () => {
     });
     const { agreement, holders } = await deployAgreementERC20({
       initialSetup,
-      shares: [600, 400],
+      shares: [600n, 400n],
     });
     const holder1 = holders[0].account;
     const holder2 = holders[1].account;
     const { lendingToken } = initialSetup;
-    await lendingToken.transfer(await agreement.getAddress(), 101);
+    await lendingToken.transfer(await agreement.getAddress(), 101n);
 
     await agreement.claimHolderFunds(holder1, await lendingToken.getAddress());
     await agreement.claimHolderFunds(holder2, await lendingToken.getAddress());
 
-    expect(await lendingToken.balanceOf(holder1)).to.equal(60);
-    expect(await lendingToken.balanceOf(holder2)).to.equal(40);
+    expect(await lendingToken.balanceOf(holder1)).to.equal(60n);
+    expect(await lendingToken.balanceOf(holder2)).to.equal(40n);
     expect(await lendingToken.balanceOf(await agreement.getAddress())).to.equal(
-      1,
+      1n,
     );
 
-    await lendingToken.transfer(await agreement.getAddress(), 100);
+    await lendingToken.transfer(await agreement.getAddress(), 100n);
 
     await agreement.claimHolderFunds(holder1, await lendingToken.getAddress());
     await agreement.claimHolderFunds(holder2, await lendingToken.getAddress());
 
-    expect(await lendingToken.balanceOf(holder1)).to.equal(120);
-    expect(await lendingToken.balanceOf(holder2)).to.equal(80);
+    expect(await lendingToken.balanceOf(holder1)).to.equal(120n);
+    expect(await lendingToken.balanceOf(holder2)).to.equal(80n);
     expect(await lendingToken.balanceOf(await agreement.getAddress())).to.equal(
-      1,
+      1n,
     );
   });
   it('currencies doesnt interfere with each other', async () => {
     const [owner] = await ethers.getSigners();
-    const incomingFundsLendingToken = 2500;
-    const incomingFundsNativeCoin = 9000;
-    const incomingFundsTokenA = 10000;
-    const incomingFundsTokenB = 50000;
+    const incomingFundsLendingToken = 2500n;
+    const incomingFundsNativeCoin = 9000n;
+    const incomingFundsTokenA = 10000n;
+    const incomingFundsTokenB = 50000n;
 
     const initialSetup = await deployInitialSetup({
       paymentFee: parseEther('0'),
     });
 
-    const holder1Shares = 600;
-    const holder2Shares = 400;
+    const holder1Shares = 600n;
+    const holder2Shares = 400n;
 
     const totalSupply = holder1Shares + holder2Shares;
 
@@ -85,23 +85,26 @@ describe('AgreementERC20.claimHolderFunds', () => {
 
     const lendingToken = initialSetup.splitCurrencies.find(
       (currency) => currency.lendingCurrency === true,
-    )!;
+    );
     const tokenA = initialSetup.splitCurrencies.find(
       (currency) => currency.name === 'TOKEN_A',
-    )!;
+    );
     const tokenB = initialSetup.splitCurrencies.find(
       (currency) => currency.name === 'TOKEN_B',
-    )!;
+    );
 
-    await lendingToken.contract!.mintTo(
+    if (!lendingToken?.contract || !tokenA?.contract || !tokenB?.contract)
+      throw new Error('No contract found');
+
+    await lendingToken.contract.mintTo(
       await agreement.getAddress(),
       incomingFundsLendingToken,
     );
-    await tokenA.contract!.mintTo(
+    await tokenA.contract.mintTo(
       await agreement.getAddress(),
       incomingFundsTokenA,
     );
-    await tokenB.contract!.mintTo(
+    await tokenB.contract.mintTo(
       await agreement.getAddress(),
       incomingFundsTokenB,
     );
@@ -122,24 +125,24 @@ describe('AgreementERC20.claimHolderFunds', () => {
     await agreement.claimHolderFunds(holder1, ethers.ZeroAddress);
     await agreement.claimHolderFunds(holder2, ethers.ZeroAddress);
 
-    expect(await lendingToken.contract!.balanceOf(holder1)).to.equal(
+    expect(await lendingToken.contract.balanceOf(holder1)).to.equal(
       (incomingFundsLendingToken * holder1Shares) / totalSupply,
     );
-    expect(await lendingToken.contract!.balanceOf(holder2)).to.equal(
+    expect(await lendingToken.contract.balanceOf(holder2)).to.equal(
       (incomingFundsLendingToken * holder2Shares) / totalSupply,
     );
 
-    expect(await tokenA.contract!.balanceOf(holder1)).to.equal(
+    expect(await tokenA.contract.balanceOf(holder1)).to.equal(
       (incomingFundsTokenA * holder1Shares) / totalSupply,
     );
-    expect(await tokenA.contract!.balanceOf(holder2)).to.equal(
+    expect(await tokenA.contract.balanceOf(holder2)).to.equal(
       (incomingFundsTokenA * holder2Shares) / totalSupply,
     );
 
-    expect(await tokenB.contract!.balanceOf(holder1)).to.equal(
+    expect(await tokenB.contract.balanceOf(holder1)).to.equal(
       (incomingFundsTokenB * holder1Shares) / totalSupply,
     );
-    expect(await tokenB.contract!.balanceOf(holder2)).to.equal(
+    expect(await tokenB.contract.balanceOf(holder2)).to.equal(
       (incomingFundsTokenB * holder2Shares) / totalSupply,
     );
 
@@ -160,7 +163,7 @@ describe('AgreementERC20.claimHolderFunds', () => {
 
       let _currencyTransfer: (
         receiver: string,
-        amount: BigNumberish,
+        amount: bigint,
       ) => Promise<TransactionResponse>;
       let _currencyBalance: (holder: string) => Promise<bigint>;
       let _currencyAddress: string;
@@ -169,10 +172,7 @@ describe('AgreementERC20.claimHolderFunds', () => {
         initialSetup = await deployInitialSetup();
 
         if (splitCurrencyDefinition.nativeCoin) {
-          _currencyTransfer = async (
-            receiver: string,
-            amount: BigNumberish,
-          ) => {
+          _currencyTransfer = async (receiver: string, amount: bigint) => {
             return await owner.sendTransaction({
               to: receiver,
               value: amount,
@@ -186,16 +186,15 @@ describe('AgreementERC20.claimHolderFunds', () => {
           const tokenContract = initialSetup.splitCurrencies.find(
             (currency) => currency.name === splitCurrencyDefinition.name,
           )?.contract;
-          _currencyTransfer = async (
-            receiver: string,
-            amount: BigNumberish,
-          ) => {
-            return await tokenContract!.transfer(receiver, amount);
+
+          if (!tokenContract) throw new Error('No TokenContract');
+          _currencyTransfer = async (receiver: string, amount: bigint) => {
+            return await tokenContract.transfer(receiver, amount);
           };
           _currencyBalance = async (holder: string) => {
-            return await tokenContract!.balanceOf(holder);
+            return await tokenContract.balanceOf(holder);
           };
-          _currencyAddress = await tokenContract!.getAddress();
+          _currencyAddress = await tokenContract.getAddress();
         }
       });
 
@@ -203,7 +202,9 @@ describe('AgreementERC20.claimHolderFunds', () => {
         const feeLevels = [0, 0.1, 0.5];
 
         for (const FEE_LEVEL of feeLevels) {
-          const MULTIPLIER = 1 - FEE_LEVEL;
+          const SCALE = 100n;
+          const SCALED_FEE_LEVEL = BigInt(FEE_LEVEL * Number(SCALE));
+          const MULTIPLIER = SCALE - SCALED_FEE_LEVEL;
 
           describe(`Payment Fee = ${FEE_LEVEL * 100}%`, () => {
             beforeEach(async () => {
@@ -212,12 +213,12 @@ describe('AgreementERC20.claimHolderFunds', () => {
               );
             });
             it('claims nothing if address does not hold shares', async () => {
-              const incomingFunds = 1000;
+              const incomingFunds = 1000n;
               const [, , , , nonHolderAccount] = await ethers.getSigners();
 
               const { agreement } = await deployAgreementERC20({
                 initialSetup,
-                shares: [1000],
+                shares: [1000n],
               });
 
               const balanceBefore = await _currencyBalance(
@@ -237,18 +238,18 @@ describe('AgreementERC20.claimHolderFunds', () => {
                 nonHolderAccount.address,
               );
 
-              expect(balanceAfter - balanceBefore).to.equal(0);
+              expect(balanceAfter - balanceBefore).to.equal(0n);
               expect(
                 await agreement.getAvailableFee(_currencyAddress),
-              ).to.equal(1000 * FEE_LEVEL);
+              ).to.equal((1000n * SCALED_FEE_LEVEL) / SCALE);
             });
 
             it('properly claims tokens (single holder)', async () => {
-              const incomingFunds = 1000;
+              const incomingFunds = 1000n;
 
               const { agreement, holders } = await deployAgreementERC20({
                 initialSetup,
-                shares: [1000],
+                shares: [1000n],
               });
               const holder = holders[0].account;
 
@@ -262,18 +263,18 @@ describe('AgreementERC20.claimHolderFunds', () => {
               const holderBalanceAfter = await _currencyBalance(holder);
 
               expect(holderBalanceAfter - holderBalanceBefore).to.equal(
-                incomingFunds * MULTIPLIER,
+                (incomingFunds * MULTIPLIER) / SCALE,
               );
               expect(
                 await agreement.getAvailableFee(_currencyAddress),
-              ).to.equal(1000 * FEE_LEVEL);
+              ).to.equal((1000n * SCALED_FEE_LEVEL) / SCALE);
             });
 
             it('properly claims tokens (multiple holders)', async () => {
-              const incomingFunds = 1000;
+              const incomingFunds = 1000n;
 
-              const holderAShares = 750;
-              const holderBShares = 250;
+              const holderAShares = 750n;
+              const holderBShares = 250n;
               const totalSupply = holderAShares + holderBShares;
 
               const { agreement, holders } = await deployAgreementERC20({
@@ -296,20 +297,22 @@ describe('AgreementERC20.claimHolderFunds', () => {
               const holderBBalanceAfter = await _currencyBalance(holderB);
 
               expect(holderABalanceAfter - holderABalanceBefore).to.equal(
-                ((incomingFunds * holderAShares) / totalSupply) * MULTIPLIER,
+                (((incomingFunds * holderAShares) / totalSupply) * MULTIPLIER) /
+                  SCALE,
               );
               expect(holderBBalanceAfter - holderBBalanceBefore).to.equal(
-                ((incomingFunds * holderBShares) / totalSupply) * MULTIPLIER,
+                (((incomingFunds * holderBShares) / totalSupply) * MULTIPLIER) /
+                  SCALE,
               );
               expect(
                 await agreement.getAvailableFee(_currencyAddress),
-              ).to.equal(incomingFunds * FEE_LEVEL);
+              ).to.equal((incomingFunds * SCALED_FEE_LEVEL) / SCALE);
             });
 
             it('skips transfer when there is nothing to claim', async () => {
               const { agreement, holders } = await deployAgreementERC20({
                 initialSetup,
-                shares: [1000],
+                shares: [1000n],
               });
               const holder = holders[0].account;
               const txPromise = agreement.claimHolderFunds(
@@ -323,15 +326,15 @@ describe('AgreementERC20.claimHolderFunds', () => {
 
               expect(
                 await agreement.getAvailableFee(_currencyAddress),
-              ).to.equal(0);
+              ).to.equal(0n);
             });
 
             it('skips transfer when amount is too small to claim', async () => {
               const { agreement, holders } = await deployAgreementERC20({
                 initialSetup,
-                shares: [10, 1000],
+                shares: [10n, 1000n],
               });
-              await _currencyTransfer(await agreement.getAddress(), '10');
+              await _currencyTransfer(await agreement.getAddress(), 10n);
 
               const holder = holders[0].account;
               const txPromise = agreement.claimHolderFunds(
@@ -345,10 +348,10 @@ describe('AgreementERC20.claimHolderFunds', () => {
             });
 
             it('emits event after successful claim', async () => {
-              const incomingFunds = 1000;
+              const incomingFunds = 1000n;
 
-              const holderAShares = 500;
-              const holderBShares = 500;
+              const holderAShares = 500n;
+              const holderBShares = 500n;
               const totalSupply = holderAShares + holderBShares;
 
               const { agreement, holders } = await deployAgreementERC20({
@@ -369,19 +372,21 @@ describe('AgreementERC20.claimHolderFunds', () => {
                 .to.emit(agreement, 'HolderFundsClaimed')
                 .withArgs(
                   holderA,
-                  ((incomingFunds * holderAShares) / totalSupply) * MULTIPLIER,
+                  (((incomingFunds * holderAShares) / totalSupply) *
+                    MULTIPLIER) /
+                    SCALE,
                   _currencyAddress,
                 );
               expect(
                 await agreement.getAvailableFee(_currencyAddress),
-              ).to.equal(incomingFunds * FEE_LEVEL);
+              ).to.equal((incomingFunds * SCALED_FEE_LEVEL) / SCALE);
             });
 
             it('claims nothing if holder already claimed', async () => {
-              const incomingFunds = 1000;
+              const incomingFunds = 1000n;
 
-              const holderAShares = 500;
-              const holderBShares = 500;
+              const holderAShares = 500n;
+              const holderBShares = 500n;
               const totalSupply = holderAShares + holderBShares;
 
               const { agreement, holders } = await deployAgreementERC20({
@@ -392,7 +397,8 @@ describe('AgreementERC20.claimHolderFunds', () => {
               const holderAInitialBalance = await _currencyBalance(holderA);
 
               const holderAExpectedBalanceDiff =
-                ((incomingFunds * holderAShares) / totalSupply) * MULTIPLIER;
+                (((incomingFunds * holderAShares) / totalSupply) * MULTIPLIER) /
+                SCALE;
 
               await _currencyTransfer(
                 await agreement.getAddress(),
@@ -413,16 +419,16 @@ describe('AgreementERC20.claimHolderFunds', () => {
               ).to.equal(holderAExpectedBalanceDiff);
               expect(
                 await agreement.getAvailableFee(_currencyAddress),
-              ).to.equal(incomingFunds * FEE_LEVEL);
+              ).to.equal((incomingFunds * SCALED_FEE_LEVEL) / SCALE);
             });
 
             it('works properly for multiple incoming transfers (single holder)', async () => {
-              const incomingFunds1 = 100;
-              const incomingFunds2 = 200;
+              const incomingFunds1 = 100n;
+              const incomingFunds2 = 200n;
 
               const { agreement, holders } = await deployAgreementERC20({
                 initialSetup,
-                shares: [1000],
+                shares: [1000n],
               });
               const holder = holders[0].account;
 
@@ -437,11 +443,11 @@ describe('AgreementERC20.claimHolderFunds', () => {
               const holderBalanceAfter1 = await _currencyBalance(holder);
 
               expect(holderBalanceAfter1 - holderInitialBalance).to.equal(
-                incomingFunds1 * MULTIPLIER,
+                (incomingFunds1 * MULTIPLIER) / SCALE,
               );
               expect(
                 await agreement.getAvailableFee(_currencyAddress),
-              ).to.equal(incomingFunds1 * FEE_LEVEL);
+              ).to.equal((incomingFunds1 * SCALED_FEE_LEVEL) / SCALE);
 
               await _currencyTransfer(
                 await agreement.getAddress(),
@@ -452,19 +458,21 @@ describe('AgreementERC20.claimHolderFunds', () => {
               const holderBalanceAfter2 = await _currencyBalance(holder);
 
               expect(holderBalanceAfter2 - holderInitialBalance).to.equal(
-                (incomingFunds1 + incomingFunds2) * MULTIPLIER,
+                ((incomingFunds1 + incomingFunds2) * MULTIPLIER) / SCALE,
               );
               expect(
                 await agreement.getAvailableFee(_currencyAddress),
-              ).to.equal((incomingFunds1 + incomingFunds2) * FEE_LEVEL);
+              ).to.equal(
+                ((incomingFunds1 + incomingFunds2) * SCALED_FEE_LEVEL) / SCALE,
+              );
             });
 
             it('works properly for multiple incoming transfers (multiple holders)', async () => {
-              const incomingFunds1 = 100;
-              const incomingFunds2 = 200;
+              const incomingFunds1 = 100n;
+              const incomingFunds2 = 200n;
 
-              const holderAShares = 500;
-              const holderBShares = 500;
+              const holderAShares = 500n;
+              const holderBShares = 500n;
               const totalSupply = holderBShares + holderBShares;
 
               const { agreement, holders } = await deployAgreementERC20({
@@ -488,12 +496,14 @@ describe('AgreementERC20.claimHolderFunds', () => {
               const holderBBalanceAfter1 = await _currencyBalance(holderB);
 
               expect(holderABalanceAfter1 - holderAInitialBalance).to.equal(
-                ((incomingFunds1 * holderAShares) / totalSupply) * MULTIPLIER,
+                (((incomingFunds1 * holderAShares) / totalSupply) *
+                  MULTIPLIER) /
+                  SCALE,
               );
-              expect(holderBBalanceAfter1 - holderBInitialBalance).to.equal(0);
+              expect(holderBBalanceAfter1 - holderBInitialBalance).to.equal(0n);
               expect(
                 await agreement.getAvailableFee(_currencyAddress),
-              ).to.equal(incomingFunds1 * FEE_LEVEL);
+              ).to.equal((incomingFunds1 * SCALED_FEE_LEVEL) / SCALE);
 
               // ROUND 2: both holders claim funds
               await _currencyTransfer(
@@ -507,28 +517,32 @@ describe('AgreementERC20.claimHolderFunds', () => {
               const holderBBalanceAfter2 = await _currencyBalance(holderB);
 
               expect(holderABalanceAfter2 - holderAInitialBalance).to.equal(
-                (((incomingFunds1 + incomingFunds2) * holderAShares) /
+                ((((incomingFunds1 + incomingFunds2) * holderAShares) /
                   totalSupply) *
-                  MULTIPLIER,
+                  MULTIPLIER) /
+                  SCALE,
               );
               expect(holderBBalanceAfter2 - holderBInitialBalance).to.equal(
-                (((incomingFunds1 + incomingFunds2) * holderBShares) /
+                ((((incomingFunds1 + incomingFunds2) * holderBShares) /
                   totalSupply) *
-                  MULTIPLIER,
+                  MULTIPLIER) /
+                  SCALE,
               );
               expect(
                 await agreement.getAvailableFee(_currencyAddress),
-              ).to.equal((incomingFunds1 + incomingFunds2) * FEE_LEVEL);
+              ).to.equal(
+                ((incomingFunds1 + incomingFunds2) * SCALED_FEE_LEVEL) / SCALE,
+              );
             });
 
             it('works for more complex case', async () => {
-              const incomingFunds1 = 100;
-              const incomingFunds2 = 200;
-              const incomingFunds3 = 300;
-              const incomingFunds4 = 200;
+              const incomingFunds1 = 100n;
+              const incomingFunds2 = 200n;
+              const incomingFunds3 = 300n;
+              const incomingFunds4 = 200n;
 
-              const holderABalance = 400;
-              const holderBBalance = 600;
+              const holderABalance = 400n;
+              const holderBBalance = 600n;
               const totalSupply = holderABalance + holderBBalance;
 
               const { agreement, holders } = await deployAgreementERC20({
@@ -552,12 +566,14 @@ describe('AgreementERC20.claimHolderFunds', () => {
               const holderBBalanceAfter1 = await _currencyBalance(holderB);
 
               expect(holderABalanceAfter1 - holderAInitialBalance).to.equal(
-                ((incomingFunds1 * holderABalance) / totalSupply) * MULTIPLIER,
+                (((incomingFunds1 * holderABalance) / totalSupply) *
+                  MULTIPLIER) /
+                  SCALE,
               );
-              expect(holderBBalanceAfter1 - holderBInitialBalance).to.equal(0);
+              expect(holderBBalanceAfter1 - holderBInitialBalance).to.equal(0n);
               expect(
                 await agreement.getAvailableFee(_currencyAddress),
-              ).to.equal(incomingFunds1 * FEE_LEVEL);
+              ).to.equal((incomingFunds1 * SCALED_FEE_LEVEL) / SCALE);
 
               // ROUND 2 & 3: only holder B claims funds
               await _currencyTransfer(
@@ -574,18 +590,23 @@ describe('AgreementERC20.claimHolderFunds', () => {
               const holderBBalanceAfter3 = await _currencyBalance(holderB);
 
               expect(holderABalanceAfter3 - holderAInitialBalance).to.equal(
-                ((incomingFunds1 * holderABalance) / totalSupply) * MULTIPLIER,
+                (((incomingFunds1 * holderABalance) / totalSupply) *
+                  MULTIPLIER) /
+                  SCALE,
               );
               expect(holderBBalanceAfter3 - holderBInitialBalance).to.equal(
-                (((incomingFunds1 + incomingFunds2 + incomingFunds3) *
+                ((((incomingFunds1 + incomingFunds2 + incomingFunds3) *
                   holderBBalance) /
                   totalSupply) *
-                  MULTIPLIER,
+                  MULTIPLIER) /
+                  SCALE,
               );
               expect(
                 await agreement.getAvailableFee(_currencyAddress),
               ).to.equal(
-                (incomingFunds1 + incomingFunds2 + incomingFunds3) * FEE_LEVEL,
+                ((incomingFunds1 + incomingFunds2 + incomingFunds3) *
+                  SCALED_FEE_LEVEL) /
+                  SCALE,
               );
 
               // ROUND 4: both holders claim funds
@@ -600,31 +621,34 @@ describe('AgreementERC20.claimHolderFunds', () => {
               const holderBBalanceAfter4 = await _currencyBalance(holderB);
 
               expect(holderABalanceAfter4 - holderAInitialBalance).to.equal(
-                (((incomingFunds1 +
+                ((((incomingFunds1 +
                   incomingFunds2 +
                   incomingFunds3 +
                   incomingFunds4) *
                   holderABalance) /
                   totalSupply) *
-                  MULTIPLIER,
+                  MULTIPLIER) /
+                  SCALE,
               );
               expect(holderBBalanceAfter4 - holderBInitialBalance).to.equal(
-                (((incomingFunds1 +
+                ((((incomingFunds1 +
                   incomingFunds2 +
                   incomingFunds3 +
                   incomingFunds4) *
                   holderBBalance) /
                   totalSupply) *
-                  MULTIPLIER,
+                  MULTIPLIER) /
+                  SCALE,
               );
               expect(
                 await agreement.getAvailableFee(_currencyAddress),
               ).to.equal(
-                (incomingFunds1 +
+                ((incomingFunds1 +
                   incomingFunds2 +
                   incomingFunds3 +
                   incomingFunds4) *
-                  FEE_LEVEL,
+                  SCALED_FEE_LEVEL) /
+                  SCALE,
               );
             });
 
@@ -668,13 +692,13 @@ describe('AgreementERC20.claimHolderFunds', () => {
               // TO TEST
               expect(holderABalanceDiffAfter1).to.equal(
                 (((incomingFunds1 * holderAShares) / totalSupply) *
-                  BigInt(MULTIPLIER * 10)) /
-                  10n,
+                  MULTIPLIER) /
+                  SCALE,
               );
-              expect(holderBBalanceDiffAfter1).to.equal(0);
+              expect(holderBBalanceDiffAfter1).to.equal(0n);
               expect(
                 await agreement.getAvailableFee(_currencyAddress),
-              ).to.equal((incomingFunds1 * BigInt(FEE_LEVEL * 10)) / 10n);
+              ).to.equal((incomingFunds1 * SCALED_FEE_LEVEL) / SCALE);
 
               // ROUND 2: transfer of shares, no user claims funds
               await _currencyTransfer(
@@ -684,7 +708,7 @@ describe('AgreementERC20.claimHolderFunds', () => {
 
               const transferTxRound2 = await agreement
                 .connect(holderAWallet)
-                .transfer(holderB, 100);
+                .transfer(holderB, 100n);
 
               const transferReceiptRound2 = await transferTxRound2.wait();
 
@@ -695,6 +719,7 @@ describe('AgreementERC20.claimHolderFunds', () => {
               const holderAGasCosts =
                 transferReceiptRound2?.gasUsed *
                 transferReceiptRound2?.gasPrice;
+
               const holderABalanceDiffAfter2 =
                 (await _currencyBalance(holderA)) -
                 holderAInitialBalance +
@@ -706,20 +731,19 @@ describe('AgreementERC20.claimHolderFunds', () => {
               expect(holderABalanceDiffAfter2).to.equal(
                 ((((incomingFunds1 + incomingFunds2) * holderAShares) /
                   totalSupply) *
-                  BigInt(MULTIPLIER * 10)) /
-                  10n,
+                  MULTIPLIER) /
+                  SCALE,
               );
               expect(holderBBalanceDiffAfter2).to.equal(
                 ((((incomingFunds1 + incomingFunds2) * holderBShares) /
                   totalSupply) *
-                  BigInt(MULTIPLIER * 10)) /
-                  10n,
+                  MULTIPLIER) /
+                  SCALE,
               );
               expect(
                 await agreement.getAvailableFee(_currencyAddress),
               ).to.equal(
-                ((incomingFunds1 + incomingFunds2) * BigInt(FEE_LEVEL * 10)) /
-                  10n,
+                ((incomingFunds1 + incomingFunds2) * SCALED_FEE_LEVEL) / SCALE,
               );
 
               holderAShares -= 100n;
@@ -734,7 +758,7 @@ describe('AgreementERC20.claimHolderFunds', () => {
 
               const transferTxRound3 = await agreement
                 .connect(holderBWallet)
-                .transfer(holderA, 50);
+                .transfer(holderA, 50n);
 
               const transferReceiptRound3 = await transferTxRound3.wait();
 
@@ -758,21 +782,21 @@ describe('AgreementERC20.claimHolderFunds', () => {
               expect(holderABalanceDiffAfter3).to.equal(
                 holderABalanceDiffAfter2 +
                   (((incomingFunds3 * holderAShares) / totalSupply) *
-                    BigInt(MULTIPLIER * 10)) /
-                    10n,
+                    MULTIPLIER) /
+                    SCALE,
               );
               expect(holderBBalanceDiffAfter3).to.equal(
                 holderBBalanceDiffAfter2 +
                   (((incomingFunds3 * holderBShares) / totalSupply) *
-                    BigInt(MULTIPLIER * 10)) /
-                    10n,
+                    MULTIPLIER) /
+                    SCALE,
               );
               expect(
                 await agreement.getAvailableFee(_currencyAddress),
               ).to.equal(
                 ((incomingFunds1 + incomingFunds2 + incomingFunds3) *
-                  BigInt(FEE_LEVEL * 10)) /
-                  10n,
+                  SCALED_FEE_LEVEL) /
+                  SCALE,
               );
 
               holderAShares += 50n;
@@ -799,14 +823,14 @@ describe('AgreementERC20.claimHolderFunds', () => {
               expect(holderABalanceDiffAfter4).to.equal(
                 holderABalanceDiffAfter3 +
                   (((incomingFunds4 * holderAShares) / totalSupply) *
-                    BigInt(MULTIPLIER * 10)) /
-                    10n,
+                    MULTIPLIER) /
+                    SCALE,
               );
               expect(holderBBalanceDiffAfter4).to.equal(
                 holderBBalanceDiffAfter3 +
                   (((incomingFunds4 * holderBShares) / totalSupply) *
-                    BigInt(MULTIPLIER * 10)) /
-                    10n,
+                    MULTIPLIER) /
+                    SCALE,
               );
               expect(
                 await agreement.getAvailableFee(_currencyAddress),
@@ -815,8 +839,8 @@ describe('AgreementERC20.claimHolderFunds', () => {
                   incomingFunds2 +
                   incomingFunds3 +
                   incomingFunds4) *
-                  BigInt(FEE_LEVEL * 10)) /
-                  10n,
+                  SCALED_FEE_LEVEL) /
+                  SCALE,
               );
             });
 
@@ -851,14 +875,12 @@ describe('AgreementERC20.claimHolderFunds', () => {
               const holder2BalanceAfter = await _currencyBalance(holder2);
 
               expect(holder1BalanceAfter - holder1InitialBalance).to.equal(
-                (((incomingFunds * holder1Shares) / totalSupply) *
-                  BigInt(MULTIPLIER * 10)) /
-                  10n,
+                (((incomingFunds * holder1Shares) / totalSupply) * MULTIPLIER) /
+                  SCALE,
               );
               expect(holder2BalanceAfter - holder2InitialBalance).to.equal(
-                (((incomingFunds * holder2Shares) / totalSupply) *
-                  BigInt(MULTIPLIER * 10)) /
-                  10n,
+                (((incomingFunds * holder2Shares) / totalSupply) * MULTIPLIER) /
+                  SCALE,
               );
             });
           });
@@ -866,15 +888,17 @@ describe('AgreementERC20.claimHolderFunds', () => {
       });
       describe('Changing fee levels in between', () => {
         it('fee introduced at a later date', async () => {
-          const incomingFunds = 1000;
-          const initialFeeLevel = 0;
+          const incomingFunds = 1000n;
+          const initialFeeLevel = 0n;
           const newFeeLevel = 0.1;
+          const SCALE = 100n;
+          const SCALED_NEW_FEE_LEVEL = BigInt(newFeeLevel * Number(SCALE));
 
           await initialSetup.feeManager.setPaymentFee(initialFeeLevel);
           const { feeManager } = initialSetup;
           const { agreement, holders } = await deployAgreementERC20({
             initialSetup,
-            shares: [1000],
+            shares: [1000n],
           });
           const holder = holders[0].account;
 
@@ -891,23 +915,26 @@ describe('AgreementERC20.claimHolderFunds', () => {
           const holderBalanceAfter = await _currencyBalance(holder);
 
           expect(holderBalanceAfter - holderBalanceBefore).to.equal(
-            incomingFunds + incomingFunds * (1 - newFeeLevel),
+            ((incomingFunds + incomingFunds) * (SCALE - SCALED_NEW_FEE_LEVEL)) /
+              SCALE,
           );
           expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
-            incomingFunds * newFeeLevel,
+            (incomingFunds * SCALED_NEW_FEE_LEVEL) / SCALE,
           );
         });
         it('fee set back to 0', async () => {
-          const incomingFunds = 1000;
-          const initialFeeLevel = 0;
+          const incomingFunds = 1000n;
+          const initialFeeLevel = 0n;
           const newFeeLevel = 0.1;
+          const SCALE = 100n;
+          const SCALED_NEW_FEE_LEVEL = BigInt(newFeeLevel * Number(SCALE));
 
           await initialSetup.feeManager.setPaymentFee(initialFeeLevel);
 
           const { feeManager } = initialSetup;
           const { agreement, holders } = await deployAgreementERC20({
             initialSetup,
-            shares: [1000],
+            shares: [1000n],
           });
           const holder = holders[0].account;
           const holderBalanceBefore = await _currencyBalance(holder);
@@ -930,24 +957,34 @@ describe('AgreementERC20.claimHolderFunds', () => {
           const holderBalanceAfter = await _currencyBalance(holder);
 
           expect(holderBalanceAfter - holderBalanceBefore).to.equal(
-            incomingFunds + incomingFunds + incomingFunds * (1 - newFeeLevel),
+            ((incomingFunds + incomingFunds + incomingFunds) *
+              (SCALE - SCALED_NEW_FEE_LEVEL)) /
+              SCALE,
           );
           expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
-            incomingFunds * newFeeLevel,
+            (incomingFunds * SCALED_NEW_FEE_LEVEL) / SCALE,
           );
         });
         it('fee raising multiple times', async () => {
-          const incomingFunds = 1000;
-          const initialFeeLevel = 0;
+          const incomingFunds = 1000n;
+          const initialFeeLevel = 0n;
           const firstStageFeeLevel = 0.1;
           const secondStageFeeLevel = 0.2;
+
+          const SCALE = 100n;
+          const SCALED_FIRST_STAGE_FEE_LEVEL = BigInt(
+            firstStageFeeLevel * Number(SCALE),
+          );
+          const SCALED_SECOND_STAGE_FEE_LEVEL = BigInt(
+            secondStageFeeLevel * Number(SCALE),
+          );
 
           await initialSetup.feeManager.setPaymentFee(initialFeeLevel);
 
           const { feeManager } = initialSetup;
           const { agreement, holders } = await deployAgreementERC20({
             initialSetup,
-            shares: [1000],
+            shares: [1000n],
           });
           const holder = holders[0].account;
           const holderBalanceBefore = await _currencyBalance(holder);
@@ -971,25 +1008,33 @@ describe('AgreementERC20.claimHolderFunds', () => {
 
           const holderBalanceAfter = await _currencyBalance(holder);
 
+          let first =
+            (incomingFunds * (SCALE - SCALED_FIRST_STAGE_FEE_LEVEL)) / SCALE;
+          let second =
+            (incomingFunds * (SCALE - SCALED_SECOND_STAGE_FEE_LEVEL)) / SCALE;
+
           expect(holderBalanceAfter - holderBalanceBefore).to.equal(
-            incomingFunds +
-              incomingFunds * (1 - firstStageFeeLevel) +
-              incomingFunds * (1 - secondStageFeeLevel),
+            incomingFunds + first + second,
           );
+
+          first = (incomingFunds * SCALED_FIRST_STAGE_FEE_LEVEL) / SCALE;
+          second = (incomingFunds * SCALED_SECOND_STAGE_FEE_LEVEL) / SCALE;
           expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
-            incomingFunds * firstStageFeeLevel +
-              incomingFunds * secondStageFeeLevel,
+            first + second,
           );
         });
         it('fee collected between transfers', async () => {
-          const incomingFunds = 1000;
+          const incomingFunds = 1000n;
           const feeLevel = 0.1;
+
+          const SCALE = 100n;
+          const SCALED_FEE_LEVEL = BigInt(feeLevel * Number(SCALE));
 
           const { feeManager } = initialSetup;
           await feeManager.setPaymentFee(parseEther(feeLevel.toString()));
           const { agreement, holders } = await deployAgreementERC20({
             initialSetup,
-            shares: [1000],
+            shares: [1000n],
           });
           const holder = holders[0].account;
           const initialHolderBalance = await _currencyBalance(holder);
@@ -998,7 +1043,7 @@ describe('AgreementERC20.claimHolderFunds', () => {
           await agreement.claimHolderFunds(holder, _currencyAddress);
 
           expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
-            incomingFunds * feeLevel,
+            (incomingFunds * SCALED_FEE_LEVEL) / SCALE,
           );
           await feeManager.collectPaymentFee(
             await agreement.getAddress(),
@@ -1007,9 +1052,11 @@ describe('AgreementERC20.claimHolderFunds', () => {
 
           const holderBalanceAfterFirstRound = await _currencyBalance(holder);
 
-          expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(0);
+          expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
+            0n,
+          );
           expect(holderBalanceAfterFirstRound - initialHolderBalance).to.equal(
-            incomingFunds * (1 - feeLevel),
+            (incomingFunds * (SCALE - SCALED_FEE_LEVEL)) / SCALE,
           );
 
           await _currencyTransfer(await agreement.getAddress(), incomingFunds);
@@ -1018,10 +1065,10 @@ describe('AgreementERC20.claimHolderFunds', () => {
           const holderBalanceAfterSecondRound = await _currencyBalance(holder);
 
           expect(holderBalanceAfterSecondRound - initialHolderBalance).to.equal(
-            incomingFunds * 2 * (1 - feeLevel),
+            (incomingFunds * 2n * (SCALE - SCALED_FEE_LEVEL)) / SCALE,
           );
           expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
-            incomingFunds * feeLevel,
+            (incomingFunds * SCALED_FEE_LEVEL) / SCALE,
           );
         });
       });

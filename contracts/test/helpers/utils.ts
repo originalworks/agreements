@@ -1,33 +1,56 @@
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { BigNumberish, Contract, providers } from 'ethers';
+import {
+  BaseContract,
+  BigNumberish,
+  id,
+  JsonRpcProvider,
+  parseEther,
+  TransactionResponse,
+} from 'ethers';
 import { ethers } from 'hardhat';
 import { whitelistLender } from '../../scripts/actions/whitelistLender';
 import { ERC20TokenMock } from '../../typechain';
 import { HolderWithWallet } from './types';
+import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 
 export async function getEvent(
-  txPromise: Promise<providers.TransactionResponse>,
-  contract: Contract,
+  txPromise: Promise<TransactionResponse>,
+  contract: BaseContract,
   eventName: string,
 ) {
   const tx = await txPromise;
-  const receipt = await contract.provider.getTransactionReceipt(tx.hash!);
+  const provider = contract.runner?.provider;
+  if (!provider) throw new Error('Provider is null or undefined');
+
+  const receipt = await provider.getTransactionReceipt(tx.hash);
+  if (!receipt) throw new Error('Receipt not found');
+
   const eventFragment = contract.interface.getEvent(eventName);
-  const topic = contract.interface.getEventTopic(eventFragment);
-  const logs = receipt.logs!.filter((log) => log.topics.includes(topic));
+  if (!eventFragment) throw new Error('Event fragment not found');
+
+  const topic = id(eventFragment.format());
+  const logs = receipt.logs.filter((log) => log.topics.includes(topic));
   if (logs.length === 0) {
     throw Error(`Event ${eventName} was not emitted`);
   }
-  return contract.interface.parseLog(logs[0]);
+
+  const event = contract.interface.parseLog(logs[0]);
+
+  if (!event) throw new Error('Event not found');
+
+  return event;
 }
 
-export async function fakeTime(provider: providers.JsonRpcProvider, days = 1) {
+export async function fakeTime(provider: JsonRpcProvider, days = 1) {
   await provider.send('evm_increaseTime', [days * 86400 + 5]);
   await provider.send('evm_mine', []);
 }
 
 export async function fakeSignerWithAddress() {
-  return await SignerWithAddress.create(ethers.provider.getSigner());
+  const signer = await ethers.provider.getSigner();
+  return await SignerWithAddress.create(
+    signer.provider as any,
+    await signer.getAddress(),
+  );
 }
 
 export function buildHolders(
@@ -56,11 +79,8 @@ export async function addLender(
 ) {
   await whitelistLender(lendingContractAddress, lender.address);
 
-  await lendingToken.mintTo(
-    lender.address,
-    ethers.utils.parseEther('1000000000'),
-  );
+  await lendingToken.mintTo(lender.address, parseEther('1000000000'));
   await lendingToken
     .connect(lender)
-    .approve(lendingContractAddress, ethers.constants.MaxUint256);
+    .approve(lendingContractAddress, ethers.MaxUint256);
 }

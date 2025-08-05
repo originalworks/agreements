@@ -14,7 +14,7 @@ describe('(FUNCTIONAL) AgreementERC20: Funds collection flow', () => {
     const { feeManager, lendingToken } = initialSetup;
     const { agreement, holders } = await deployAgreementERC20({
       initialSetup,
-      shares: [500, 500],
+      shares: [500n, 500n],
     });
 
     await lendingToken.mintTo(await agreement.getAddress(), parseEther('100'));
@@ -31,8 +31,8 @@ describe('(FUNCTIONAL) AgreementERC20: Funds collection flow', () => {
       await lendingToken.balanceOf(await feeManager.getAddress()),
     ).to.equal(parseEther('10'));
 
-    expect(await lendingToken.balanceOf(holders[0].account)).to.equal(0);
-    expect(await lendingToken.balanceOf(holders[1].account)).to.equal(0);
+    expect(await lendingToken.balanceOf(holders[0].account)).to.equal(0n);
+    expect(await lendingToken.balanceOf(holders[1].account)).to.equal(0n);
 
     await agreement.claimHolderFunds(
       holders[0].account,
@@ -53,8 +53,8 @@ describe('(FUNCTIONAL) AgreementERC20: Funds collection flow', () => {
   it('User can collect income after feeManager collected fee (collected in-between)', async () => {
     const { feeManager, holders, lendingToken, agreement } = await setup();
 
-    expect(await lendingToken.balanceOf(holders[0].account)).to.equal(0);
-    expect(await lendingToken.balanceOf(holders[1].account)).to.equal(0);
+    expect(await lendingToken.balanceOf(holders[0].account)).to.equal(0n);
+    expect(await lendingToken.balanceOf(holders[1].account)).to.equal(0n);
 
     await agreement.claimHolderFunds(
       holders[0].account,
