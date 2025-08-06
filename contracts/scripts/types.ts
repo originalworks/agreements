@@ -3,7 +3,7 @@ import { ERC20TokenMock } from '../typechain';
 export interface SplitCurrencyDefinition {
   name: string;
   symbol: string;
-  decimals: number;
+  decimals: bigint;
   lendingCurrency: boolean;
   nativeCoin: boolean;
 }

@@ -20,6 +20,7 @@ import {
   LENDING_TOKEN_NAME,
   splitCurrencyDefinitions,
 } from './splitCurrenciesDefinitions';
+import { parseEther } from 'ethers';
 
 export async function deployInitialSetup(
   options?: InitialSetupOptions,
@@ -51,8 +52,8 @@ export async function deployInitialSetup(
   }
 
   const feeManager = await deployFeeManager(
-    options?.creationFee || ethers.utils.parseEther('0.01'),
-    options?.paymentFee || ethers.utils.parseEther('0.02'),
+    options?.creationFee || parseEther('0.01'),
+    options?.paymentFee || parseEther('0.02'),
   );
 
   const { agreementERC20Implementation, AgreementERC20Factory } =
@@ -71,13 +72,15 @@ export async function deployInitialSetup(
   );
 
   const agreementFactory = await deployAgreementFactory({
-    agreementERC20Implementation: agreementERC20Implementation.address,
-    agreementERC1155Implementation: agreementERC1155Implementation.address,
-    feeManager: feeManager.address,
-    agreementRelationsRegistry: agreementRelationsRegistry.address,
-    splitCurrencyListManager: splitCurrencyListManager.address,
-    fallbackVault: fallbackVault.address,
-    namespaceRegistry: namespaceRegistry.address,
+    agreementERC20Implementation:
+      await agreementERC20Implementation.getAddress(),
+    agreementERC1155Implementation:
+      await agreementERC1155Implementation.getAddress(),
+    feeManager: await feeManager.getAddress(),
+    agreementRelationsRegistry: await agreementRelationsRegistry.getAddress(),
+    splitCurrencyListManager: await splitCurrencyListManager.getAddress(),
+    fallbackVault: await fallbackVault.getAddress(),
+    namespaceRegistry: await namespaceRegistry.getAddress(),
   });
 
   return {
@@ -126,8 +129,9 @@ export async function deployAgreementERC20(
     'AgreementCreated',
   );
   const agreementAddress = event.args[0];
-  const agreement =
-    input.initialSetup.AgreementERC20Factory.attach(agreementAddress);
+  const agreement = input.initialSetup.AgreementERC20Factory.attach(
+    agreementAddress,
+  ) as AgreementERC20;
   return { agreement, holders, dataHash };
 }
 
@@ -158,7 +162,8 @@ export async function deployAgreementERC1155(
     'AgreementCreated',
   );
   const agreementAddress = event.args[0];
-  const agreement =
-    input.initialSetup.AgreementERC1155Factory.attach(agreementAddress);
+  const agreement = input.initialSetup.AgreementERC1155Factory.attach(
+    agreementAddress,
+  ) as AgreementERC1155;
   return { agreement, holders, dataHash, contractUri };
 }

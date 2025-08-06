@@ -1,20 +1,20 @@
-import { BigNumber, Signer } from 'ethers'
-import { FeeManager, FeeManager__factory } from '../../typechain'
-import { deployProxy } from '../deployProxy'
+import { Signer } from 'ethers';
+import { FeeManager, FeeManager__factory } from '../../typechain';
+import { deployProxy } from '../deployProxy';
 
 export async function deployFeeManager(
   deployer: Signer,
-  creationFee: BigNumber,
-  paymentFee: BigNumber,
+  creationFee: bigint,
+  paymentFee: bigint,
 ) {
-  const FeeManager = new FeeManager__factory(deployer)
+  const FeeManager = new FeeManager__factory(deployer);
 
   const feeManager = (await deployProxy(FeeManager, [
     creationFee,
     paymentFee,
-  ])) as FeeManager
+  ])) as FeeManager;
 
-  await feeManager.deployed()
+  await feeManager.waitForDeployment();
 
-  return feeManager
+  return feeManager;
 }

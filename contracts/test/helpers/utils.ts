@@ -1,14 +1,5 @@
-import {
-  BaseContract,
-  BigNumberish,
-  id,
-  JsonRpcProvider,
-  parseEther,
-  TransactionResponse,
-} from 'ethers';
+import { BaseContract, id, JsonRpcProvider, TransactionResponse } from 'ethers';
 import { ethers } from 'hardhat';
-import { whitelistLender } from '../../scripts/actions/whitelistLender';
-import { ERC20TokenMock } from '../../typechain';
 import { HolderWithWallet } from './types';
 import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 
@@ -48,14 +39,14 @@ export async function fakeTime(provider: JsonRpcProvider, days = 1) {
 export async function fakeSignerWithAddress() {
   const signer = await ethers.provider.getSigner();
   return await SignerWithAddress.create(
-    signer.provider as any,
+    signer.provider as any, //TODO
     await signer.getAddress(),
   );
 }
 
 export function buildHolders(
   defaultHolders: SignerWithAddress[],
-  shares?: BigNumberish[],
+  shares?: bigint[],
   passedHolders?: HolderWithWallet[],
 ): HolderWithWallet[] {
   if (passedHolders) {
@@ -63,24 +54,11 @@ export function buildHolders(
   } else if (shares) {
     return shares.map((share, i) => ({
       account: defaultHolders[i].address,
-      balance: share.toString(),
+      balance: share,
       isAdmin: i === 0,
       wallet: defaultHolders[i],
     }));
   } else {
     throw new Error('You must specify either shares or holders');
   }
-}
-
-export async function addLender(
-  lendingContractAddress: string,
-  lendingToken: ERC20TokenMock,
-  lender: SignerWithAddress,
-) {
-  await whitelistLender(lendingContractAddress, lender.address);
-
-  await lendingToken.mintTo(lender.address, parseEther('1000000000'));
-  await lendingToken
-    .connect(lender)
-    .approve(lendingContractAddress, ethers.MaxUint256);
 }

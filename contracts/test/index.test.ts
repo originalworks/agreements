@@ -1,3 +1,3 @@
-import { upgrades } from 'hardhat'
+import { upgrades } from 'hardhat';
 
-upgrades.silenceWarnings()
+upgrades.silenceWarnings();

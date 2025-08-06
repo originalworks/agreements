@@ -6,7 +6,7 @@ import { parseUnits } from 'ethers';
 export async function deployERC20TokenMock(
   name: string,
   symbol: string,
-  decimals: number,
+  decimals: bigint,
 ): Promise<ERC20TokenMock> {
   console.log({ name, symbol, decimals });
 

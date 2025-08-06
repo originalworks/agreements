@@ -1,119 +1,126 @@
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
-import { deployERC20TokenMock } from '../../scripts/actions/deployERC20TokenMock'
-import { SplitCurrencyListManager } from '../../typechain'
-import { deployInitialSetup } from '../helpers/deployments'
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { deployERC20TokenMock } from '../../scripts/actions/deployERC20TokenMock';
+import { SplitCurrencyListManager } from '../../typechain';
+import { deployInitialSetup } from '../helpers/deployments';
 
 describe('SplitCurrencyListManager.setLendingCurrency', () => {
-  let splitCurrencyListManager: SplitCurrencyListManager
+  let splitCurrencyListManager: SplitCurrencyListManager;
 
   beforeEach(async () => {
-    const initialSetup = await deployInitialSetup()
-    splitCurrencyListManager = initialSetup.splitCurrencyListManager
-  })
+    const initialSetup = await deployInitialSetup();
+    splitCurrencyListManager = initialSetup.splitCurrencyListManager;
+  });
 
   it('can change lending currency to new one', async () => {
     const newLendingCurrency = await deployERC20TokenMock(
       'new token',
       'NTKN',
-      10,
-    )
+      10n,
+    );
 
     const currentLendingCurrency =
-      await splitCurrencyListManager.lendingCurrency()
+      await splitCurrencyListManager.lendingCurrency();
 
     expect(await splitCurrencyListManager.lendingCurrency()).to.equal(
       currentLendingCurrency,
-    )
+    );
 
     await splitCurrencyListManager.setLendingCurrency(
-      newLendingCurrency.address,
-    )
+      await newLendingCurrency.getAddress(),
+    );
 
     expect(await splitCurrencyListManager.lendingCurrency()).to.equal(
-      newLendingCurrency.address,
-    )
-  })
+      await newLendingCurrency.getAddress(),
+    );
+  });
 
   it('can set already listed currency as lending currency', async () => {
     const initialCurrencyArray =
-      await splitCurrencyListManager.getCurrencyArray()
+      await splitCurrencyListManager.getCurrencyArray();
 
-    const lendingCurrency = await splitCurrencyListManager.lendingCurrency()
+    const lendingCurrency = await splitCurrencyListManager.lendingCurrency();
 
     const alreadyListedCurrency = initialCurrencyArray.find(
       (currency) =>
-        currency !== lendingCurrency &&
-        currency !== ethers.constants.AddressZero,
-    )
+        currency !== lendingCurrency && currency !== ethers.ZeroAddress,
+    );
+
+    if (!alreadyListedCurrency)
+      throw new Error('No alreadyListedCurrency found');
 
     expect(
-      await splitCurrencyListManager.currencyMap(alreadyListedCurrency!),
-    ).to.equal(true)
+      await splitCurrencyListManager.currencyMap(alreadyListedCurrency),
+    ).to.equal(true);
 
     expect(await splitCurrencyListManager.lendingCurrency()).to.not.equal(
-      alreadyListedCurrency!,
-    )
+      alreadyListedCurrency,
+    );
 
-    await splitCurrencyListManager.setLendingCurrency(alreadyListedCurrency!)
+    await splitCurrencyListManager.setLendingCurrency(alreadyListedCurrency);
 
     expect(
-      await splitCurrencyListManager.currencyMap(alreadyListedCurrency!),
-    ).to.equal(true)
+      await splitCurrencyListManager.currencyMap(alreadyListedCurrency),
+    ).to.equal(true);
 
     expect(await splitCurrencyListManager.lendingCurrency()).to.equal(
-      alreadyListedCurrency!,
-    )
-  })
+      alreadyListedCurrency,
+    );
+  });
 
   it("can't set lending currency to the same value", async () => {
-    const lendingCurrency = await splitCurrencyListManager.lendingCurrency()
+    const lendingCurrency = await splitCurrencyListManager.lendingCurrency();
     await expect(
       splitCurrencyListManager.setLendingCurrency(lendingCurrency),
     ).to.be.revertedWith(
       'SplitCurrencyListManager: lending currency already in use',
-    )
-  })
+    );
+  });
 
   it('only owner can set lending currency', async () => {
-    const [, , , , , , nonOwner] = await ethers.getSigners()
+    const [, , , , , , nonOwner] = await ethers.getSigners();
 
     const newLendingCurrency = await deployERC20TokenMock(
       'new token',
       'NTKN',
-      10,
-    )
+      10n,
+    );
 
     await expect(
       splitCurrencyListManager
         .connect(nonOwner)
-        .setLendingCurrency(newLendingCurrency.address),
-    ).to.be.revertedWith('Ownable: caller is not the owner')
-  })
+        .setLendingCurrency(await newLendingCurrency.getAddress()),
+    ).to.be.revertedWith('Ownable: caller is not the owner');
+  });
 
   it('adds new lending currency to currency mapping and array', async () => {
     const newLendingCurrency = await deployERC20TokenMock(
       'new token',
       'NTKN',
-      10,
-    )
+      10n,
+    );
 
     await splitCurrencyListManager.setLendingCurrency(
-      newLendingCurrency.address,
-    )
+      await newLendingCurrency.getAddress(),
+    );
 
-    const currencyArray = await splitCurrencyListManager.getCurrencyArray()
+    const currencyArray = await splitCurrencyListManager.getCurrencyArray();
 
     expect(await splitCurrencyListManager.lendingCurrency()).to.equal(
-      newLendingCurrency.address,
-    )
+      await newLendingCurrency.getAddress(),
+    );
 
     expect(
-      await splitCurrencyListManager.currencyMap(newLendingCurrency.address),
-    ).to.equal(true)
+      await splitCurrencyListManager.currencyMap(
+        await newLendingCurrency.getAddress(),
+      ),
+    ).to.equal(true);
 
     expect(
-      currencyArray.find((currency) => currency === newLendingCurrency.address),
-    ).to.not.be.undefined
-  })
-})
+      currencyArray.find(
+        async (currency) =>
+          currency === (await newLendingCurrency.getAddress()),
+      ),
+    ).not.to.equal(undefined);
+  });
+});

@@ -1,5 +1,4 @@
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { BigNumber, BigNumberish, Signer } from 'ethers';
+import { BigNumberish, Signer } from 'ethers';
 import { SplitCurrency } from '../../scripts/types';
 import {
   AgreementERC1155,
@@ -14,10 +13,11 @@ import {
   NamespaceRegistry,
   SplitCurrencyListManager,
 } from '../../typechain';
+import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 
 export interface InitialSetupOptions {
-  paymentFee?: BigNumber;
-  creationFee?: BigNumber;
+  paymentFee?: bigint;
+  creationFee?: bigint;
 }
 
 export interface InitialSetup {
@@ -36,6 +36,11 @@ export interface InitialSetup {
   splitCurrencyListManager: SplitCurrencyListManager;
   fallbackVault: FallbackVault;
   namespaceRegistry: NamespaceRegistry;
+}
+
+export enum TokenStandard {
+  ERC20 = 0,
+  ERC1155 = 1,
 }
 
 export interface Holder {
@@ -59,9 +64,12 @@ export interface AgreementDeploymentData<
 
 export interface DeployAgreementInput {
   initialSetup: InitialSetup;
-  shares?: BigNumberish[];
+  shares?: bigint[];
   partialRevenueStreamURIs?: string[];
   holders?: HolderWithWallet[];
   dataHash?: string;
   txExecutorWallet?: Signer;
 }
+
+export type NativeCryptoTicker = 'ETH' | 'BNB' | 'MATIC' | 'SBY';
+export type TokenCryptoTicker = 'USDC' | 'BUSD' | 'DAI' | 'USDT';

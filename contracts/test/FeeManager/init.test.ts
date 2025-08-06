@@ -1,64 +1,63 @@
-import { expect } from 'chai'
-import { BigNumber } from 'ethers'
-import { ethers, upgrades } from 'hardhat'
-import { deployInitialSetup } from '../helpers/deployments'
+import { expect } from 'chai';
+import { ethers, upgrades } from 'hardhat';
+import { deployInitialSetup } from '../helpers/deployments';
 
 describe('FeeManager.initialize', () => {
   it('correctly initializes values', async () => {
     const { feeManager, deployer } = await deployInitialSetup({
-      paymentFee: BigNumber.from(9000),
-      creationFee: BigNumber.from(1234),
-    })
+      paymentFee: 9000n,
+      creationFee: 1234n,
+    });
 
-    expect(await feeManager.owner()).to.equal(deployer.address)
-    expect(await feeManager.creationFee()).to.equal(1234)
-    expect(await feeManager.paymentFee()).to.equal(9000)
-  })
+    expect(await feeManager.owner()).to.equal(deployer.address);
+    expect(await feeManager.creationFee()).to.equal(1234n);
+    expect(await feeManager.paymentFee()).to.equal(9000n);
+  });
 
   it('emits events', async () => {
-    const [deployer] = await ethers.getSigners()
+    const [deployer] = await ethers.getSigners();
 
-    const block = await ethers.provider.getBlockNumber()
-    const FeeManager = await ethers.getContractFactory('FeeManager')
-    const feeManager = await upgrades.deployProxy(FeeManager, [1234, 9000], {
+    const block = await ethers.provider.getBlockNumber();
+    const FeeManager = await ethers.getContractFactory('FeeManager');
+    const feeManager = await upgrades.deployProxy(FeeManager, [1234n, 9000n], {
       kind: 'uups',
-    })
+    });
 
     const ownershipTransferredEvent = await feeManager.queryFilter(
-      'OwnershipTransferred',
+      feeManager.getEvent('OwnershipTransferred'),
       block,
-    )
+    );
 
     const creationFeeChangedEvent = await feeManager.queryFilter(
-      'CreationFeeChanged',
+      feeManager.getEvent('CreationFeeChanged'),
       block,
-    )
+    );
 
     const paymentFeeChangedEvent = await feeManager.queryFilter(
-      'PaymentFeeChanged',
+      feeManager.getEvent('PaymentFeeChanged'),
       block,
-    )
+    );
 
-    expect(ownershipTransferredEvent[0].args!['previousOwner']).to.equal(
-      ethers.constants.AddressZero,
-    )
-    expect(ownershipTransferredEvent[0].args!['newOwner']).to.equal(
+    expect(ownershipTransferredEvent[0].args.previousOwner).to.equal(
+      ethers.ZeroAddress,
+    );
+    expect(ownershipTransferredEvent[0].args.newOwner).to.equal(
       deployer.address,
-    )
+    );
 
-    expect(creationFeeChangedEvent[0].args!['creationFee']).to.equal(1234)
+    expect(creationFeeChangedEvent[0].args.creationFee).to.equal(1234n);
 
-    expect(paymentFeeChangedEvent[0].args!['paymentFee']).to.equal(9000)
-  })
+    expect(paymentFeeChangedEvent[0].args.paymentFee).to.equal(9000n);
+  });
 
   it('cannot be called twice', async () => {
-    const FeeManager = await ethers.getContractFactory('FeeManager')
-    const feeManager = await upgrades.deployProxy(FeeManager, [0, 0], {
+    const FeeManager = await ethers.getContractFactory('FeeManager');
+    const feeManager = await upgrades.deployProxy(FeeManager, [0n, 0n], {
       kind: 'uups',
-    })
+    });
 
     await expect(feeManager.initialize(1, 2)).to.be.revertedWith(
       'Initializable: contract is already initialized',
-    )
-  })
-})
+    );
+  });
+});
