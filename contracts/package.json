@@ -37,6 +37,19 @@
           "command": "npx hardhat compile",
           "cwd": "libs/contracts-agreements"
         }
+      },
+      "lint": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "eslint \"{src,test}/**/*.ts\" --fix",
+          "cwd": "libs/contracts-agreements"
+        }
+      },
+      "typecheck": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "tsc --noEmit"
+        }
       }
     }
   }
