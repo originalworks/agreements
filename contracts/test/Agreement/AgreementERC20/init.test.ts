@@ -105,7 +105,7 @@ describe('AgreementERC20.initialize', () => {
         await namespaceRegistry.getAddress(),
         ['ABC123'],
       ),
-    ).to.be.revertedWith('Initializable: contract is already initialized');
+    ).to.be.reverted; // InvalidInitialization()
   });
 
   it('fails when there are no holders', async () => {

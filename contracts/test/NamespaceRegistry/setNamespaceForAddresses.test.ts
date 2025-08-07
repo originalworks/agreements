@@ -89,7 +89,10 @@ describe('NamespaceRegistry.setNamespaceForAddresses', function () {
           [revelatorNamespaceOwner.address],
           [revelatorNamespace],
         ),
-    ).to.be.revertedWith('Ownable: caller is not the owner');
+    ).to.be.revertedWithCustomError(
+      namespaceRegistry,
+      'OwnableUnauthorizedAccount',
+    );
   });
 
   it('Emits event when namespaces are edited', async () => {

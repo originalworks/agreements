@@ -69,8 +69,7 @@ describe('AgreementERC1155.getClaimableAmount', () => {
     ).to.equal(claimableAmountHolder1.fee);
 
     expect(
-      ((incomingFunds * holder2Shares) / agreementTotalSupply) *
-        paymentFee *
+      (((incomingFunds * holder2Shares) / agreementTotalSupply) * paymentFee) /
         parseEther('1'),
     ).to.equal(claimableAmountHolder2.fee);
   });

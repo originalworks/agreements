@@ -70,7 +70,7 @@ describe('AgreementRelationsRegistry: different agreement types', () => {
 
     const { agreement: agreementParentERC1155 } = await deployAgreementERC1155({
       initialSetup,
-      shares: [1000, 500],
+      shares: [1000n, 500n],
     });
 
     const { agreement: agreementChildERC1155 } = await deployAgreementERC1155({

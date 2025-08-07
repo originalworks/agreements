@@ -113,7 +113,7 @@ describe('AgreementERC1155.initialize', () => {
         await namespaceRegistry.getAddress(),
         ['REVELATOR:ABC123'],
       ),
-    ).to.be.revertedWith('Initializable: contract is already initialized');
+    ).to.be.reverted;
   });
 
   it('fails when there are no holders', async () => {

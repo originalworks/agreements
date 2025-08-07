@@ -8,8 +8,9 @@ describe('FallbackVault initialization', function () {
     const fallbackVault = (await upgrades.deployProxy(FallbackVault, [], {
       kind: 'uups',
     })) as FallbackVault;
-    await expect(fallbackVault.initialize()).to.be.revertedWith(
-      'Initializable: contract is already initialized',
+    await expect(fallbackVault.initialize()).to.be.revertedWithCustomError(
+      fallbackVault,
+      'InvalidInitialization',
     );
   });
 });

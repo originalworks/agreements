@@ -7,7 +7,7 @@ import {
 import { fakeSignerWithAddress } from '../../helpers/utils';
 
 describe('(FUNCTIONAL) AgreementERC1155: Circular dependency', () => {
-  const TOKEN_ID = 1;
+  const TOKEN_ID = 1n;
   async function setup() {
     const initialSetup = await deployInitialSetup();
     const [, , , , userWallet] = await ethers.getSigners();
@@ -90,10 +90,10 @@ describe('(FUNCTIONAL) AgreementERC1155: Circular dependency', () => {
     const {
       agreement: agreement1,
       holders: [holder],
-    } = await deployAgreementERC1155({ initialSetup, shares: [500] });
+    } = await deployAgreementERC1155({ initialSetup, shares: [500n] });
     const { agreement: agreement2 } = await deployAgreementERC1155({
       initialSetup,
-      shares: [500],
+      shares: [500n],
     });
 
     await agreement1
@@ -102,7 +102,7 @@ describe('(FUNCTIONAL) AgreementERC1155: Circular dependency', () => {
         holder.account,
         await agreement2.getAddress(),
         TOKEN_ID,
-        100,
+        100n,
         '0x00',
       );
     await expect(
@@ -112,7 +112,7 @@ describe('(FUNCTIONAL) AgreementERC1155: Circular dependency', () => {
           holder.account,
           await agreement1.getAddress(),
           TOKEN_ID,
-          100,
+          100n,
           '0x00',
         ),
     ).to.be.revertedWith(
@@ -130,7 +130,7 @@ describe('(FUNCTIONAL) AgreementERC1155: Circular dependency', () => {
           userHolder.account,
           await agreementChild.getAddress(),
           TOKEN_ID,
-          100,
+          100n,
           '0x00',
         ),
     ).to.be.revertedWith(
@@ -145,7 +145,7 @@ describe('(FUNCTIONAL) AgreementERC1155: Circular dependency', () => {
         userHolder.account,
         await agreementGrandGrandParent.getAddress(),
         TOKEN_ID,
-        100,
+        100n,
         '0x00',
       );
 
@@ -156,7 +156,7 @@ describe('(FUNCTIONAL) AgreementERC1155: Circular dependency', () => {
           userHolder.account,
           await agreementChild.getAddress(),
           TOKEN_ID,
-          100,
+          100n,
           '0x00',
         ),
     ).to.be.revertedWith(
@@ -176,7 +176,7 @@ describe('(FUNCTIONAL) AgreementERC1155: Circular dependency', () => {
         .transferOwnedERC1155Shares(
           await agreementParent.getAddress(),
           await agreementChild.getAddress(),
-          100,
+          100n,
         ),
     ).to.be.revertedWith(
       'AgreementRelationsRegistry: Circular dependency not allowed',
@@ -192,7 +192,7 @@ describe('(FUNCTIONAL) AgreementERC1155: Circular dependency', () => {
       .transferOwnedERC1155Shares(
         await agreementChild.getAddress(),
         userHolder.account,
-        500,
+        500n,
       );
 
     await agreementParent
@@ -201,7 +201,7 @@ describe('(FUNCTIONAL) AgreementERC1155: Circular dependency', () => {
         userHolder.account,
         await agreementChild.getAddress(),
         TOKEN_ID,
-        100,
+        100n,
         '0x00',
       );
 
@@ -210,7 +210,7 @@ describe('(FUNCTIONAL) AgreementERC1155: Circular dependency', () => {
         await agreementChild.getAddress(),
         TOKEN_ID,
       ),
-    ).to.equal(100);
+    ).to.equal(100n);
     await expect(
       agreementParent2
         .connect(userHolder.wallet)
@@ -218,7 +218,7 @@ describe('(FUNCTIONAL) AgreementERC1155: Circular dependency', () => {
           userHolder.account,
           await agreementChild.getAddress(),
           TOKEN_ID,
-          100,
+          100n,
           '0x00',
         ),
     ).to.be.revertedWith(

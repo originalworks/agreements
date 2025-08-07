@@ -85,6 +85,9 @@ describe('SplitCurrencyListManager.removeCurrency', () => {
 
     await expect(
       splitCurrencyListManager.connect(nonOwner).addCurrency(currencyToRemove),
-    ).to.be.revertedWith('Ownable: caller is not the owner');
+    ).to.be.revertedWithCustomError(
+      splitCurrencyListManager,
+      'OwnableUnauthorizedAccount',
+    );
   });
 });

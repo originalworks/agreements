@@ -24,14 +24,14 @@ describe('FeeManager getters and setters', () => {
         feeManager
           .connect(notOwner)
           .transferOwnership(Wallet.createRandom().address),
-      ).to.be.revertedWith('Ownable: caller is not the owner');
+      ).to.be.revertedWithCustomError(feeManager, 'OwnableUnauthorizedAccount');
     });
 
     it('cannot be set to zero', async () => {
       const { feeManager } = await deployInitialSetup();
       await expect(
         feeManager.transferOwnership(ethers.ZeroAddress),
-      ).to.be.revertedWith('Ownable: new owner is the zero address');
+      ).to.be.revertedWithCustomError(feeManager, 'OwnableInvalidOwner');
     });
   });
 
@@ -59,7 +59,7 @@ describe('FeeManager getters and setters', () => {
       const { feeManager } = await deployInitialSetup();
       await expect(
         feeManager.connect(notOwner).setCreationFee(123n),
-      ).to.be.revertedWith('Ownable: caller is not the owner');
+      ).to.be.revertedWithCustomError(feeManager, 'OwnableUnauthorizedAccount');
     });
   });
   describe('get & set payment fee', () => {
@@ -87,7 +87,7 @@ describe('FeeManager getters and setters', () => {
       const { feeManager } = await deployInitialSetup();
       await expect(
         feeManager.connect(notOwner).setPaymentFee(123n),
-      ).to.be.revertedWith('Ownable: caller is not the owner');
+      ).to.be.revertedWithCustomError(feeManager, 'OwnableUnauthorizedAccount');
     });
   });
 });

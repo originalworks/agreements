@@ -96,7 +96,6 @@ describe('AgreementFactory.setAgreementImplementation', () => {
     const [, otherAccount] = await ethers.getSigners();
 
     const { agreementFactory, lendingToken } = await deployInitialSetup();
-
     await expect(
       agreementFactory
         .connect(otherAccount)
@@ -104,7 +103,10 @@ describe('AgreementFactory.setAgreementImplementation', () => {
           await lendingToken.getAddress(),
           BigInt(TokenStandard.ERC20),
         ),
-    ).to.be.revertedWith('Ownable: caller is not the owner');
+    ).to.be.revertedWithCustomError(
+      agreementFactory,
+      'OwnableUnauthorizedAccount',
+    );
   });
 
   it('cannot be set to 0', async () => {

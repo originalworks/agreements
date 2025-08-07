@@ -84,6 +84,6 @@ describe('AgreementERC20.removeAdmin', () => {
     await expect(Promise.resolve(tx))
       .to.emit(agreement, 'AdminRemoved')
       .withArgs(adminHolder.address);
-    expect(await agreement.isAdmin(adminHolder.address)).to.equal(true);
+    expect(await agreement.isAdmin(adminHolder.address)).to.equal(false);
   });
 });

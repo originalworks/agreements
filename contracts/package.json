@@ -18,7 +18,7 @@
       "prepare": {
         "executor": "nx:run-commands",
         "options": {
-          "command": "ts-node libs/scripts/symlink-shared.ts"
+          "command": "ts-node scripts/symlink-shared.ts"
         }
       },
       "test": {

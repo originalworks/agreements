@@ -90,7 +90,10 @@ describe('SplitCurrencyListManager.setLendingCurrency', () => {
       splitCurrencyListManager
         .connect(nonOwner)
         .setLendingCurrency(await newLendingCurrency.getAddress()),
-    ).to.be.revertedWith('Ownable: caller is not the owner');
+    ).to.be.revertedWithCustomError(
+      splitCurrencyListManager,
+      'OwnableUnauthorizedAccount',
+    );
   });
 
   it('adds new lending currency to currency mapping and array', async () => {

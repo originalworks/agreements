@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { BigNumberish, parseEther, TransactionResponse } from 'ethers';
+import { parseEther, TransactionResponse } from 'ethers';
 import { ethers } from 'hardhat';
 import {
   deployAgreementERC20,

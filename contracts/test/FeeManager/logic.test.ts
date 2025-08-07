@@ -24,7 +24,7 @@ describe('FeeManager logic', () => {
             await agreement.getAddress(),
             await lendingToken.getAddress(),
           ),
-      ).to.be.revertedWith('Ownable: caller is not the owner');
+      ).to.be.revertedWithCustomError(feeManager, 'OwnableUnauthorizedAccount');
     });
 
     describe('collect paymentFee', () => {
@@ -157,7 +157,7 @@ describe('FeeManager logic', () => {
       const { feeManager } = await deployInitialSetup();
       await expect(
         feeManager.connect(notOwner).withdrawNativeCoins(notOwner.address),
-      ).to.be.revertedWith('Ownable: caller is not the owner');
+      ).to.be.revertedWithCustomError(feeManager, 'OwnableUnauthorizedAccount');
     });
 
     it('withdrawERC20 can only be called by owner', async () => {
@@ -167,7 +167,7 @@ describe('FeeManager logic', () => {
         feeManager
           .connect(notOwner)
           .withdrawERC20(notOwner.address, await lendingToken.getAddress()),
-      ).to.be.revertedWith('Ownable: caller is not the owner');
+      ).to.be.revertedWithCustomError(feeManager, 'OwnableUnauthorizedAccount');
     });
   });
 });

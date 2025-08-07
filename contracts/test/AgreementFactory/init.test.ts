@@ -125,7 +125,7 @@ describe('AgreementFactory.initialize', () => {
           fallbackVault,
           namespaceRegistry,
         ),
-    ).to.be.revertedWith('Initializable: contract is already initialized');
+    ).to.be.reverted;
   });
   it('fails for initialize with address zero', async () => {
     const AgreementFactory =

@@ -14,7 +14,7 @@ describe('AgreementERC1155.safeTransferFrom', () => {
 
     const { agreement, holders } = await deployAgreementERC1155({
       initialSetup,
-      shares: [500, 500],
+      shares: [500n, 500n],
     });
     const holder1 = holders[0];
     const holder2 = holders[1];

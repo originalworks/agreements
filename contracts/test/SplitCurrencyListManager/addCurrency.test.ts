@@ -24,10 +24,10 @@ describe('SplitCurrencyListManager.addCurrency', () => {
     const initialCurrencyArray =
       await splitCurrencyListManager.getCurrencyArray();
 
+    const newCurrencyAddress = await newCurrency.getAddress();
+
     expect(
-      initialCurrencyArray.find(
-        async (currency) => currency === (await newCurrency.getAddress()),
-      ),
+      initialCurrencyArray.find((currency) => currency === newCurrencyAddress),
     ).to.equal(undefined);
 
     expect(
@@ -94,7 +94,10 @@ describe('SplitCurrencyListManager.addCurrency', () => {
       splitCurrencyListManager
         .connect(nonOwner)
         .addCurrency(await newCurrency.getAddress()),
-    ).to.be.revertedWith('Ownable: caller is not the owner');
+    ).to.be.revertedWithCustomError(
+      splitCurrencyListManager,
+      'OwnableUnauthorizedAccount',
+    );
   });
 
   it("can add currency to the list and perform split after funds' been sent (AgreementERC20)", async () => {

@@ -1,10 +1,5 @@
 import { expect } from 'chai';
-import {
-  BigNumberish,
-  parseEther,
-  parseUnits,
-  TransactionResponse,
-} from 'ethers';
+import { parseEther, parseUnits, TransactionResponse } from 'ethers';
 import { ethers } from 'hardhat';
 import {
   deployAgreementERC20,
@@ -188,6 +183,7 @@ describe('AgreementERC20.claimHolderFunds', () => {
           )?.contract;
 
           if (!tokenContract) throw new Error('No TokenContract');
+
           _currencyTransfer = async (receiver: string, amount: bigint) => {
             return await tokenContract.transfer(receiver, amount);
           };
@@ -895,6 +891,7 @@ describe('AgreementERC20.claimHolderFunds', () => {
           const SCALED_NEW_FEE_LEVEL = BigInt(newFeeLevel * Number(SCALE));
 
           await initialSetup.feeManager.setPaymentFee(initialFeeLevel);
+
           const { feeManager } = initialSetup;
           const { agreement, holders } = await deployAgreementERC20({
             initialSetup,
@@ -915,8 +912,8 @@ describe('AgreementERC20.claimHolderFunds', () => {
           const holderBalanceAfter = await _currencyBalance(holder);
 
           expect(holderBalanceAfter - holderBalanceBefore).to.equal(
-            ((incomingFunds + incomingFunds) * (SCALE - SCALED_NEW_FEE_LEVEL)) /
-              SCALE,
+            incomingFunds +
+              (incomingFunds * (SCALE - SCALED_NEW_FEE_LEVEL)) / SCALE,
           );
           expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
             (incomingFunds * SCALED_NEW_FEE_LEVEL) / SCALE,
@@ -957,9 +954,8 @@ describe('AgreementERC20.claimHolderFunds', () => {
           const holderBalanceAfter = await _currencyBalance(holder);
 
           expect(holderBalanceAfter - holderBalanceBefore).to.equal(
-            ((incomingFunds + incomingFunds + incomingFunds) *
-              (SCALE - SCALED_NEW_FEE_LEVEL)) /
-              SCALE,
+            incomingFunds * 2n +
+              (incomingFunds * (SCALE - SCALED_NEW_FEE_LEVEL)) / SCALE,
           );
           expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
             (incomingFunds * SCALED_NEW_FEE_LEVEL) / SCALE,

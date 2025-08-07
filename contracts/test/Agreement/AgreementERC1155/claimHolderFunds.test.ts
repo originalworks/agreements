@@ -1,10 +1,5 @@
 import { expect } from 'chai';
-import {
-  BigNumberish,
-  parseEther,
-  parseUnits,
-  TransactionResponse,
-} from 'ethers';
+import { parseEther, parseUnits, TransactionResponse } from 'ethers';
 import { ethers } from 'hardhat';
 import {
   deployAgreementERC1155,
@@ -40,7 +35,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
     expect(await lendingToken.balanceOf(holder1)).to.equal(60n);
     expect(await lendingToken.balanceOf(holder2)).to.equal(40n);
     expect(await lendingToken.balanceOf(await agreement.getAddress())).to.equal(
-      1,
+      1n,
     );
 
     await lendingToken.transfer(await agreement.getAddress(), 100n);
@@ -51,7 +46,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
     expect(await lendingToken.balanceOf(holder1)).to.equal(120n);
     expect(await lendingToken.balanceOf(holder2)).to.equal(80n);
     expect(await lendingToken.balanceOf(await agreement.getAddress())).to.equal(
-      1,
+      1n,
     );
   });
   it('currencies doesnt interfere with each other', async () => {
@@ -238,7 +233,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
                 nonHolderAccount.address,
               );
 
-              expect(balanceAfter - balanceBefore).to.equal(0);
+              expect(balanceAfter - balanceBefore).to.equal(0n);
               expect(
                 await agreement.getAvailableFee(_currencyAddress),
               ).to.equal((incomingFunds * SCALED_FEE_LEVEL) / SCALE);
@@ -570,7 +565,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
                   MULTIPLIER) /
                   SCALE,
               );
-              expect(holderBBalanceAfter1 - holderBInitialBalance).to.equal(0);
+              expect(holderBBalanceAfter1 - holderBInitialBalance).to.equal(0n);
               expect(
                 await agreement.getAvailableFee(_currencyAddress),
               ).to.equal((incomingFunds1 * SCALED_FEE_LEVEL) / SCALE);
@@ -698,7 +693,6 @@ describe('AgreementERC1155.claimHolderFunds', () => {
               expect(
                 await agreement.getAvailableFee(_currencyAddress),
               ).to.equal((incomingFunds1 * SCALED_FEE_LEVEL) / SCALE);
-
               // ROUND 2: transfer of shares, no user claims funds
               await _currencyTransfer(
                 await agreement.getAddress(),
@@ -750,7 +744,6 @@ describe('AgreementERC1155.claimHolderFunds', () => {
               ).to.equal(
                 ((incomingFunds1 + incomingFunds2) * SCALED_FEE_LEVEL) / SCALE,
               );
-
               holderAShares -= 100n;
               holderBShares += 100n;
 
@@ -776,6 +769,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
 
               const holderBGasCosts =
                 transferReceiptRound3.gasUsed * transferReceiptRound3.gasPrice;
+
               const holderABalanceDiffAfter3 =
                 (await _currencyBalance(holderA)) -
                 holderAInitialBalance +
@@ -787,17 +781,19 @@ describe('AgreementERC1155.claimHolderFunds', () => {
                 (isNativeCoinRun ? holderBGasCosts : 0n);
 
               expect(holderABalanceDiffAfter3).to.equal(
-                (holderABalanceDiffAfter2 +
-                  ((incomingFunds3 * holderAShares) / totalSupply) *
-                    MULTIPLIER) /
-                  SCALE,
+                (((incomingFunds3 * holderAShares) / totalSupply) *
+                  MULTIPLIER) /
+                  SCALE +
+                  holderABalanceDiffAfter2,
               );
+
               expect(holderBBalanceDiffAfter3).to.equal(
-                holderBBalanceDiffAfter2 +
-                  (((incomingFunds3 * holderBShares) / totalSupply) *
-                    MULTIPLIER) /
-                    SCALE,
+                (((incomingFunds3 * holderBShares) / totalSupply) *
+                  MULTIPLIER) /
+                  SCALE +
+                  holderBBalanceDiffAfter2,
               );
+
               expect(
                 await agreement.getAvailableFee(_currencyAddress),
               ).to.equal(
@@ -828,16 +824,16 @@ describe('AgreementERC1155.claimHolderFunds', () => {
                 (isNativeCoinRun ? holderBGasCosts : 0n);
 
               expect(holderABalanceDiffAfter4).to.equal(
-                holderABalanceDiffAfter3 +
-                  (((incomingFunds4 * holderAShares) / totalSupply) *
-                    MULTIPLIER) /
-                    SCALE,
+                (((incomingFunds4 * holderAShares) / totalSupply) *
+                  MULTIPLIER) /
+                  SCALE +
+                  holderABalanceDiffAfter3,
               );
               expect(holderBBalanceDiffAfter4).to.equal(
-                holderBBalanceDiffAfter3 +
-                  (((incomingFunds4 * holderBShares) / totalSupply) *
-                    MULTIPLIER) /
-                    SCALE,
+                (((incomingFunds4 * holderBShares) / totalSupply) *
+                  MULTIPLIER) /
+                  SCALE +
+                  holderBBalanceDiffAfter3,
               );
               expect(
                 await agreement.getAvailableFee(_currencyAddress),
@@ -906,7 +902,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
           const { feeManager } = initialSetup;
           const { agreement, holders } = await deployAgreementERC1155({
             initialSetup,
-            shares: [1000],
+            shares: [1000n],
           });
           const holder = holders[0].account;
 
@@ -923,7 +919,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
           const holderBalanceAfter = await _currencyBalance(holder);
 
           expect(holderBalanceAfter - holderBalanceBefore).to.equal(
-            ((incomingFunds + incomingFunds) * MULTIPLIER) / SCALE,
+            (incomingFunds * MULTIPLIER) / SCALE + incomingFunds,
           );
           expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
             (incomingFunds * SCALED_NEW_FEE_LEVEL) / SCALE,
@@ -964,9 +960,11 @@ describe('AgreementERC1155.claimHolderFunds', () => {
 
           const holderBalanceAfter = await _currencyBalance(holder);
 
+          let expectedRes = (incomingFunds * MULTIPLIER) / SCALE;
+          expectedRes = incomingFunds * 2n + expectedRes;
+
           expect(holderBalanceAfter - holderBalanceBefore).to.equal(
-            ((incomingFunds + incomingFunds + incomingFunds) * MULTIPLIER) /
-              SCALE,
+            expectedRes,
           );
           expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
             (incomingFunds * SCALED_NEW_FEE_LEVEL) / SCALE,
@@ -991,7 +989,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
           const { feeManager } = initialSetup;
           const { agreement, holders } = await deployAgreementERC1155({
             initialSetup,
-            shares: [1000],
+            shares: [1000n],
           });
           const holder = holders[0].account;
           const holderBalanceBefore = await _currencyBalance(holder);
@@ -1060,7 +1058,9 @@ describe('AgreementERC1155.claimHolderFunds', () => {
 
           const holderBalanceAfterFirstRound = await _currencyBalance(holder);
 
-          expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(0);
+          expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
+            0n,
+          );
           expect(holderBalanceAfterFirstRound - initialHolderBalance).to.equal(
             (incomingFunds * (SCALE - SCALED_FEE_LEVEL)) / SCALE,
           );

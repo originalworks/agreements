@@ -11,7 +11,7 @@ describe('AgreementERC1155.removeAdmin', () => {
     const initialSetup = await deployInitialSetup();
     const { agreement, holders } = await deployAgreementERC1155({
       initialSetup,
-      shares: [1000],
+      shares: [1000n],
     });
     await expect(agreement.connect(notAdmin).removeAdmin(holders[0].account)).to
       .be.reverted;
@@ -85,6 +85,6 @@ describe('AgreementERC1155.removeAdmin', () => {
     await expect(Promise.resolve(tx))
       .to.emit(agreement, 'AdminRemoved')
       .withArgs(adminHolder.address);
-    expect(await agreement.isAdmin(adminHolder.address)).to.equal(true);
+    expect(await agreement.isAdmin(adminHolder.address)).to.equal(false);
   });
 });

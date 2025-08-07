@@ -56,8 +56,9 @@ describe('FeeManager.initialize', () => {
       kind: 'uups',
     });
 
-    await expect(feeManager.initialize(1, 2)).to.be.revertedWith(
-      'Initializable: contract is already initialized',
+    await expect(feeManager.initialize(1, 2)).to.be.revertedWithCustomError(
+      feeManager,
+      'InvalidInitialization',
     );
   });
 });

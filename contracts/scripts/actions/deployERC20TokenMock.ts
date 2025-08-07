@@ -8,8 +8,6 @@ export async function deployERC20TokenMock(
   symbol: string,
   decimals: bigint,
 ): Promise<ERC20TokenMock> {
-  console.log({ name, symbol, decimals });
-
   const TokenContract = await ethers.getContractFactory('ERC20TokenMock');
   const tokenContract = await deployProxy(TokenContract, [
     name,
@@ -25,7 +23,6 @@ export async function deployERC20TokenMock(
       parseUnits('10000000', decimals),
     )
   ).wait();
-  console.log({ ERC20_address: await tokenContract.getAddress() });
 
   return tokenContract;
 }

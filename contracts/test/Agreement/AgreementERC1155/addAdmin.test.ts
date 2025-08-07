@@ -11,7 +11,7 @@ describe('AgreementERC1155.addAdmin', () => {
     const initialSetup = await deployInitialSetup();
     const { agreement } = await deployAgreementERC1155({
       initialSetup,
-      shares: [1000],
+      shares: [1000n],
     });
     await expect(agreement.connect(notAdmin).addAdmin(otherAccount.address)).to
       .be.reverted;
@@ -21,7 +21,7 @@ describe('AgreementERC1155.addAdmin', () => {
     const initialSetup = await deployInitialSetup();
     const { agreement } = await deployAgreementERC1155({
       initialSetup,
-      shares: [1000],
+      shares: [1000n],
     });
     await expect(agreement.addAdmin(ethers.ZeroAddress)).to.be.reverted;
   });
@@ -30,7 +30,7 @@ describe('AgreementERC1155.addAdmin', () => {
     const initialSetup = await deployInitialSetup();
     const { agreement, holders } = await deployAgreementERC1155({
       initialSetup,
-      shares: [1000],
+      shares: [1000n],
     });
     const admin = holders[0];
     await expect(agreement.addAdmin(admin.account)).to.be.reverted;
@@ -41,7 +41,7 @@ describe('AgreementERC1155.addAdmin', () => {
 
     const { agreement, holders } = await deployAgreementERC1155({
       initialSetup,
-      shares: [500, 500],
+      shares: [500n, 500n],
     });
     const admin = holders[0];
     const holder = holders[1];

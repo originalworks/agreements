@@ -52,8 +52,8 @@ export async function deployInitialSetup(
   }
 
   const feeManager = await deployFeeManager(
-    options?.creationFee || parseEther('0.01'),
-    options?.paymentFee || parseEther('0.02'),
+    options?.creationFee ?? parseEther('0.01'),
+    options?.paymentFee ?? parseEther('0.02'),
   );
 
   const { agreementERC20Implementation, AgreementERC20Factory } =

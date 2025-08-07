@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.4;
 
-import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
+import '@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
@@ -11,7 +11,7 @@ import './interfaces/IFallbackVault.sol';
 
 contract FallbackVault is
   IFallbackVault,
-  ReentrancyGuard,
+  ReentrancyGuardUpgradeable,
   OwnableUpgradeable,
   ERC165Upgradeable,
   UUPSUpgradeable
@@ -26,6 +26,7 @@ contract FallbackVault is
   }
 
   function initialize() public initializer {
+    __ReentrancyGuard_init();
     __Ownable_init(msg.sender);
     __ERC165_init();
   }

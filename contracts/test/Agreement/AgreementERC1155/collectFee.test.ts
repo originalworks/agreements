@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { BigNumberish, parseEther, TransactionResponse } from 'ethers';
+import { parseEther, TransactionResponse } from 'ethers';
 import { ethers } from 'hardhat';
 import {
   deployAgreementERC1155,
@@ -180,6 +180,7 @@ describe('AgreementERC1155.collectFee', () => {
           expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
             (incomingFunds * SCALED_FEE_LEVEL_1) / SCALE,
           );
+
           await feeManager.collectPaymentFee(
             await agreement.getAddress(),
             _currencyAddress,
@@ -200,6 +201,7 @@ describe('AgreementERC1155.collectFee', () => {
           expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
             (incomingFunds * SCALED_FEE_LEVEL_3) / SCALE,
           );
+
           await feeManager.collectPaymentFee(
             await agreement.getAddress(),
             _currencyAddress,
@@ -207,11 +209,12 @@ describe('AgreementERC1155.collectFee', () => {
 
           const first = (incomingFunds * SCALED_FEE_LEVEL_1) / SCALE;
           const second = (incomingFunds * SCALED_FEE_LEVEL_2) / SCALE;
-          const third = (incomingFunds * SCALED_FEE_LEVEL_2) / SCALE;
+          const third = (incomingFunds * SCALED_FEE_LEVEL_3) / SCALE;
 
           expect(await _currencyBalance(await agreement.getAddress())).to.equal(
             incomingFunds * 3n - (first + second + third),
           );
+
           expect(
             await _currencyBalance(await feeManager.getAddress()),
           ).to.equal(first + second + third);

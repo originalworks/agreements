@@ -1,11 +1,5 @@
 import { ethers } from 'hardhat';
-import {
-  ContractTransactionReceipt,
-  ContractTransactionResponse,
-  id,
-  TransactionReceipt,
-  Wallet,
-} from 'ethers';
+import { ContractTransactionReceipt, id, Wallet } from 'ethers';
 import { expect } from 'chai';
 import { deployInitialSetup } from '../helpers/deployments';
 import { AgreementFactory, AgreementFactory__factory } from '../../typechain';
@@ -103,29 +97,32 @@ describe('AgreementFactory.createBatch', function () {
 
       expect(batchTxGasCost < separateTxsCumulativeGasCost).to.equal(true);
     });
-
-    it('Can create up to 28 agreements (with 3 holders) before reaching block size limit', async function () {
+    it('Can create up to 32 agreements (with 3 holders) before reaching block size limit', async function () {
       const { agreementFactory } = initialSetup;
 
+      let agreementsCount = 32n;
       await expect(
         agreementFactory.createBatchERC20(
-          buildCreateBatchInput(28n).transactionInput,
+          buildCreateBatchInput(agreementsCount).transactionInput,
           {
-            value: creationFee * 28n,
+            value: creationFee * agreementsCount,
           },
         ),
       ).to.not.be.reverted;
 
+      agreementsCount = 33n;
+
       await expect(
         agreementFactory.createBatchERC20(
-          buildCreateBatchInput(29n).transactionInput,
+          buildCreateBatchInput(agreementsCount).transactionInput,
           {
-            value: creationFee * 29n,
+            value: creationFee * agreementsCount,
           },
         ),
       ).to.be.reverted;
     }).timeout(100000);
   });
+
   describe('createBatchERC1155', () => {
     it('Create multiple ERC1155', async function () {
       const inputSize = 3n;
@@ -150,7 +147,7 @@ describe('AgreementFactory.createBatch', function () {
           createdAgreements.find(
             (agreement) => agreement.revenueStreamURI === expectedUri,
           ),
-        ).to.equal(undefined);
+        ).not.to.equal(undefined);
       }
     });
     it('Require creationFee for each token created', async function () {
@@ -204,23 +201,26 @@ describe('AgreementFactory.createBatch', function () {
       expect(batchTxGasCost < separateTxsCumulativeGasCost).to.equal(true);
     });
 
-    it('Can create up to 28 agreements (with 3 holders) before reaching block size limit', async function () {
+    it('Can create up to 33 agreements (with 3 holders) before reaching block size limit', async function () {
       const { agreementFactory } = initialSetup;
+      let agreementsCount = 33n;
 
       await expect(
         agreementFactory.createBatchERC1155(
-          buildCreateBatchInput(28n).transactionInput,
+          buildCreateBatchInput(agreementsCount).transactionInput,
           {
-            value: creationFee * 28n,
+            value: creationFee * agreementsCount,
           },
         ),
       ).to.not.be.reverted;
 
+      agreementsCount = 34n;
+
       await expect(
         agreementFactory.createBatchERC1155(
-          buildCreateBatchInput(29n).transactionInput,
+          buildCreateBatchInput(agreementsCount).transactionInput,
           {
-            value: creationFee * 29n,
+            value: creationFee * agreementsCount,
           },
         ),
       ).to.be.reverted;
