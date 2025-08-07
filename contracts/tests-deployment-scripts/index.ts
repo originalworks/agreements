@@ -1,4 +1,4 @@
-export * from './deployProxy';
+export * from './getRunnerAddress';
 export * from './deployAgreementsTestFixture';
 export * from './deploy-contracts/deployAgreementERC20Implementation';
 export * from './deploy-contracts/deployAgreementERC1155Implementation';

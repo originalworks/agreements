@@ -1,4 +1,4 @@
-import { BigNumberish, Signer } from 'ethers';
+import { Signer } from 'ethers';
 import { SplitCurrency } from '../../scripts/types';
 import {
   AgreementERC1155,

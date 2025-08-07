@@ -1,6 +1,6 @@
 import { Wallet } from 'ethers';
 import { AgreementFactory, AgreementFactory__factory } from '../../typechain';
-import { deployProxy } from '../deployProxy';
+import { deployProxy } from '@royalty-loans/contracts-shared';
 
 export interface AgreementFactoryDeploymentInput {
   agreementERC20Implementation: string;

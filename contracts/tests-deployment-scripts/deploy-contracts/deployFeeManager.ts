@@ -1,6 +1,6 @@
 import { Signer } from 'ethers';
 import { FeeManager, FeeManager__factory } from '../../typechain';
-import { deployProxy } from '../deployProxy';
+import { deployProxy } from '@royalty-loans/contracts-shared';
 
 export async function deployFeeManager(
   deployer: Signer,

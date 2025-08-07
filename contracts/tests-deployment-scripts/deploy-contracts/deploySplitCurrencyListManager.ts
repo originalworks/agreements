@@ -3,7 +3,7 @@ import {
   SplitCurrencyListManager,
   SplitCurrencyListManager__factory,
 } from '../../typechain';
-import { deployProxy } from '../deployProxy';
+import { deployProxy } from '@royalty-loans/contracts-shared';
 
 export async function deploySplitCurrencyListManager(
   deployer: Wallet,

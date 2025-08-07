@@ -1,11 +1,11 @@
 import { ethers, parseUnits, Signer, Wallet } from 'ethers';
 import { ERC20TokenMock__factory } from '../../typechain';
-import { deployProxy } from '../deployProxy';
 import {
   NativeCryptoTicker,
   TokenCryptoTicker,
 } from '../../test/helpers/types';
 import { SplitCurrency } from '../types';
+import { deployProxy } from '@royalty-loans/contracts-shared';
 
 export async function deploySplitCurrencies(deployer: Wallet) {
   const ERC20Factory = new ERC20TokenMock__factory(deployer);

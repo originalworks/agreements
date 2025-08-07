@@ -1,7 +1,8 @@
 import { ethers } from 'hardhat';
 import { ERC20TokenMock } from '../../typechain';
-import { deployProxy, getRunnerAddress } from '../../tests-deployment-scripts';
+import { getRunnerAddress } from '../../tests-deployment-scripts';
 import { parseUnits } from 'ethers';
+import { deployProxy } from '@royalty-loans/contracts-shared';
 
 export async function deployERC20TokenMock(
   name: string,
