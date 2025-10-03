@@ -6,25 +6,27 @@
   "types": "./index.ts",
   "exports": {
     ".": {
-      "types": "./index.ts",
-      "import": "./index.ts",
-      "default": "./index.ts"
+      "types": "./dist/index.js",
+      "default": "./dist/index.js",
+      "import": "./dist/index.d.ts"
     },
     "./package.json": "./package.json"
   },
   "dependencies": {},
   "nx": {
     "targets": {
-      "prepare": {
-        "executor": "nx:run-commands",
-        "options": {
-          "command": "ts-node scripts/symlink-shared.ts"
-        }
+      "postinstall": {
+        "dependsOn": [
+          "build"
+        ]
       },
-      "test": {
+      "build": {
+        "dependsOn": [
+          "compile"
+        ],
         "executor": "nx:run-commands",
         "options": {
-          "command": "npx hardhat test",
+          "command": "bash ./build.sh",
           "cwd": "libs/contracts-agreements"
         }
       },
@@ -35,6 +37,19 @@
         "executor": "nx:run-commands",
         "options": {
           "command": "npx hardhat compile",
+          "cwd": "libs/contracts-agreements"
+        }
+      },
+      "prepare": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "ts-node scripts/symlink-shared.ts"
+        }
+      },
+      "test": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "npx hardhat test",
           "cwd": "libs/contracts-agreements"
         }
       },
