@@ -1,13 +1,15 @@
-import { ethers, parseUnits, Signer, Wallet } from 'ethers';
+import { ethers, parseUnits, Signer } from 'ethers';
 import { ERC20TokenMock__factory } from '../../typechain';
+
 import {
   NativeCryptoTicker,
+  SignerOrWallet,
+  SplitCurrency,
   TokenCryptoTicker,
-} from '../../test/helpers/types';
-import { SplitCurrency } from '../types';
+} from '../types';
 import { deployProxy } from '@royalty-loans/contracts-shared';
 
-export async function deploySplitCurrencies(deployer: Wallet) {
+export async function deploySplitCurrencies(deployer: SignerOrWallet) {
   const ERC20Factory = new ERC20TokenMock__factory(deployer);
 
   const lendingToken = await deployToken('USDC mock', 'USDC', 6n, ERC20Factory);

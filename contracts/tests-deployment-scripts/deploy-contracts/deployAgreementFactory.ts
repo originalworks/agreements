@@ -1,6 +1,6 @@
-import { Wallet } from 'ethers';
 import { AgreementFactory, AgreementFactory__factory } from '../../typechain';
 import { deployProxy } from '@royalty-loans/contracts-shared';
+import { SignerOrWallet } from '../types';
 
 export interface AgreementFactoryDeploymentInput {
   agreementERC20Implementation: string;
@@ -13,7 +13,7 @@ export interface AgreementFactoryDeploymentInput {
 }
 
 export async function deployAgreementFactory(
-  deployer: Wallet,
+  deployer: SignerOrWallet,
   input: AgreementFactoryDeploymentInput,
 ) {
   const factory = new AgreementFactory__factory(deployer);

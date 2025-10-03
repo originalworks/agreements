@@ -1,5 +1,10 @@
-import { JsonRpcProvider, parseEther, Wallet } from 'ethers';
-import { AgreementsBlockchainFixture, AgreementsFixtureOptions } from './types';
+import { JsonRpcProvider, parseEther } from 'ethers';
+import {
+  AgreementsBlockchainFixture,
+  AgreementsFixtureOptions,
+  SignerOrWallet,
+  TestAgreementHolder,
+} from './types';
 import { deployNamespaceRegistry } from './deploy-contracts/deployNamespaceRegistry';
 import { deploySplitCurrencies } from './deploy-contracts/deploySplitCurrencies';
 import { deployFeeManager } from './deploy-contracts/deployFeeManager';
@@ -9,9 +14,11 @@ import { deployAgreementRelationsRegistry } from './deploy-contracts/deployAgree
 import { deployFallbackVault } from './deploy-contracts/deployFallbackVault';
 import { deploySplitCurrencyListManager } from './deploy-contracts/deploySplitCurrencyListManager';
 import { deployAgreementFactory } from './deploy-contracts/deployAgreementFactory';
+import { AgreementERC1155, AgreementERC1155__factory } from '../typechain';
+import { getEvent } from './utils';
 
 export async function deployAgreementsTestFixture(
-  wallets: Wallet[],
+  wallets: SignerOrWallet[],
   provider: JsonRpcProvider,
   options?: AgreementsFixtureOptions,
 ) {
@@ -58,6 +65,28 @@ export async function deployAgreementsTestFixture(
     namespaceRegistry: await namespaceRegistry.getAddress(),
   });
 
+  const deployAgreementERC1155 = async (
+    holders: Omit<TestAgreementHolder, 'wallet'>[],
+  ) => {
+    const dataHash = `0x${'ab'.repeat(32)}`;
+    const contractUri = 'contractUri';
+    const partialRevenueStreamURIs = ['REVELATOR:ABC123'];
+    const tx = agreementFactory.createERC1155(
+      dataHash,
+      holders,
+      contractUri,
+      partialRevenueStreamURIs,
+      { value: CREATION_FEE },
+    );
+    const event = await getEvent(tx, agreementFactory, 'AgreementCreated');
+    const agreementAddress = event.args[0];
+    const agreement = AgreementERC1155__factory.connect(
+      agreementAddress,
+    ) as AgreementERC1155;
+
+    return agreement;
+  };
+
   const fixture: AgreementsBlockchainFixture = {
     agreementFactory,
     splitCurrencyListManager,
@@ -71,6 +100,7 @@ export async function deployAgreementsTestFixture(
     testWallets,
     provider,
     namespaceRegistry,
+    deployAgreementERC1155,
   };
 
   return fixture;

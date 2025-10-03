@@ -1,7 +1,9 @@
-import { Wallet } from 'ethers';
 import { AgreementERC20__factory } from '../../typechain';
+import { SignerOrWallet } from '../types';
 
-export async function deployAgreementERC20Implementation(deployer: Wallet) {
+export async function deployAgreementERC20Implementation(
+  deployer: SignerOrWallet,
+) {
   const factory = new AgreementERC20__factory(deployer);
 
   const agreementERC20Implementation = await factory.deploy();

@@ -1,4 +1,4 @@
-import { JsonRpcProvider, Wallet } from 'ethers';
+import { JsonRpcProvider, Signer, Wallet } from 'ethers';
 import {
   AgreementERC1155,
   AgreementERC20,
@@ -10,7 +10,9 @@ import {
   SplitCurrencyListManager,
 } from '../typechain';
 import { IHolder } from '../typechain/contracts/agreements/AgreementFactory';
-import { NativeCryptoTicker, TokenCryptoTicker } from '../test/helpers/types';
+
+export type NativeCryptoTicker = 'ETH' | 'BNB' | 'MATIC' | 'SBY';
+export type TokenCryptoTicker = 'USDC' | 'BUSD' | 'DAI' | 'USDT';
 
 export interface AgreementsFixtureOptions {
   creationFee?: bigint;
@@ -38,12 +40,17 @@ export interface AgreementsBlockchainFixture {
   agreementERC20Implementation: AgreementERC20;
   feeManager: FeeManager;
   splitCurrencies: SplitCurrencies;
-  deployer: Wallet;
-  testWallets: Wallet[];
+  deployer: SignerOrWallet;
+  testWallets: SignerOrWallet[];
   provider: JsonRpcProvider;
   namespaceRegistry: NamespaceRegistry;
+  deployAgreementERC1155: (
+    holders: IHolder.HolderStruct[],
+  ) => Promise<AgreementERC1155>;
 }
 
 export interface TestAgreementHolder extends IHolder.HolderStruct {
-  wallet: Wallet;
+  wallet: SignerOrWallet;
 }
+
+export type SignerOrWallet = Wallet | Signer;
