@@ -41,7 +41,6 @@ export interface AgreementsBlockchainFixture {
   feeManager: FeeManager;
   splitCurrencies: SplitCurrencies;
   deployer: SignerOrWallet;
-  testWallets: SignerOrWallet[];
   provider: JsonRpcProvider;
   namespaceRegistry: NamespaceRegistry;
   deployAgreementERC1155: (

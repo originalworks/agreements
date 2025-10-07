@@ -18,13 +18,12 @@ import { AgreementERC1155, AgreementERC1155__factory } from '../typechain';
 import { getEvent } from './utils';
 
 export async function deployAgreementsTestFixture(
-  wallets: SignerOrWallet[],
+  deployer: SignerOrWallet,
   provider: JsonRpcProvider,
   options?: AgreementsFixtureOptions,
 ) {
-  const CREATION_FEE = options?.creationFee || parseEther('0.001');
-  const PAYMENT_FEE = options?.paymentFee || parseEther('0.01');
-  const [deployer, ...testWallets] = wallets;
+  const CREATION_FEE = options?.creationFee ?? parseEther('0.001');
+  const PAYMENT_FEE = options?.paymentFee ?? parseEther('0.01');
 
   const namespaceRegistry = await deployNamespaceRegistry(deployer);
 
@@ -97,7 +96,6 @@ export async function deployAgreementsTestFixture(
     feeManager,
     splitCurrencies,
     deployer,
-    testWallets,
     provider,
     namespaceRegistry,
     deployAgreementERC1155,
