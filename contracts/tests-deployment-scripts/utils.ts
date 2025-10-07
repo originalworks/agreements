@@ -1,4 +1,7 @@
 import { BaseContract, id, TransactionResponse } from 'ethers';
+import { ContractFactory } from 'ethers';
+import { ERC1967Proxy__factory } from '../typechain';
+import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 
 export async function getEvent(
   txPromise: Promise<TransactionResponse>,
@@ -27,3 +30,21 @@ export async function getEvent(
 
   return event;
 }
+
+export const deployProxy = async <T extends ContractFactory>(
+  factory: T,
+  initArgs: any[],
+) => {
+  const implementation = await factory.deploy();
+  const encodedInitArgs = // @ts-expect-error fk ethers v6
+    (await implementation.initialize.populateTransaction(...initArgs)).data;
+  const proxy = await (
+    await new ERC1967Proxy__factory(
+      implementation.runner as unknown as SignerWithAddress,
+    ).deploy(await implementation.getAddress(), encodedInitArgs)
+  ).waitForDeployment();
+
+  return implementation.attach(await proxy.getAddress()) as ReturnType<
+    T['deploy']
+  >;
+};

@@ -1,5 +1,5 @@
 import { AgreementFactory, AgreementFactory__factory } from '../../typechain';
-import { deployProxy } from '@royalty-loans/contracts-shared';
+import { deployProxy } from '../utils';
 import { SignerOrWallet } from '../types';
 
 export interface AgreementFactoryDeploymentInput {

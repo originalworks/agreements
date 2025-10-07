@@ -7,7 +7,7 @@ import {
   SplitCurrency,
   TokenCryptoTicker,
 } from '../types';
-import { deployProxy } from '@royalty-loans/contracts-shared';
+import { deployProxy } from '../utils';
 
 export async function deploySplitCurrencies(deployer: SignerOrWallet) {
   const ERC20Factory = new ERC20TokenMock__factory(deployer);
