@@ -13,7 +13,7 @@ describe('AgreementFactory.initialize', () => {
   let agreementERC1155Implementation: string;
   let feeManager: string;
   let agreementRelationsRegistry: string;
-  let splitCurrencyListManager: string;
+  let currencyManager: string;
   let fallbackVault: string;
   let namespaceRegistry: string;
 
@@ -28,8 +28,7 @@ describe('AgreementFactory.initialize', () => {
     feeManager = await initialSetup.feeManager.getAddress();
     agreementRelationsRegistry =
       await initialSetup.agreementRelationsRegistry.getAddress();
-    splitCurrencyListManager =
-      await initialSetup.splitCurrencyListManager.getAddress();
+    currencyManager = await initialSetup.currencyManager.getAddress();
     fallbackVault = await initialSetup.fallbackVault.getAddress();
     namespaceRegistry = await initialSetup.namespaceRegistry.getAddress();
   });
@@ -44,7 +43,7 @@ describe('AgreementFactory.initialize', () => {
         agreementERC1155Implementation,
         feeManager,
         agreementRelationsRegistry,
-        splitCurrencyListManager,
+        currencyManager,
         fallbackVault,
         namespaceRegistry,
       ],
@@ -72,7 +71,7 @@ describe('AgreementFactory.initialize', () => {
         agreementERC1155Implementation,
         feeManager,
         agreementRelationsRegistry,
-        splitCurrencyListManager,
+        currencyManager,
         fallbackVault,
         namespaceRegistry,
       ],
@@ -121,7 +120,7 @@ describe('AgreementFactory.initialize', () => {
           agreementERC1155Implementation,
           feeManager,
           agreementRelationsRegistry,
-          splitCurrencyListManager,
+          currencyManager,
           fallbackVault,
           namespaceRegistry,
         ),
@@ -139,7 +138,7 @@ describe('AgreementFactory.initialize', () => {
           agreementERC1155Implementation,
           feeManager,
           agreementRelationsRegistry,
-          splitCurrencyListManager,
+          currencyManager,
           fallbackVault,
           namespaceRegistry,
         ],
@@ -155,7 +154,7 @@ describe('AgreementFactory.initialize', () => {
           ethers.ZeroAddress,
           feeManager,
           agreementRelationsRegistry,
-          splitCurrencyListManager,
+          currencyManager,
           fallbackVault,
           namespaceRegistry,
         ],
@@ -171,7 +170,7 @@ describe('AgreementFactory.initialize', () => {
           agreementERC1155Implementation,
           ethers.ZeroAddress,
           agreementRelationsRegistry,
-          splitCurrencyListManager,
+          currencyManager,
           fallbackVault,
           namespaceRegistry,
         ],
@@ -189,7 +188,7 @@ describe('AgreementFactory.initialize', () => {
           agreementERC1155Implementation,
           feeManager,
           ethers.ZeroAddress,
-          splitCurrencyListManager,
+          currencyManager,
           fallbackVault,
           namespaceRegistry,
         ],
@@ -214,7 +213,7 @@ describe('AgreementFactory.initialize', () => {
         { kind: 'uups' },
       ),
     ).to.be.revertedWith(
-      'AgreementFactory: Wrong interface at SplitCurrencyListManager address',
+      'AgreementFactory: Wrong interface at CurrencyManager address',
     );
 
     await expect(
@@ -225,7 +224,7 @@ describe('AgreementFactory.initialize', () => {
           agreementERC1155Implementation,
           feeManager,
           agreementRelationsRegistry,
-          splitCurrencyListManager,
+          currencyManager,
           ethers.ZeroAddress,
           namespaceRegistry,
         ],
@@ -247,7 +246,7 @@ describe('AgreementFactory.initialize', () => {
           agreementERC1155Implementation,
           feeManager,
           agreementRelationsRegistry,
-          splitCurrencyListManager,
+          currencyManager,
           fallbackVault,
           namespaceRegistry,
         ],
@@ -265,7 +264,7 @@ describe('AgreementFactory.initialize', () => {
           Wallet.createRandom().address,
           feeManager,
           agreementRelationsRegistry,
-          splitCurrencyListManager,
+          currencyManager,
           fallbackVault,
           namespaceRegistry,
         ],
@@ -283,7 +282,7 @@ describe('AgreementFactory.initialize', () => {
           agreementERC1155Implementation,
           Wallet.createRandom().address,
           agreementRelationsRegistry,
-          splitCurrencyListManager,
+          currencyManager,
           fallbackVault,
           namespaceRegistry,
         ],
@@ -301,7 +300,7 @@ describe('AgreementFactory.initialize', () => {
           agreementERC1155Implementation,
           feeManager,
           Wallet.createRandom().address,
-          splitCurrencyListManager,
+          currencyManager,
           fallbackVault,
           namespaceRegistry,
         ],
@@ -326,7 +325,7 @@ describe('AgreementFactory.initialize', () => {
         { kind: 'uups' },
       ),
     ).to.be.revertedWith(
-      'AgreementFactory: Wrong interface at SplitCurrencyListManager address',
+      'AgreementFactory: Wrong interface at CurrencyManager address',
     );
 
     await expect(
@@ -337,7 +336,7 @@ describe('AgreementFactory.initialize', () => {
           agreementERC1155Implementation,
           feeManager,
           agreementRelationsRegistry,
-          splitCurrencyListManager,
+          currencyManager,
           Wallet.createRandom().address,
           namespaceRegistry,
         ],

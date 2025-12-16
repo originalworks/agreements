@@ -113,7 +113,7 @@ describe('AgreementERC1155.safeTransferFrom', () => {
     const initialSetup = await deployInitialSetup({
       paymentFee: parseEther('0'),
     });
-    const { lendingToken } = initialSetup;
+    const { splitCurrencies } = initialSetup;
     const { agreement, holders } = await deployAgreementERC1155({
       initialSetup,
       shares: [600n, 400n],
@@ -121,10 +121,15 @@ describe('AgreementERC1155.safeTransferFrom', () => {
     const sender = holders[0];
     const receiver = holders[1];
 
-    expect(await lendingToken.balanceOf(sender.account)).to.equal(0n);
-    expect(await lendingToken.balanceOf(receiver.account)).to.equal(0n);
+    const currencyContract = splitCurrencies[0].contract;
+    if (!currencyContract) {
+      throw new Error('No currencyContract found');
+    }
 
-    await lendingToken.transfer(await agreement.getAddress(), 1000n);
+    expect(await currencyContract.balanceOf(sender.account)).to.equal(0n);
+    expect(await currencyContract.balanceOf(receiver.account)).to.equal(0n);
+
+    await currencyContract.transfer(await agreement.getAddress(), 1000n);
     await agreement
       .connect(sender.wallet)
       .safeTransferFrom(
@@ -140,15 +145,15 @@ describe('AgreementERC1155.safeTransferFrom', () => {
       900n,
     );
 
-    expect(await lendingToken.balanceOf(sender.account)).to.equal(600n);
-    expect(await lendingToken.balanceOf(receiver.account)).to.equal(400n);
+    expect(await currencyContract.balanceOf(sender.account)).to.equal(600n);
+    expect(await currencyContract.balanceOf(receiver.account)).to.equal(400n);
   });
 
   it('does not affect third party holder in any matter', async () => {
     const initialSetup = await deployInitialSetup({
       paymentFee: parseEther('0'),
     });
-    const { lendingToken } = initialSetup;
+    const { splitCurrencies } = initialSetup;
     const { agreement, holders } = await deployAgreementERC1155({
       initialSetup,
       shares: [600n, 400n],
@@ -157,7 +162,12 @@ describe('AgreementERC1155.safeTransferFrom', () => {
     const [, , , , , receiver] = await ethers.getSigners();
     const thirdPartyHolder = holders[1];
 
-    await lendingToken.transfer(await agreement.getAddress(), 1000n);
+    const currencyContract = splitCurrencies[0].contract;
+    if (!currencyContract) {
+      throw new Error('No currencyContract found');
+    }
+
+    await currencyContract.transfer(await agreement.getAddress(), 1000n);
     await agreement
       .connect(sender.wallet)
       .safeTransferFrom(
@@ -168,11 +178,13 @@ describe('AgreementERC1155.safeTransferFrom', () => {
         '0x00',
       );
 
-    expect(await lendingToken.balanceOf(sender.account)).to.equal(600n); // Received 60% of 1000 Tokens
-    expect(await lendingToken.balanceOf(thirdPartyHolder.account)).to.equal(0n); // No action performed
-    expect(await lendingToken.balanceOf(receiver.address)).to.equal(0n); // Received 0% of 100 Tokens
+    expect(await currencyContract.balanceOf(sender.account)).to.equal(600n); // Received 60% of 1000 Tokens
+    expect(await currencyContract.balanceOf(thirdPartyHolder.account)).to.equal(
+      0n,
+    ); // No action performed
+    expect(await currencyContract.balanceOf(receiver.address)).to.equal(0n); // Received 0% of 100 Tokens
 
-    await lendingToken.transfer(await agreement.getAddress(), 2000n);
+    await currencyContract.transfer(await agreement.getAddress(), 2000n);
     await agreement
       .connect(sender.wallet)
       .safeTransferFrom(
@@ -183,37 +195,39 @@ describe('AgreementERC1155.safeTransferFrom', () => {
         '0x00',
       );
     // Received 50% of 2000 Tokens (600 + 1000 Tokens)
-    expect(await lendingToken.balanceOf(sender.account)).to.equal(1600n);
+    expect(await currencyContract.balanceOf(sender.account)).to.equal(1600n);
 
     // No action performed
-    expect(await lendingToken.balanceOf(thirdPartyHolder.account)).to.equal(0n);
+    expect(await currencyContract.balanceOf(thirdPartyHolder.account)).to.equal(
+      0n,
+    );
 
     // Received 10% of 2000 Tokens (0 + 200 Tokens)
-    expect(await lendingToken.balanceOf(receiver.address)).to.equal(200n);
+    expect(await currencyContract.balanceOf(receiver.address)).to.equal(200n);
 
-    await lendingToken.transfer(await agreement.getAddress(), 3000n);
+    await currencyContract.transfer(await agreement.getAddress(), 3000n);
     await agreement.claimHolderFunds(
       sender.account,
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
     );
     await agreement.claimHolderFunds(
       thirdPartyHolder.account,
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
     );
     await agreement.claimHolderFunds(
       receiver.address,
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
     );
 
     // Received 40% of 3000 Tokens (1600 + 1200 Tokens)
-    expect(await lendingToken.balanceOf(sender.account)).to.equal(2800n);
+    expect(await currencyContract.balanceOf(sender.account)).to.equal(2800n);
 
     // Received 40% of 6000 Tokens
-    expect(await lendingToken.balanceOf(thirdPartyHolder.account)).to.equal(
+    expect(await currencyContract.balanceOf(thirdPartyHolder.account)).to.equal(
       2400n,
     );
 
     // Received 20% of 3000 Tokens (200 + 600 Tokens)
-    expect(await lendingToken.balanceOf(receiver.address)).to.equal(800n);
+    expect(await currencyContract.balanceOf(receiver.address)).to.equal(800n);
   });
 });

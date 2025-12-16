@@ -8,12 +8,11 @@ import '@openzeppelin/contracts/utils/introspection/ERC165Checker.sol';
 import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 import './AgreementProxy.sol';
 import '../interfaces/IFeeManager.sol';
-import '../interfaces/ILendingContract.sol';
 import '../interfaces/IAgreementRelationsRegistry.sol';
 import '../interfaces/IAgreementERC20.sol';
 import '../interfaces/IAgreementERC1155.sol';
 import '../interfaces/IHolder.sol';
-import '../interfaces/ISplitCurrencyListManager.sol';
+import '../interfaces/ICurrencyManager.sol';
 import '../interfaces/IFallbackVault.sol';
 import '../interfaces/ICreationFeeSource.sol';
 import '../interfaces/INamespaceRegistry.sol';
@@ -28,7 +27,6 @@ contract AgreementFactory is
   using ERC165Checker for address;
 
   IFeeManager private feeManager;
-  address private lendingContract; // unused legacy parameter
   address private splitCurrencyListManager;
   address private agreementRelationsRegistry;
   address private agreementERC20Implementation;
@@ -95,9 +93,9 @@ contract AgreementFactory is
     );
     require(
       _splitCurrencyListManager.supportsInterface(
-        type(ISplitCurrencyListManager).interfaceId
+        type(ICurrencyManager).interfaceId
       ),
-      'AgreementFactory: Wrong interface at SplitCurrencyListManager address'
+      'AgreementFactory: Wrong interface at CurrencyManager address'
     );
     require(
       _fallbackVault.supportsInterface(type(IFallbackVault).interfaceId),

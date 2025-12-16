@@ -13,7 +13,7 @@ export async function deployAgreementFactory(
       input.agreementERC1155Implementation,
       input.feeManager,
       input.agreementRelationsRegistry,
-      input.splitCurrencyListManager,
+      input.currencyManager,
       input.fallbackVault,
       input.namespaceRegistry,
     ],

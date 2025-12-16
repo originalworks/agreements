@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { deployERC20TokenMock } from '../../scripts/actions/deployERC20TokenMock';
-import { SplitCurrencyListManager } from '../../typechain';
+import { CurrencyManager } from '../../typechain';
 import {
   deployAgreementERC1155,
   deployAgreementERC20,
@@ -10,19 +10,18 @@ import {
 import { InitialSetup } from '../helpers/types';
 import { parseUnits } from 'ethers';
 
-describe('SplitCurrencyListManager.addCurrency', () => {
+describe('CurrencyManager.addCurrency', () => {
   let initialSetup: InitialSetup;
-  let splitCurrencyListManager: SplitCurrencyListManager;
+  let currencyManager: CurrencyManager;
 
   beforeEach(async () => {
     initialSetup = await deployInitialSetup();
-    splitCurrencyListManager = initialSetup.splitCurrencyListManager;
+    currencyManager = initialSetup.currencyManager;
   });
 
   it('can add new currency', async () => {
     const newCurrency = await deployERC20TokenMock('new token', 'NTKN', 10n);
-    const initialCurrencyArray =
-      await splitCurrencyListManager.getCurrencyArray();
+    const initialCurrencyArray = await currencyManager.getCurrencyArray();
 
     const newCurrencyAddress = await newCurrency.getAddress();
 
@@ -31,15 +30,12 @@ describe('SplitCurrencyListManager.addCurrency', () => {
     ).to.equal(undefined);
 
     expect(
-      await splitCurrencyListManager.currencyMap(
-        await newCurrency.getAddress(),
-      ),
+      await currencyManager.currencyMap(await newCurrency.getAddress()),
     ).to.equal(false);
 
-    await splitCurrencyListManager.addCurrency(await newCurrency.getAddress());
+    await currencyManager.addCurrency(await newCurrency.getAddress());
 
-    const updatedCurrencyArray =
-      await splitCurrencyListManager.getCurrencyArray();
+    const updatedCurrencyArray = await currencyManager.getCurrencyArray();
 
     expect(
       updatedCurrencyArray.find(
@@ -48,27 +44,17 @@ describe('SplitCurrencyListManager.addCurrency', () => {
     ).not.to.equal(undefined);
 
     expect(
-      await splitCurrencyListManager.currencyMap(
-        await newCurrency.getAddress(),
-      ),
+      await currencyManager.currencyMap(await newCurrency.getAddress()),
     ).to.equal(true);
   });
 
   it("doesn't add new currency if it's already listed", async () => {
     const newCurrency = await deployERC20TokenMock('new token', 'NTKN', 10n);
-    await splitCurrencyListManager.addCurrency(await newCurrency.getAddress());
+    await currencyManager.addCurrency(await newCurrency.getAddress());
 
     await expect(
-      splitCurrencyListManager.addCurrency(await newCurrency.getAddress()),
-    ).to.be.revertedWith('SplitCurrencyListManager: currency already listed');
-  });
-
-  it("doesn't add new currency if it's lending currency", async () => {
-    const lendingCurrency = await splitCurrencyListManager.lendingCurrency();
-
-    await expect(
-      splitCurrencyListManager.addCurrency(lendingCurrency),
-    ).to.be.revertedWith('SplitCurrencyListManager: currency already listed');
+      currencyManager.addCurrency(await newCurrency.getAddress()),
+    ).to.be.revertedWith('CurrencyManager: currency already listed');
   });
 
   it('emits CurrencyAdded event', async () => {
@@ -77,12 +63,12 @@ describe('SplitCurrencyListManager.addCurrency', () => {
     const decimals = 10n;
     const newCurrency = await deployERC20TokenMock(name, symbol, decimals);
 
-    const tx = await splitCurrencyListManager.addCurrency(
+    const tx = await currencyManager.addCurrency(
       await newCurrency.getAddress(),
     );
 
     await expect(Promise.resolve(tx))
-      .to.emit(splitCurrencyListManager, 'CurrencyAdded')
+      .to.emit(currencyManager, 'CurrencyAdded')
       .withArgs(await newCurrency.getAddress(), symbol, name, decimals);
   });
 
@@ -91,11 +77,11 @@ describe('SplitCurrencyListManager.addCurrency', () => {
     const newCurrency = await deployERC20TokenMock('new token', 'NTKN', 10n);
 
     await expect(
-      splitCurrencyListManager
+      currencyManager
         .connect(nonOwner)
         .addCurrency(await newCurrency.getAddress()),
     ).to.be.revertedWithCustomError(
-      splitCurrencyListManager,
+      currencyManager,
       'OwnableUnauthorizedAccount',
     );
   });
@@ -118,7 +104,7 @@ describe('SplitCurrencyListManager.addCurrency', () => {
 
     await newCurrency.mintTo(await agreement.getAddress(), amount);
 
-    await splitCurrencyListManager.addCurrency(await newCurrency.getAddress());
+    await currencyManager.addCurrency(await newCurrency.getAddress());
 
     await agreement.claimHolderFunds(holderA.account, newCurrency.getAddress());
     await agreement.claimHolderFunds(holderB.account, newCurrency.getAddress());
@@ -152,7 +138,7 @@ describe('SplitCurrencyListManager.addCurrency', () => {
 
     await newCurrency.mintTo(await agreement.getAddress(), amount);
 
-    await splitCurrencyListManager.addCurrency(await newCurrency.getAddress());
+    await currencyManager.addCurrency(await newCurrency.getAddress());
 
     await agreement.claimHolderFunds(
       holderA.account,

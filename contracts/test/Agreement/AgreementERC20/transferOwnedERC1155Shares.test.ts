@@ -214,14 +214,19 @@ describe('AgreementERC20.transferOwnedERC1155Shares', () => {
     const incomingFundsAmount =
       (await nestedAgreementERC1155.totalSupply()) * 10n;
 
-    const { feeManager, deployer, lendingToken } = initialSetup;
+    const { feeManager, deployer, splitCurrencies } = initialSetup;
+
+    const currencyContract = splitCurrencies[0].contract;
+    if (!currencyContract) {
+      throw new Error('No currencyContract found');
+    }
 
     await feeManager.connect(deployer).setPaymentFee(0n);
 
-    expect(await lendingToken.balanceOf(adminHolder.account)).to.equal(0n);
-    expect(await lendingToken.balanceOf(receiver.account)).to.equal(0n);
+    expect(await currencyContract.balanceOf(adminHolder.account)).to.equal(0n);
+    expect(await currencyContract.balanceOf(receiver.account)).to.equal(0n);
 
-    await lendingToken
+    await currencyContract
       .connect(deployer)
       .mintTo(await nestedAgreementERC1155.getAddress(), incomingFundsAmount);
     await agreementERC20
@@ -232,11 +237,11 @@ describe('AgreementERC20.transferOwnedERC1155Shares', () => {
         100n,
       );
 
-    expect(await lendingToken.balanceOf(receiver.account)).to.equal(
+    expect(await currencyContract.balanceOf(receiver.account)).to.equal(
       receiver.balance * 10n,
     );
     expect(
-      await lendingToken.balanceOf(await agreementERC20.getAddress()),
+      await currencyContract.balanceOf(await agreementERC20.getAddress()),
     ).to.equal(NESTED_AGREEMENT_BALANCE * 10n);
   });
 });

@@ -9,9 +9,8 @@ import '@openzeppelin/contracts/utils/introspection/ERC165Checker.sol';
 import '@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155HolderUpgradeable.sol';
 import '../interfaces/IAgreementProxy.sol';
 import '../interfaces/IFeeManager.sol';
-import '../interfaces/ILendingContract.sol';
 import '../interfaces/IAgreementRelationsRegistry.sol';
-import '../interfaces/ISplitCurrencyListManager.sol';
+import '../interfaces/ICurrencyManager.sol';
 import '../interfaces/IAgreementERC20.sol';
 import '../interfaces/IFallbackVault.sol';
 import '../interfaces/INamespaceRegistry.sol';
@@ -24,9 +23,8 @@ contract AgreementERC20 is
 {
   using SafeERC20 for IERC20;
 
-  ISplitCurrencyListManager private splitCurrencyListManager;
+  ICurrencyManager private splitCurrencyListManager;
   IFeeManager private feeManager;
-  ILendingContract private lendingContract; // unused legacy parameter
   IAgreementRelationsRegistry private agreementRelationsRegistry;
   IFallbackVault private fallbackVault;
 
@@ -72,9 +70,7 @@ contract AgreementERC20 is
 
     __ERC20_init('OW Agreement', 'share');
     _setDataHash(_dataHash);
-    splitCurrencyListManager = ISplitCurrencyListManager(
-      _splitCurrencyListManager
-    );
+    splitCurrencyListManager = ICurrencyManager(_splitCurrencyListManager);
     feeManager = IFeeManager(_feeManager);
     agreementRelationsRegistry = IAgreementRelationsRegistry(
       _agreementRelationsRegistry

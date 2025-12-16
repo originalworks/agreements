@@ -34,7 +34,7 @@ describe('AgreementERC1155.collectFee', () => {
     });
 
     const { feeManager } = initialSetup;
-    const incomingFundsLendingToken = 2500n;
+
     const incomingFundsNativeCoin = 9000n;
     const incomingFundsTokenA = 10000n;
     const incomingFundsTokenB = 50000n;
@@ -44,9 +44,6 @@ describe('AgreementERC1155.collectFee', () => {
       shares: [1000n],
     });
 
-    const lendingToken = initialSetup.splitCurrencies.find(
-      (currency) => currency.lendingCurrency === true,
-    );
     const tokenA = initialSetup.splitCurrencies.find(
       (currency) => currency.name === 'TOKEN_A',
     );
@@ -54,13 +51,9 @@ describe('AgreementERC1155.collectFee', () => {
       (currency) => currency.name === 'TOKEN_B',
     );
 
-    if (!lendingToken?.contract || !tokenA?.contract || !tokenB?.contract)
+    if (!tokenA?.contract || !tokenB?.contract)
       throw new Error('Missing contract');
 
-    await lendingToken.contract.mintTo(
-      await agreement.getAddress(),
-      incomingFundsLendingToken,
-    );
     await tokenA.contract.mintTo(
       await agreement.getAddress(),
       incomingFundsTokenA,
@@ -74,9 +67,6 @@ describe('AgreementERC1155.collectFee', () => {
       to: await agreement.getAddress(),
     });
 
-    expect(await agreement.getAvailableFee(lendingToken.address)).to.equal(
-      (incomingFundsLendingToken * SCALED_FEE_LEVEL) / SCALE,
-    );
     expect(await agreement.getAvailableFee(tokenA.address)).to.equal(
       (incomingFundsTokenA * SCALED_FEE_LEVEL) / SCALE,
     );
@@ -87,10 +77,6 @@ describe('AgreementERC1155.collectFee', () => {
       (incomingFundsNativeCoin * SCALED_FEE_LEVEL) / SCALE,
     );
 
-    await feeManager.collectPaymentFee(
-      await agreement.getAddress(),
-      lendingToken.address,
-    );
     await feeManager.collectPaymentFee(
       await agreement.getAddress(),
       tokenA.address,
@@ -104,9 +90,6 @@ describe('AgreementERC1155.collectFee', () => {
       ethers.ZeroAddress,
     );
 
-    expect(
-      await lendingToken.contract.balanceOf(await feeManager.getAddress()),
-    ).to.equal((incomingFundsLendingToken * SCALED_FEE_LEVEL) / SCALE);
     expect(
       await tokenA.contract.balanceOf(await feeManager.getAddress()),
     ).to.equal((incomingFundsTokenA * SCALED_FEE_LEVEL) / SCALE);
