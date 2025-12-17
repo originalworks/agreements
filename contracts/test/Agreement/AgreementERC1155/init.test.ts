@@ -97,7 +97,7 @@ describe('AgreementERC1155.initialize', () => {
       feeManager,
       defaultHolders,
       agreementRelationsRegistry,
-      splitCurrencyListManager,
+      currencyManager,
       fallbackVault,
       namespaceRegistry,
     } = initialSetup;
@@ -106,7 +106,7 @@ describe('AgreementERC1155.initialize', () => {
         CONTRACT_URI,
         URI,
         [{ account: defaultHolders[0].address, balance: 100n, isAdmin: true }],
-        await splitCurrencyListManager.getAddress(),
+        await currencyManager.getAddress(),
         await feeManager.getAddress(),
         await agreementRelationsRegistry.getAddress(),
         await fallbackVault.getAddress(),

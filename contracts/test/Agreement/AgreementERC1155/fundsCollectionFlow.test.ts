@@ -11,167 +11,182 @@ describe('(FUNCTIONAL) AgreementERC1155: Funds collection flow', () => {
     const initialSetup = await deployInitialSetup({
       paymentFee: parseEther('0.1'),
     });
-    const { feeManager, lendingToken } = initialSetup;
+    const { feeManager, splitCurrencies } = initialSetup;
     const { agreement, holders } = await deployAgreementERC1155({
       initialSetup,
       shares: [500n, 500n],
     });
 
-    await lendingToken.mintTo(await agreement.getAddress(), parseEther('100'));
-    return { feeManager, holders, lendingToken, agreement };
+    const currencyContract = splitCurrencies[0].contract;
+
+    if (!currencyContract) {
+      throw new Error('No currencyContract found');
+    }
+
+    await currencyContract.mintTo(
+      await agreement.getAddress(),
+      parseEther('100'),
+    );
+    return { feeManager, holders, currencyContract, agreement };
   }
   it('User can collect income after feeManager collected fee', async () => {
-    const { feeManager, holders, lendingToken, agreement } = await setup();
+    const { feeManager, holders, currencyContract, agreement } = await setup();
     await feeManager.collectPaymentFee(
       await agreement.getAddress(),
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
     );
 
     expect(
-      await lendingToken.balanceOf(await feeManager.getAddress()),
+      await currencyContract.balanceOf(await feeManager.getAddress()),
     ).to.equal(parseEther('10'));
 
-    expect(await lendingToken.balanceOf(holders[0].account)).to.equal(0);
-    expect(await lendingToken.balanceOf(holders[1].account)).to.equal(0);
+    expect(await currencyContract.balanceOf(holders[0].account)).to.equal(0);
+    expect(await currencyContract.balanceOf(holders[1].account)).to.equal(0);
 
     await agreement.claimHolderFunds(
       holders[0].account,
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
     );
     await agreement.claimHolderFunds(
       holders[1].account,
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
     );
 
-    expect(await lendingToken.balanceOf(holders[0].account)).to.equal(
+    expect(await currencyContract.balanceOf(holders[0].account)).to.equal(
       parseEther('45'),
     );
-    expect(await lendingToken.balanceOf(holders[1].account)).to.equal(
+    expect(await currencyContract.balanceOf(holders[1].account)).to.equal(
       parseEther('45'),
     );
   });
   it('User can collect income after feeManager collected fee (collected in-between)', async () => {
-    const { feeManager, holders, lendingToken, agreement } = await setup();
+    const { feeManager, holders, currencyContract, agreement } = await setup();
 
-    expect(await lendingToken.balanceOf(holders[0].account)).to.equal(0n);
-    expect(await lendingToken.balanceOf(holders[1].account)).to.equal(0n);
+    expect(await currencyContract.balanceOf(holders[0].account)).to.equal(0n);
+    expect(await currencyContract.balanceOf(holders[1].account)).to.equal(0n);
 
     await agreement.claimHolderFunds(
       holders[0].account,
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
     );
-    expect(await lendingToken.balanceOf(holders[0].account)).to.equal(
+    expect(await currencyContract.balanceOf(holders[0].account)).to.equal(
       parseEther('45'),
     );
 
     await feeManager.collectPaymentFee(
       await agreement.getAddress(),
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
     );
 
     expect(
-      await lendingToken.balanceOf(await feeManager.getAddress()),
+      await currencyContract.balanceOf(await feeManager.getAddress()),
     ).to.equal(parseEther('10'));
 
     await agreement.claimHolderFunds(
       holders[1].account,
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
     );
 
-    expect(await lendingToken.balanceOf(holders[1].account)).to.equal(
+    expect(await currencyContract.balanceOf(holders[1].account)).to.equal(
       parseEther('45'),
     );
   });
   it('Can collect fee after all users collected income', async () => {
-    const { feeManager, holders, lendingToken, agreement } = await setup();
+    const { feeManager, holders, currencyContract, agreement } = await setup();
     await agreement.claimHolderFunds(
       holders[0].account,
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
     );
     await agreement.claimHolderFunds(
       holders[1].account,
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
     );
     await feeManager.collectPaymentFee(
       await agreement.getAddress(),
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
     );
     expect(
-      await lendingToken.balanceOf(await feeManager.getAddress()),
+      await currencyContract.balanceOf(await feeManager.getAddress()),
     ).to.equal(parseEther('10'));
-    expect(await lendingToken.balanceOf(holders[0].account)).to.equal(
+    expect(await currencyContract.balanceOf(holders[0].account)).to.equal(
       parseEther('45'),
     );
-    expect(await lendingToken.balanceOf(holders[1].account)).to.equal(
+    expect(await currencyContract.balanceOf(holders[1].account)).to.equal(
       parseEther('45'),
     );
   });
   it('Can collect fee and claim holder funds with incoming transfers at different time', async () => {
-    const { feeManager, holders, lendingToken, agreement } = await setup();
+    const { feeManager, holders, currencyContract, agreement } = await setup();
     await agreement.claimHolderFunds(
       holders[0].account,
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
     );
     await agreement.claimHolderFunds(
       holders[1].account,
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
     );
     await feeManager.collectPaymentFee(
       await agreement.getAddress(),
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
     );
     expect(
-      await lendingToken.balanceOf(await feeManager.getAddress()),
+      await currencyContract.balanceOf(await feeManager.getAddress()),
     ).to.equal(parseEther('10'));
-    expect(await lendingToken.balanceOf(holders[0].account)).to.equal(
+    expect(await currencyContract.balanceOf(holders[0].account)).to.equal(
       parseEther('45'),
     );
-    expect(await lendingToken.balanceOf(holders[1].account)).to.equal(
+    expect(await currencyContract.balanceOf(holders[1].account)).to.equal(
       parseEther('45'),
     );
 
-    await lendingToken.mintTo(await agreement.getAddress(), parseEther('200'));
+    await currencyContract.mintTo(
+      await agreement.getAddress(),
+      parseEther('200'),
+    );
 
     await agreement.claimHolderFunds(
       holders[0].account,
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
     );
-    expect(await lendingToken.balanceOf(holders[0].account)).to.equal(
+    expect(await currencyContract.balanceOf(holders[0].account)).to.equal(
       parseEther('135'), // 45 + 90 = 135
     );
     await feeManager.collectPaymentFee(
       await agreement.getAddress(),
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
     );
     expect(
-      await lendingToken.balanceOf(await feeManager.getAddress()),
+      await currencyContract.balanceOf(await feeManager.getAddress()),
     ).to.equal(
       parseEther('30'), // 10 + 20 = 30
     );
-    await lendingToken.mintTo(await agreement.getAddress(), parseEther('300'));
+    await currencyContract.mintTo(
+      await agreement.getAddress(),
+      parseEther('300'),
+    );
     await agreement.claimHolderFunds(
       holders[1].account,
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
     );
-    expect(await lendingToken.balanceOf(holders[1].account)).to.equal(
+    expect(await currencyContract.balanceOf(holders[1].account)).to.equal(
       parseEther('270'), // 45 + 90 + 135 = 270
     );
 
     await feeManager.collectPaymentFee(
       await agreement.getAddress(),
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
     );
     expect(
-      await lendingToken.balanceOf(await feeManager.getAddress()),
+      await currencyContract.balanceOf(await feeManager.getAddress()),
     ).to.equal(
       parseEther('60'), // 10 + 20 + 30 = 60
     );
 
     await agreement.claimHolderFunds(
       holders[0].account,
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
     );
-    expect(await lendingToken.balanceOf(holders[0].account)).to.equal(
+    expect(await currencyContract.balanceOf(holders[0].account)).to.equal(
       parseEther('270'), // 45 + 90 + 135 = 270
     );
   });

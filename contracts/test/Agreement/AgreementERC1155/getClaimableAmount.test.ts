@@ -9,10 +9,15 @@ describe('AgreementERC1155.getClaimableAmount', () => {
   it('Return amount available for claim and the applied fee', async () => {
     const incomingFunds = 100000n;
     const initialSetup = await deployInitialSetup();
-    const { lendingToken, feeManager } = initialSetup;
+    const { splitCurrencies, feeManager } = initialSetup;
     const paymentFee = await feeManager.paymentFee();
     const holder1Shares = 600n;
     const holder2Shares = 400n;
+
+    const currencyContract = splitCurrencies[0].contract;
+    if (!currencyContract) {
+      throw new Error('No currencyContract found');
+    }
 
     const { agreement, holders } = await deployAgreementERC1155({
       initialSetup,
@@ -22,37 +27,37 @@ describe('AgreementERC1155.getClaimableAmount', () => {
     const holder2 = holders[1];
     const agreementTotalSupply = await agreement.totalSupply();
 
-    const tokenBalanceBeforeHolder1 = await lendingToken.balanceOf(
+    const tokenBalanceBeforeHolder1 = await currencyContract.balanceOf(
       holder1.account,
     );
-    const tokenBalanceBeforeHolder2 = await lendingToken.balanceOf(
+    const tokenBalanceBeforeHolder2 = await currencyContract.balanceOf(
       holder2.account,
     );
 
-    await lendingToken.mintTo(await agreement.getAddress(), incomingFunds);
+    await currencyContract.mintTo(await agreement.getAddress(), incomingFunds);
 
     const claimableAmountHolder1 = await agreement.getClaimableAmount(
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
       holder1.account,
     );
     const claimableAmountHolder2 = await agreement.getClaimableAmount(
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
       holder2.account,
     );
 
     await agreement.claimHolderFunds(
       holder1.account,
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
     );
     await agreement.claimHolderFunds(
       holder2.account,
-      await lendingToken.getAddress(),
+      await currencyContract.getAddress(),
     );
 
-    const tokenBalanceAfterHolder1 = await lendingToken.balanceOf(
+    const tokenBalanceAfterHolder1 = await currencyContract.balanceOf(
       holder1.account,
     );
-    const tokenBalanceAfterHolder2 = await lendingToken.balanceOf(
+    const tokenBalanceAfterHolder2 = await currencyContract.balanceOf(
       holder2.account,
     );
 

@@ -95,14 +95,12 @@ describe('AgreementFactory.setAgreementImplementation', () => {
   it('can only be called by the owner', async () => {
     const [, otherAccount] = await ethers.getSigners();
 
-    const { agreementFactory, lendingToken } = await deployInitialSetup();
+    const { agreementFactory } = await deployInitialSetup();
+    const randomAddress = ethers.Wallet.createRandom().address;
     await expect(
       agreementFactory
         .connect(otherAccount)
-        .setAgreementImplementation(
-          await lendingToken.getAddress(),
-          BigInt(TokenStandard.ERC20),
-        ),
+        .setAgreementImplementation(randomAddress, BigInt(TokenStandard.ERC20)),
     ).to.be.revertedWithCustomError(
       agreementFactory,
       'OwnableUnauthorizedAccount',

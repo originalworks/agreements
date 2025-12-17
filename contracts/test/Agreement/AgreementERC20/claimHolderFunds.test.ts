@@ -26,32 +26,49 @@ describe('AgreementERC20.claimHolderFunds', () => {
     });
     const holder1 = holders[0].account;
     const holder2 = holders[1].account;
-    const { lendingToken } = initialSetup;
-    await lendingToken.transfer(await agreement.getAddress(), 101n);
+    const { splitCurrencies } = initialSetup;
 
-    await agreement.claimHolderFunds(holder1, await lendingToken.getAddress());
-    await agreement.claimHolderFunds(holder2, await lendingToken.getAddress());
+    const currencyContract = splitCurrencies[0].contract;
+    if (!currencyContract) {
+      throw new Error('No currencyContract found');
+    }
 
-    expect(await lendingToken.balanceOf(holder1)).to.equal(60n);
-    expect(await lendingToken.balanceOf(holder2)).to.equal(40n);
-    expect(await lendingToken.balanceOf(await agreement.getAddress())).to.equal(
-      1n,
+    await currencyContract.transfer(await agreement.getAddress(), 101n);
+
+    await agreement.claimHolderFunds(
+      holder1,
+      await currencyContract.getAddress(),
+    );
+    await agreement.claimHolderFunds(
+      holder2,
+      await currencyContract.getAddress(),
     );
 
-    await lendingToken.transfer(await agreement.getAddress(), 100n);
+    expect(await currencyContract.balanceOf(holder1)).to.equal(60n);
+    expect(await currencyContract.balanceOf(holder2)).to.equal(40n);
+    expect(
+      await currencyContract.balanceOf(await agreement.getAddress()),
+    ).to.equal(1n);
 
-    await agreement.claimHolderFunds(holder1, await lendingToken.getAddress());
-    await agreement.claimHolderFunds(holder2, await lendingToken.getAddress());
+    await currencyContract.transfer(await agreement.getAddress(), 100n);
 
-    expect(await lendingToken.balanceOf(holder1)).to.equal(120n);
-    expect(await lendingToken.balanceOf(holder2)).to.equal(80n);
-    expect(await lendingToken.balanceOf(await agreement.getAddress())).to.equal(
-      1n,
+    await agreement.claimHolderFunds(
+      holder1,
+      await currencyContract.getAddress(),
     );
+    await agreement.claimHolderFunds(
+      holder2,
+      await currencyContract.getAddress(),
+    );
+
+    expect(await currencyContract.balanceOf(holder1)).to.equal(120n);
+    expect(await currencyContract.balanceOf(holder2)).to.equal(80n);
+    expect(
+      await currencyContract.balanceOf(await agreement.getAddress()),
+    ).to.equal(1n);
   });
   it('currencies doesnt interfere with each other', async () => {
     const [owner] = await ethers.getSigners();
-    const incomingFundsLendingToken = 2500n;
     const incomingFundsNativeCoin = 9000n;
     const incomingFundsTokenA = 10000n;
     const incomingFundsTokenB = 50000n;
@@ -78,9 +95,6 @@ describe('AgreementERC20.claimHolderFunds', () => {
     const holder2NativeCoinBalanceBefore =
       await ethers.provider.getBalance(holder2);
 
-    const lendingToken = initialSetup.splitCurrencies.find(
-      (currency) => currency.lendingCurrency === true,
-    );
     const tokenA = initialSetup.splitCurrencies.find(
       (currency) => currency.name === 'TOKEN_A',
     );
@@ -88,13 +102,9 @@ describe('AgreementERC20.claimHolderFunds', () => {
       (currency) => currency.name === 'TOKEN_B',
     );
 
-    if (!lendingToken?.contract || !tokenA?.contract || !tokenB?.contract)
+    if (!tokenA?.contract || !tokenB?.contract)
       throw new Error('No contract found');
 
-    await lendingToken.contract.mintTo(
-      await agreement.getAddress(),
-      incomingFundsLendingToken,
-    );
     await tokenA.contract.mintTo(
       await agreement.getAddress(),
       incomingFundsTokenA,
@@ -108,9 +118,6 @@ describe('AgreementERC20.claimHolderFunds', () => {
       to: await agreement.getAddress(),
     });
 
-    await agreement.claimHolderFunds(holder1, lendingToken.address);
-    await agreement.claimHolderFunds(holder2, lendingToken.address);
-
     await agreement.claimHolderFunds(holder1, tokenA.address);
     await agreement.claimHolderFunds(holder2, tokenA.address);
 
@@ -119,13 +126,6 @@ describe('AgreementERC20.claimHolderFunds', () => {
 
     await agreement.claimHolderFunds(holder1, ethers.ZeroAddress);
     await agreement.claimHolderFunds(holder2, ethers.ZeroAddress);
-
-    expect(await lendingToken.contract.balanceOf(holder1)).to.equal(
-      (incomingFundsLendingToken * holder1Shares) / totalSupply,
-    );
-    expect(await lendingToken.contract.balanceOf(holder2)).to.equal(
-      (incomingFundsLendingToken * holder2Shares) / totalSupply,
-    );
 
     expect(await tokenA.contract.balanceOf(holder1)).to.equal(
       (incomingFundsTokenA * holder1Shares) / totalSupply,

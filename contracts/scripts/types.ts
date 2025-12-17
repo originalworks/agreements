@@ -4,7 +4,6 @@ export interface SplitCurrencyDefinition {
   name: string;
   symbol: string;
   decimals: bigint;
-  lendingCurrency: boolean;
   nativeCoin: boolean;
 }
 
@@ -18,7 +17,7 @@ export interface AgreementFactoryDeploymentInput {
   agreementERC1155Implementation: string;
   feeManager: string;
   agreementRelationsRegistry: string;
-  splitCurrencyListManager: string;
+  currencyManager: string;
   fallbackVault: string;
   namespaceRegistry: string;
 }
@@ -29,7 +28,7 @@ export interface DeploymentOutput {
   agreementERC1155Implementation: string;
   agreementRelationsRegistry: string;
   fallbackVault: string;
-  splitCurrencyListManager: string;
+  currencyManager: string;
   feeManager: string;
   agreementFactory: string;
   namespaceRegistry: string;

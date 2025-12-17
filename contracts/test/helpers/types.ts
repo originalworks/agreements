@@ -11,7 +11,7 @@ import {
   FallbackVault,
   FeeManager,
   NamespaceRegistry,
-  SplitCurrencyListManager,
+  CurrencyManager,
 } from '../../typechain';
 import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 
@@ -23,17 +23,15 @@ export interface InitialSetupOptions {
 export interface InitialSetup {
   feeManager: FeeManager;
   agreementFactory: AgreementFactory;
-  lendingToken: ERC20TokenMock;
   AgreementERC20Factory: AgreementERC20__factory;
   AgreementERC1155Factory: AgreementERC1155__factory;
   agreementERC20Implementation: AgreementERC20;
   agreementERC1155Implementation: AgreementERC1155;
   agreementRelationsRegistry: AgreementRelationsRegistry;
-  lender: SignerWithAddress;
   defaultHolders: SignerWithAddress[];
   deployer: SignerWithAddress;
   splitCurrencies: SplitCurrency[];
-  splitCurrencyListManager: SplitCurrencyListManager;
+  currencyManager: CurrencyManager;
   fallbackVault: FallbackVault;
   namespaceRegistry: NamespaceRegistry;
 }

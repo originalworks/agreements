@@ -6,7 +6,7 @@ import { deployAgreementRelationsRegistry } from '../../actions/deployAgreementR
 import { deployFeeManager } from '../../actions/deployFeeManager';
 import { deployAgreementFactory } from '../../actions/deployAgreementFactory';
 import { deployNamespaceRegistry } from '../../actions/deployNamespaceRegistry';
-import { deploySplitCurrencyListManager } from '../../actions/deploySplitCurrencyListManager';
+import { deployCurrencyManager } from '../../actions/deployCurrencyManager';
 import { prepareSplitCurrencies, saveDeploymentData } from './helpers';
 import { parseEther } from 'ethers';
 
@@ -27,8 +27,7 @@ async function main() {
   console.log('namespaceRegistry:', await namespaceRegistry.getAddress());
 
   console.log('preparing split currencies list...');
-  const { splitCurrencies, nonLendingERC20SplitCurrencies, lendingToken } =
-    await prepareSplitCurrencies(DEPLOY_NEW_CURRENCIES);
+  const splitCurrencies = await prepareSplitCurrencies(DEPLOY_NEW_CURRENCIES);
 
   console.log('deploying FeeManager...');
   const feeManager = await deployFeeManager(CREATION_FEE, PAYMENT_FEE);
@@ -61,15 +60,11 @@ async function main() {
   const fallbackVault = await deployFallbackVault();
   console.log('fallbackVault:', await fallbackVault.getAddress());
 
-  console.log('deploying SplitCurrencyListManager...');
-  const splitCurrencyListManager = await deploySplitCurrencyListManager(
-    nonLendingERC20SplitCurrencies,
-    lendingToken.address,
+  console.log('deploying CurrencyManager...');
+  const currencyManager = await deployCurrencyManager(
+    splitCurrencies.map((currency) => currency.address),
   );
-  console.log(
-    'splitCurrencyListManager:',
-    await splitCurrencyListManager.getAddress(),
-  );
+  console.log('currencyManager:', await currencyManager.getAddress());
 
   console.log('deploying AgreementFactory...');
   const agreementFactory = await deployAgreementFactory({
@@ -79,7 +74,7 @@ async function main() {
       await agreementERC1155Implementation.getAddress(),
     feeManager: await feeManager.getAddress(),
     agreementRelationsRegistry: await agreementRelationsRegistry.getAddress(),
-    splitCurrencyListManager: await splitCurrencyListManager.getAddress(),
+    currencyManager: await currencyManager.getAddress(),
     fallbackVault: await fallbackVault.getAddress(),
     namespaceRegistry: await namespaceRegistry.getAddress(),
   });
@@ -94,7 +89,7 @@ async function main() {
       await agreementERC1155Implementation.getAddress(),
     agreementRelationsRegistry: await agreementRelationsRegistry.getAddress(),
     fallbackVault: await fallbackVault.getAddress(),
-    splitCurrencyListManager: await splitCurrencyListManager.getAddress(),
+    currencyManager: await currencyManager.getAddress(),
     feeManager: await feeManager.getAddress(),
     agreementFactory: await agreementFactory.getAddress(),
     namespaceRegistry: await namespaceRegistry.getAddress(),

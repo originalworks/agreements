@@ -12,7 +12,13 @@ describe('FeeManager logic', () => {
     it('can only be called by owner', async () => {
       const [, , , notOwner] = await ethers.getSigners();
       const initialSetup = await deployInitialSetup();
-      const { feeManager, lendingToken } = initialSetup;
+      const { feeManager, splitCurrencies } = initialSetup;
+
+      const currencyContract = splitCurrencies[0].contract;
+      if (!currencyContract) {
+        throw new Error('No currencyContract found');
+      }
+
       const { agreement } = await deployAgreementERC20({
         initialSetup,
         shares: [1000n],
@@ -22,7 +28,7 @@ describe('FeeManager logic', () => {
           .connect(notOwner)
           .collectPaymentFee(
             await agreement.getAddress(),
-            await lendingToken.getAddress(),
+            await currencyContract.getAddress(),
           ),
       ).to.be.revertedWithCustomError(feeManager, 'OwnableUnauthorizedAccount');
     });
@@ -35,26 +41,35 @@ describe('FeeManager logic', () => {
         const initialSetup = await deployInitialSetup({
           paymentFee,
         });
-        const { feeManager, lendingToken } = initialSetup;
+        const { feeManager, splitCurrencies } = initialSetup;
         const { agreement } = await deployAgreementERC20({
           initialSetup,
           shares: [1000n],
         });
-        await lendingToken.mintTo(await agreement.getAddress(), incomingFunds);
+
+        const currencyContract = splitCurrencies[0].contract;
+        if (!currencyContract) {
+          throw new Error('No currencyContract found');
+        }
+
+        await currencyContract.mintTo(
+          await agreement.getAddress(),
+          incomingFunds,
+        );
         await feeManager.collectPaymentFee(
           await agreement.getAddress(),
-          await lendingToken.getAddress(),
+          await currencyContract.getAddress(),
         );
 
         let expectedRes = (incomingFunds * paymentFee) / parseEther('1');
         expectedRes = incomingFunds - expectedRes;
 
         expect(
-          await lendingToken.balanceOf(await agreement.getAddress()),
+          await currencyContract.balanceOf(await agreement.getAddress()),
         ).to.equal(expectedRes);
 
         expect(
-          await lendingToken.balanceOf(await feeManager.getAddress()),
+          await currencyContract.balanceOf(await feeManager.getAddress()),
         ).to.equal((incomingFunds * paymentFee) / parseEther('1'));
       });
       it('collect paymentFee from the specified ERC1155 agreement contract', async () => {
@@ -64,25 +79,34 @@ describe('FeeManager logic', () => {
         const initialSetup = await deployInitialSetup({
           paymentFee,
         });
-        const { feeManager, lendingToken } = initialSetup;
+        const { feeManager, splitCurrencies } = initialSetup;
+
+        const currencyContract = splitCurrencies[0].contract;
+        if (!currencyContract) {
+          throw new Error('No currencyContract found');
+        }
+
         const { agreement } = await deployAgreementERC1155({
           initialSetup,
           shares: [1000n],
         });
-        await lendingToken.mintTo(await agreement.getAddress(), incomingFunds);
+        await currencyContract.mintTo(
+          await agreement.getAddress(),
+          incomingFunds,
+        );
         await feeManager.collectPaymentFee(
           await agreement.getAddress(),
-          await lendingToken.getAddress(),
+          await currencyContract.getAddress(),
         );
 
         let expectedRes = (incomingFunds * paymentFee) / parseEther('1');
         expectedRes = incomingFunds - expectedRes;
 
         expect(
-          await lendingToken.balanceOf(await agreement.getAddress()),
+          await currencyContract.balanceOf(await agreement.getAddress()),
         ).to.equal(expectedRes);
         expect(
-          await lendingToken.balanceOf(await feeManager.getAddress()),
+          await currencyContract.balanceOf(await feeManager.getAddress()),
         ).to.equal((incomingFunds * paymentFee) / parseEther('1'));
       });
     });
@@ -142,14 +166,20 @@ describe('FeeManager logic', () => {
     });
 
     it('can transfer ERC20', async () => {
-      const { feeManager, lendingToken } = await deployInitialSetup();
+      const { feeManager, splitCurrencies } = await deployInitialSetup();
+
+      const currencyContract = splitCurrencies[0].contract;
+      if (!currencyContract) {
+        throw new Error('No currencyContract found');
+      }
+
       const wallet = Wallet.createRandom().connect(ethers.provider);
-      await lendingToken.mintTo(await feeManager.getAddress(), 2137n);
+      await currencyContract.mintTo(await feeManager.getAddress(), 2137n);
       await feeManager.withdrawERC20(
         wallet.address,
-        await lendingToken.getAddress(),
+        await currencyContract.getAddress(),
       );
-      expect(await lendingToken.balanceOf(wallet.address)).to.equal(2137n);
+      expect(await currencyContract.balanceOf(wallet.address)).to.equal(2137n);
     });
 
     it('withdrawNativeCoins can only be called by owner', async () => {
@@ -162,11 +192,17 @@ describe('FeeManager logic', () => {
 
     it('withdrawERC20 can only be called by owner', async () => {
       const [, , , notOwner] = await ethers.getSigners();
-      const { feeManager, lendingToken } = await deployInitialSetup();
+      const { feeManager, splitCurrencies } = await deployInitialSetup();
+
+      const currencyContract = splitCurrencies[0].contract;
+      if (!currencyContract) {
+        throw new Error('No currencyContract found');
+      }
+
       await expect(
         feeManager
           .connect(notOwner)
-          .withdrawERC20(notOwner.address, await lendingToken.getAddress()),
+          .withdrawERC20(notOwner.address, await currencyContract.getAddress()),
       ).to.be.revertedWithCustomError(feeManager, 'OwnableUnauthorizedAccount');
     });
   });

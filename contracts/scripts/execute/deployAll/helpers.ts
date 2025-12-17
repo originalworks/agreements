@@ -33,25 +33,7 @@ export async function prepareSplitCurrencies(deployNewCurrencies: boolean) {
     splitCurrencies = PREDEFINED_SPLIT_CURRENCIES;
   }
 
-  const nonLendingERC20SplitCurrencies = splitCurrencies.reduce<string[]>(
-    (all, current) => {
-      if (!current.lendingCurrency && !current.nativeCoin) {
-        all.push(current.address);
-      }
-      return all;
-    },
-    [],
-  );
-
-  const lendingToken = splitCurrencies.find(
-    (currency) => currency.lendingCurrency === true,
-  );
-
-  if (!lendingToken) {
-    throw new Error("Couldn't find lending token");
-  }
-
-  return { splitCurrencies, nonLendingERC20SplitCurrencies, lendingToken };
+  return splitCurrencies;
 }
 
 export async function saveDeploymentData(input: DeploymentOutput) {
@@ -73,7 +55,6 @@ export async function saveDeploymentData(input: DeploymentOutput) {
       name: currency.name,
       symbol: currency.symbol,
       decimals: currency.decimals,
-      lendingCurrency: currency.lendingCurrency,
       nativeCoin: currency.nativeCoin,
       address: currency.address,
     })),
