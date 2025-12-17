@@ -14,12 +14,14 @@ import '../interfaces/ICurrencyManager.sol';
 import '../interfaces/IAgreementERC20.sol';
 import '../interfaces/IFallbackVault.sol';
 import '../interfaces/INamespaceRegistry.sol';
+import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 
 contract AgreementERC20 is
   Initializable,
   ERC20Upgradeable,
   ERC1155HolderUpgradeable,
-  IAgreementERC20
+  IAgreementERC20,
+  UUPSUpgradeable
 {
   using SafeERC20 for IERC20;
 
@@ -69,6 +71,9 @@ contract AgreementERC20 is
     require(holders[0].isAdmin, 'AgreementERC20: First holder must be admin');
 
     __ERC20_init('OW Agreement', 'share');
+    __ERC1155Holder_init();
+    __UUPSUpgradeable_init();
+
     _setDataHash(_dataHash);
     splitCurrencyListManager = ICurrencyManager(_splitCurrencyListManager);
     feeManager = IFeeManager(_feeManager);
@@ -260,9 +265,7 @@ contract AgreementERC20 is
     emit RevenueStreamURIRemoved(uriToRemove, msg.sender);
   }
 
-  function upgrade(address implementation) public onlyAdmin {
-    IAgreementProxy(address(this)).upgradeTo(implementation);
-  }
+  function _authorizeUpgrade(address) internal override onlyAdmin {}
 
   function _update(address from, address to, uint256 amount) internal override {
     if (balanceOf(to) == 0 && to.code.length > 0) {

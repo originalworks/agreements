@@ -12,11 +12,13 @@ import '../interfaces/ICurrencyManager.sol';
 import '../interfaces/IAgreementERC1155.sol';
 import '../interfaces/IFallbackVault.sol';
 import '../interfaces/INamespaceRegistry.sol';
+import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 
 contract AgreementERC1155 is
   ERC1155Upgradeable,
   ERC1155HolderUpgradeable,
-  IAgreementERC1155
+  IAgreementERC1155,
+  UUPSUpgradeable
 {
   using SafeERC20 for IERC20;
 
@@ -69,6 +71,8 @@ contract AgreementERC1155 is
 
     __ERC1155_init(_uri);
     __ERC1155Holder_init();
+    __UUPSUpgradeable_init();
+
     splitCurrencyListManager = ICurrencyManager(_splitCurrencyListManager);
     feeManager = IFeeManager(_feeManager);
     agreementRelationsRegistry = IAgreementRelationsRegistry(
@@ -270,9 +274,7 @@ contract AgreementERC1155 is
     emit RevenueStreamURIRemoved(uriToRemove, msg.sender);
   }
 
-  function upgrade(address implementation) public onlyAdmin {
-    IAgreementProxy(address(this)).upgradeTo(implementation);
-  }
+  function _authorizeUpgrade(address) internal override onlyAdmin {}
 
   function _update(
     address from,
