@@ -5,7 +5,7 @@ import {
   deployInitialSetup,
 } from '../../helpers/deployments';
 
-describe.only('AgreementER1155.upgradeToAndCall', () => {
+describe('AgreementER1155.upgradeToAndCall', () => {
   it('Only admin can upgrade', async () => {
     const initialSetup = await deployInitialSetup();
     const AgreementERC1155WithUpgrade = await ethers.getContractFactory(

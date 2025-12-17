@@ -5,7 +5,7 @@ import {
   deployInitialSetup,
 } from '../../helpers/deployments';
 
-describe.only('AgreementERC20.upgradeToAndCall', () => {
+describe('AgreementERC20.upgradeToAndCall', () => {
   it('Only admin can upgrade', async () => {
     const initialSetup = await deployInitialSetup();
     const AgreementERC20WithUpgrade = await ethers.getContractFactory(
