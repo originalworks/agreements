@@ -6,6 +6,7 @@ import '@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol';
 import '@openzeppelin/contracts/utils/Address.sol';
 import '@openzeppelin/contracts/utils/introspection/ERC165Checker.sol';
 import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
+import '@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol';
 import '../interfaces/IFeeManager.sol';
 import '../interfaces/IAgreementRelationsRegistry.sol';
 import '../interfaces/IAgreementERC20.sol';
@@ -15,7 +16,6 @@ import '../interfaces/ICurrencyManager.sol';
 import '../interfaces/IFallbackVault.sol';
 import '../interfaces/ICreationFeeSource.sol';
 import '../interfaces/INamespaceRegistry.sol';
-import '@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol';
 
 contract AgreementFactory is
   Initializable,

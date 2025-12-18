@@ -7,14 +7,13 @@ import '@openzeppelin/contracts/utils/Address.sol';
 import '@openzeppelin/contracts/token/ERC1155/IERC1155.sol';
 import '@openzeppelin/contracts/utils/introspection/ERC165Checker.sol';
 import '@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155HolderUpgradeable.sol';
-import '../interfaces/IAgreementProxy.sol';
+import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 import '../interfaces/IFeeManager.sol';
 import '../interfaces/IAgreementRelationsRegistry.sol';
 import '../interfaces/ICurrencyManager.sol';
 import '../interfaces/IAgreementERC20.sol';
 import '../interfaces/IFallbackVault.sol';
 import '../interfaces/INamespaceRegistry.sol';
-import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 
 contract AgreementERC20 is
   Initializable,
