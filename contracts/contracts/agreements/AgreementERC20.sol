@@ -7,7 +7,7 @@ import '@openzeppelin/contracts/utils/Address.sol';
 import '@openzeppelin/contracts/token/ERC1155/IERC1155.sol';
 import '@openzeppelin/contracts/utils/introspection/ERC165Checker.sol';
 import '@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155HolderUpgradeable.sol';
-import '../interfaces/IAgreementProxy.sol';
+import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 import '../interfaces/IFeeManager.sol';
 import '../interfaces/IAgreementRelationsRegistry.sol';
 import '../interfaces/ICurrencyManager.sol';
@@ -19,7 +19,8 @@ contract AgreementERC20 is
   Initializable,
   ERC20Upgradeable,
   ERC1155HolderUpgradeable,
-  IAgreementERC20
+  IAgreementERC20,
+  UUPSUpgradeable
 {
   using SafeERC20 for IERC20;
 
@@ -69,6 +70,9 @@ contract AgreementERC20 is
     require(holders[0].isAdmin, 'AgreementERC20: First holder must be admin');
 
     __ERC20_init('OW Agreement', 'share');
+    __ERC1155Holder_init();
+    __UUPSUpgradeable_init();
+
     _setDataHash(_dataHash);
     splitCurrencyListManager = ICurrencyManager(_splitCurrencyListManager);
     feeManager = IFeeManager(_feeManager);
@@ -260,9 +264,7 @@ contract AgreementERC20 is
     emit RevenueStreamURIRemoved(uriToRemove, msg.sender);
   }
 
-  function upgrade(address implementation) public onlyAdmin {
-    IAgreementProxy(address(this)).upgradeTo(implementation);
-  }
+  function _authorizeUpgrade(address) internal override onlyAdmin {}
 
   function _update(address from, address to, uint256 amount) internal override {
     if (balanceOf(to) == 0 && to.code.length > 0) {

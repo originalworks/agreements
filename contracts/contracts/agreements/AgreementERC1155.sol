@@ -5,7 +5,7 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import '@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155HolderUpgradeable.sol';
-import '../interfaces/IAgreementProxy.sol';
+import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 import '../interfaces/IFeeManager.sol';
 import '../interfaces/IAgreementRelationsRegistry.sol';
 import '../interfaces/ICurrencyManager.sol';
@@ -16,7 +16,8 @@ import '../interfaces/INamespaceRegistry.sol';
 contract AgreementERC1155 is
   ERC1155Upgradeable,
   ERC1155HolderUpgradeable,
-  IAgreementERC1155
+  IAgreementERC1155,
+  UUPSUpgradeable
 {
   using SafeERC20 for IERC20;
 
@@ -69,6 +70,8 @@ contract AgreementERC1155 is
 
     __ERC1155_init(_uri);
     __ERC1155Holder_init();
+    __UUPSUpgradeable_init();
+
     splitCurrencyListManager = ICurrencyManager(_splitCurrencyListManager);
     feeManager = IFeeManager(_feeManager);
     agreementRelationsRegistry = IAgreementRelationsRegistry(
@@ -270,9 +273,7 @@ contract AgreementERC1155 is
     emit RevenueStreamURIRemoved(uriToRemove, msg.sender);
   }
 
-  function upgrade(address implementation) public onlyAdmin {
-    IAgreementProxy(address(this)).upgradeTo(implementation);
-  }
+  function _authorizeUpgrade(address) internal override onlyAdmin {}
 
   function _update(
     address from,
