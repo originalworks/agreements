@@ -102,11 +102,11 @@ contract AgreementERC1155 is
     emit DataHashChanged(newUri);
   }
 
-  function addAdmin(address user) public onlyAdmin {
+  function addAdmin(address user) public override onlyAdmin {
     _addAdmin(user);
   }
 
-  function removeAdmin(address user) public onlyAdmin {
+  function removeAdmin(address user) public override onlyAdmin {
     require(admins[user] == true, 'AgreementERC1155: Account is not an admin');
     require(_adminCount > 1, 'AgreementERC1155: Cannot remove last admin');
     _adminCount--;
@@ -114,7 +114,7 @@ contract AgreementERC1155 is
     emit AdminRemoved(user);
   }
 
-  function claimHolderFunds(address holder, address currency) public {
+  function claimHolderFunds(address holder, address currency) public override {
     require(
       splitCurrencyListManager.currencyMap(currency) == true,
       'AgreementERC1155: Currency not supported'
@@ -154,7 +154,7 @@ contract AgreementERC1155 is
     }
   }
 
-  function collectFee(address currency) public {
+  function collectFee(address currency) public override {
     require(
       msg.sender == address(feeManager),
       'AgreementERC1155: Only FeeManager can collect fee'
@@ -180,26 +180,34 @@ contract AgreementERC1155 is
   }
 
   function transferOwnedERC20Shares(
-    IERC20 agreement,
+    address agreement,
     address recipient,
     uint256 amount
-  ) public onlyAdmin {
-    agreement.safeTransfer(recipient, amount);
+  ) public override onlyAdmin {
+    IERC20(agreement).safeTransfer(recipient, amount);
   }
 
   function transferOwnedERC1155Shares(
-    IERC1155 agreement,
+    address agreement,
     address recipient,
     uint256 amount
-  ) public onlyAdmin {
-    agreement.safeTransferFrom(address(this), recipient, 1, amount, '');
+  ) public override onlyAdmin {
+    IERC1155(agreement).safeTransferFrom(
+      address(this),
+      recipient,
+      1,
+      amount,
+      ''
+    );
   }
 
-  function isAdmin(address user) public view returns (bool) {
+  function isAdmin(address user) public view override returns (bool) {
     return admins[user];
   }
 
-  function getAvailableFee(address currency) public view returns (uint256) {
+  function getAvailableFee(
+    address currency
+  ) public view override returns (uint256) {
     (, uint256 paymentFee, uint256 paymentFeeDenominator) = feeManager
       .getFees();
     uint256 availableFee = fees[currency] - feesCollected[currency];
@@ -217,7 +225,7 @@ contract AgreementERC1155 is
   function getClaimableAmount(
     address currency,
     address holder
-  ) public view returns (uint256 claimableAmount, uint256 fee) {
+  ) public view override returns (uint256 claimableAmount, uint256 fee) {
     require(
       splitCurrencyListManager.currencyMap(currency) == true,
       'AgreementERC20: Currency not supported'
@@ -387,7 +395,9 @@ contract AgreementERC1155 is
     override(ERC1155Upgradeable, ERC1155HolderUpgradeable)
     returns (bool)
   {
-    return super.supportsInterface(interfaceId);
+    return
+      interfaceId == type(IAgreement).interfaceId ||
+      super.supportsInterface(interfaceId);
   }
 
   function _updateFee(address currency) private returns (uint256, uint256) {
