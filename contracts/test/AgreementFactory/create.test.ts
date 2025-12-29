@@ -10,7 +10,7 @@ import { Holder } from '../helpers/types';
 describe('AgreementFactory.create', function () {
   let OWNER: Holder;
   let HOLDER: Holder;
-  const DATA_HASH = `0x${'ab'.repeat(32)}`;
+
   const ERC1155_TOKEN_ID = 1n;
 
   before(async () => {
@@ -28,14 +28,13 @@ describe('AgreementFactory.create', function () {
   });
   it('should create an ERC20 token with holders', async function () {
     const initialSetup = await deployInitialSetup();
-    const { agreement, holders, dataHash } = await deployAgreementERC20({
+    const { agreement, holders } = await deployAgreementERC20({
       initialSetup,
       shares: [500n, 500n],
     });
     const holder1 = holders[0];
     const holder2 = holders[1];
 
-    expect(await agreement.dataHash()).to.equal(dataHash);
     expect(await agreement.totalSupply()).to.equal(
       Number(holder1.balance) + Number(holder2.balance),
     );
@@ -50,14 +49,19 @@ describe('AgreementFactory.create', function () {
   });
   it('should create an ERC1155 token with holders', async function () {
     const initialSetup = await deployInitialSetup();
-    const { agreement, holders, dataHash } = await deployAgreementERC1155({
+    const tokenUri = 'tokenUri';
+    const contractUri = 'contractUri';
+    const { agreement, holders } = await deployAgreementERC1155({
       initialSetup,
       shares: [500n, 500n],
+      tokenUri,
+      contractUri,
     });
     const holder1 = holders[0];
     const holder2 = holders[1];
 
-    expect(await agreement.uri(1)).to.equal(dataHash);
+    expect(await agreement.uri(1)).to.equal(tokenUri);
+    expect(await agreement.contractURI()).to.equal(contractUri);
     expect(await agreement.totalSupply()).to.equal(
       Number(holder1.balance) + Number(holder2.balance),
     );
@@ -105,15 +109,26 @@ describe('AgreementFactory.create', function () {
     const { agreementFactory, feeManager } = await deployInitialSetup();
 
     await expect(
-      agreementFactory.createERC20(DATA_HASH, [OWNER, HOLDER], [''], {
-        value: (await feeManager.creationFee()) - 1n,
-      }),
+      agreementFactory.createERC20(
+        { holders: [OWNER, HOLDER], unassignedRwaId: '' },
+        {
+          value: (await feeManager.creationFee()) - 1n,
+        },
+      ),
     ).to.be.revertedWith('AgreementFactory: Insufficient fee');
 
     await expect(
-      agreementFactory.createERC1155(DATA_HASH, [OWNER, HOLDER], '', [''], {
-        value: (await feeManager.creationFee()) - 1n,
-      }),
+      agreementFactory.createERC1155(
+        {
+          holders: [OWNER, HOLDER],
+          unassignedRwaId: '',
+          tokenUri: '',
+          contractURI: '',
+        },
+        {
+          value: (await feeManager.creationFee()) - 1n,
+        },
+      ),
     ).to.be.revertedWith('AgreementFactory: Insufficient fee');
   });
 
@@ -121,7 +136,10 @@ describe('AgreementFactory.create', function () {
     const { agreementFactory, feeManager } = await deployInitialSetup();
 
     await (await feeManager.setCreationFee(0)).wait();
-    await agreementFactory.createERC20(DATA_HASH, [OWNER, HOLDER], ['']);
+    await agreementFactory.createERC20({
+      holders: [OWNER, HOLDER],
+      unassignedRwaId: '',
+    });
   });
 
   it('allow holder with 0 balance if it is admin', async () => {

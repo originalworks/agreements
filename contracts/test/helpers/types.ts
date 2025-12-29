@@ -7,7 +7,6 @@ import {
   AgreementERC20__factory,
   AgreementFactory,
   AgreementRelationsRegistry,
-  ERC20TokenMock,
   FallbackVault,
   FeeManager,
   NamespaceRegistry,
@@ -56,17 +55,16 @@ export interface AgreementDeploymentData<
 > {
   agreement: T;
   holders: HolderWithWallet[];
-  dataHash: string;
-  contractUri?: string;
 }
 
 export interface DeployAgreementInput {
   initialSetup: InitialSetup;
   shares?: bigint[];
-  partialRevenueStreamURIs?: string[];
+  unassignedRwaId?: string;
   holders?: HolderWithWallet[];
-  dataHash?: string;
   txExecutorWallet?: Signer;
+  tokenUri?: string;
+  contractUri?: string;
 }
 
 export type NativeCryptoTicker = 'ETH' | 'BNB' | 'MATIC' | 'SBY';

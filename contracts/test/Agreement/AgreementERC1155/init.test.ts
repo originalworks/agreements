@@ -5,10 +5,11 @@ import {
   deployInitialSetup,
 } from '../../helpers/deployments';
 import { getEvent } from '../../helpers/utils';
+import { TokenStandard } from '../../helpers/types';
 
 describe('AgreementERC1155.initialize', () => {
   const CONTRACT_URI = 'contract_uri';
-  const URI = `ipfs://${'ab'.repeat(32)}`;
+  const TOKEN_URI = `ipfs://${'ab'.repeat(32)}`;
   const TOKEN_ID = 1;
   it('should initialize values properly', async () => {
     const [, holder1Account, holder2Account] = await ethers.getSigners();
@@ -16,6 +17,8 @@ describe('AgreementERC1155.initialize', () => {
     const holder2Balance = 400n;
     const initialSetup = await deployInitialSetup();
     const { agreement } = await deployAgreementERC1155({
+      contractUri: CONTRACT_URI,
+      tokenUri: TOKEN_URI,
       initialSetup,
       holders: [
         {
@@ -31,9 +34,9 @@ describe('AgreementERC1155.initialize', () => {
           wallet: holder2Account,
         },
       ],
-      dataHash: URI,
     });
-    expect(await agreement.uri(1)).to.equal(URI);
+    expect(await agreement.uri(1)).to.equal(TOKEN_URI);
+    expect(await agreement.contractURI()).to.equal(CONTRACT_URI);
     expect(await agreement.totalSupply()).to.equal(1000);
     expect(
       await agreement.balanceOf(holder1Account.address, TOKEN_ID),
@@ -46,27 +49,26 @@ describe('AgreementERC1155.initialize', () => {
   });
   it('emits events', async () => {
     const Agreement = await ethers.getContractFactory('AgreementERC1155');
-    const [, holder1Account, holder2Account] = await ethers.getSigners();
+    const [, holder1Account] = await ethers.getSigners();
     const holder1Balance = 600;
-    const holder2Balance = 400;
+    const unassignedRwaId = 'ABC123';
+
     const { agreementFactory, feeManager } = await deployInitialSetup();
 
     const createTx = agreementFactory.createERC1155(
-      URI,
-      [
-        {
-          account: holder1Account.address,
-          balance: holder1Balance.toString(),
-          isAdmin: true,
-        },
-        {
-          account: holder2Account.address,
-          balance: holder2Balance.toString(),
-          isAdmin: false,
-        },
-      ],
-      CONTRACT_URI,
-      ['ABC123'],
+      {
+        tokenUri: 'tokenUri',
+        contractURI: 'contractURI',
+        holders: [
+          {
+            account: holder1Account.address,
+            balance: holder1Balance.toString(),
+            isAdmin: true,
+          },
+        ],
+        unassignedRwaId,
+      },
+
       { value: await feeManager.creationFee() },
     );
 
@@ -77,14 +79,17 @@ describe('AgreementERC1155.initialize', () => {
     );
 
     const agreementAddress = event.args[0];
+    const tokenStandard = event.args[1];
+    const rwaId = event.args[2];
+
     const agreement = Agreement.attach(agreementAddress);
+
+    expect(tokenStandard).to.equal(TokenStandard.ERC1155);
+    expect(rwaId).equal(`UNKNOWN:${unassignedRwaId}`);
 
     await expect(Promise.resolve(createTx))
       .to.emit(agreement, 'AdminAdded')
       .withArgs(holder1Account.address);
-    await expect(Promise.resolve(createTx))
-      .to.emit(agreement, 'DataHashChanged')
-      .withArgs(URI);
   });
 
   it('cannot be called twice', async () => {
@@ -102,17 +107,20 @@ describe('AgreementERC1155.initialize', () => {
       namespaceRegistry,
     } = initialSetup;
     await expect(
-      agreement.initialize(
-        CONTRACT_URI,
-        URI,
-        [{ account: defaultHolders[0].address, balance: 100n, isAdmin: true }],
-        await currencyManager.getAddress(),
-        await feeManager.getAddress(),
-        await agreementRelationsRegistry.getAddress(),
-        await fallbackVault.getAddress(),
-        await namespaceRegistry.getAddress(),
-        ['REVELATOR:ABC123'],
-      ),
+      agreement.initialize({
+        tokenUri: TOKEN_URI,
+        contractUri: CONTRACT_URI,
+        holders: [
+          { account: defaultHolders[0].address, balance: 100n, isAdmin: true },
+        ],
+        currencyManager: await currencyManager.getAddress(),
+        feeManager: await feeManager.getAddress(),
+        agreementRelationsRegistry:
+          await agreementRelationsRegistry.getAddress(),
+        fallbackVault: await fallbackVault.getAddress(),
+        namespaceRegistry: await namespaceRegistry.getAddress(),
+        rwaId: 'REVELATOR:ABC123',
+      }),
     ).to.be.reverted;
   });
 
@@ -120,9 +128,17 @@ describe('AgreementERC1155.initialize', () => {
     const { agreementFactory, feeManager } = await deployInitialSetup();
 
     await expect(
-      agreementFactory.createERC1155(URI, [], CONTRACT_URI, ['ABC123'], {
-        value: await feeManager.creationFee(),
-      }),
+      agreementFactory.createERC1155(
+        {
+          tokenUri: TOKEN_URI,
+          holders: [],
+          contractURI: CONTRACT_URI,
+          unassignedRwaId: 'ABC123',
+        },
+        {
+          value: await feeManager.creationFee(),
+        },
+      ),
     ).to.be.revertedWith('AgreementERC1155: No holders');
   });
 
@@ -132,13 +148,23 @@ describe('AgreementERC1155.initialize', () => {
 
     await expect(
       agreementFactory.createERC1155(
-        URI,
-        [
-          { account: defaultHolders[0].address, balance: 600n, isAdmin: false },
-          { account: defaultHolders[1].address, balance: 400n, isAdmin: false },
-        ],
-        CONTRACT_URI,
-        ['ABC123'],
+        {
+          tokenUri: TOKEN_URI,
+          holders: [
+            {
+              account: defaultHolders[0].address,
+              balance: 600n,
+              isAdmin: false,
+            },
+            {
+              account: defaultHolders[1].address,
+              balance: 400n,
+              isAdmin: false,
+            },
+          ],
+          contractURI: CONTRACT_URI,
+          unassignedRwaId: 'ABC123',
+        },
         { value: await feeManager.creationFee() },
       ),
     ).to.be.revertedWith('AgreementERC1155: First holder must be admin');
@@ -150,13 +176,19 @@ describe('AgreementERC1155.initialize', () => {
 
     await expect(
       agreementFactory.createERC1155(
-        URI,
-        [
-          { account: defaultHolders[0].address, balance: 600n, isAdmin: true },
-          { account: defaultHolders[1].address, balance: 0n, isAdmin: false },
-        ],
-        CONTRACT_URI,
-        ['ABC123'],
+        {
+          tokenUri: TOKEN_URI,
+          contractURI: CONTRACT_URI,
+          unassignedRwaId: 'ABC123',
+          holders: [
+            {
+              account: defaultHolders[0].address,
+              balance: 600n,
+              isAdmin: true,
+            },
+            { account: defaultHolders[1].address, balance: 0n, isAdmin: false },
+          ],
+        },
         { value: await feeManager.creationFee() },
       ),
     ).to.be.revertedWith('AgreementERC1155: Holder balance is zero');
@@ -168,17 +200,23 @@ describe('AgreementERC1155.initialize', () => {
 
     await expect(
       agreementFactory.createERC1155(
-        URI,
-        [
-          { account: defaultHolders[0].address, balance: 600n, isAdmin: true },
-          {
-            account: ethers.ZeroAddress,
-            balance: 400,
-            isAdmin: false,
-          },
-        ],
-        CONTRACT_URI,
-        ['ABC123'],
+        {
+          tokenUri: TOKEN_URI,
+          contractURI: CONTRACT_URI,
+          unassignedRwaId: 'ABC123',
+          holders: [
+            {
+              account: defaultHolders[0].address,
+              balance: 600n,
+              isAdmin: true,
+            },
+            {
+              account: ethers.ZeroAddress,
+              balance: 400,
+              isAdmin: false,
+            },
+          ],
+        },
         { value: await feeManager.creationFee() },
       ),
     ).to.be.revertedWith('AgreementERC1155: Holder account is zero');
@@ -190,17 +228,23 @@ describe('AgreementERC1155.initialize', () => {
 
     await expect(
       agreementFactory.createERC1155(
-        URI,
-        [
-          { account: defaultHolders[0].address, balance: 600n, isAdmin: true },
-          {
-            account: defaultHolders[0].address,
-            balance: 400n,
-            isAdmin: false,
-          },
-        ],
-        CONTRACT_URI,
-        ['ABC123'],
+        {
+          tokenUri: TOKEN_URI,
+          contractURI: CONTRACT_URI,
+          unassignedRwaId: 'ABC123',
+          holders: [
+            {
+              account: defaultHolders[0].address,
+              balance: 600n,
+              isAdmin: true,
+            },
+            {
+              account: defaultHolders[0].address,
+              balance: 400n,
+              isAdmin: false,
+            },
+          ],
+        },
         { value: await feeManager.creationFee() },
       ),
     ).to.be.revertedWith('AgreementERC1155: Duplicate holder');

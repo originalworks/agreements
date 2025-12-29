@@ -2,7 +2,9 @@ import { ethers } from 'hardhat';
 import { ContractTransactionReceipt, id, Wallet } from 'ethers';
 import { expect } from 'chai';
 import { deployInitialSetup } from '../helpers/deployments';
-import { AgreementFactory, AgreementFactory__factory } from '../../typechain';
+import { AgreementFactory__factory } from '../../typechain';
+import { IAgreementERC20 } from '../../typechain/contracts/agreements/AgreementFactory';
+import { IAgreementERC1155 } from '../../typechain/contracts/agreements/AgreementFactory';
 import { InitialSetup } from '../helpers/types';
 
 const namespace = 'REVELATOR';
@@ -26,8 +28,7 @@ describe('AgreementFactory.createBatch', function () {
       const inputSize = 3n;
       const { agreementFactory } = initialSetup;
 
-      const { transactionInput, expectedRevenueStreamUris } =
-        buildCreateBatchInput(inputSize);
+      const transactionInput = buildCreateBatchERC20Input(inputSize);
 
       const tx = await agreementFactory.createBatchERC20(transactionInput, {
         value: creationFee * inputSize,
@@ -37,22 +38,22 @@ describe('AgreementFactory.createBatch', function () {
 
       if (!receipt) throw new Error('No receipt found');
 
-      const createdAgreements = readAddressesAndUrisFromReceipt(receipt);
+      const createdAgreements = readAddressesFromReceipt(receipt);
 
-      for (let i = 0; i < expectedRevenueStreamUris.length; i++) {
-        const expectedUri = expectedRevenueStreamUris[i];
-        expect(
-          createdAgreements.find(
-            (agreement) => agreement.revenueStreamURI === expectedUri,
-          ),
-        ).not.to.equal(undefined);
+      for (let i = 0; i < createdAgreements.length; i++) {
+        const agreementContract = await ethers.getContractAt(
+          'AgreementERC20',
+          createdAgreements[i],
+        );
+
+        expect(await agreementContract.rwaId()).not.to.equal(undefined);
       }
     });
     it('Require creationFee for each token created', async function () {
       const inputSize = 3n;
       const { agreementFactory } = initialSetup;
 
-      const { transactionInput } = buildCreateBatchInput(inputSize);
+      const transactionInput = buildCreateBatchERC20Input(inputSize);
 
       await expect(
         agreementFactory.createBatchERC20(transactionInput, {
@@ -65,7 +66,7 @@ describe('AgreementFactory.createBatch', function () {
       const inputSize = 5n;
       const { agreementFactory } = initialSetup;
 
-      const { transactionInput } = buildCreateBatchInput(inputSize);
+      const transactionInput = buildCreateBatchERC20Input(inputSize);
 
       const batchTx = await agreementFactory.createBatchERC20(
         transactionInput,
@@ -80,9 +81,10 @@ describe('AgreementFactory.createBatch', function () {
 
       for (let i = 0; i < inputSize; i++) {
         const tx = await agreementFactory.createERC20(
-          transactionInput[i]._dataHash,
-          transactionInput[i].holders,
-          transactionInput[i].partialRevenueStreamURIs,
+          {
+            holders: transactionInput[i].holders,
+            unassignedRwaId: transactionInput[i].unassignedRwaId,
+          },
           {
             value: creationFee,
           },
@@ -97,24 +99,24 @@ describe('AgreementFactory.createBatch', function () {
 
       expect(batchTxGasCost < separateTxsCumulativeGasCost).to.equal(true);
     });
-    it('Can create up to 40 agreements (with 3 holders) before reaching block size limit', async function () {
+    it('Can create up to 48 agreements (with 3 holders) before reaching block size limit', async function () {
       const { agreementFactory } = initialSetup;
 
-      let agreementsCount = 40n;
+      let agreementsCount = 48n;
       await expect(
         agreementFactory.createBatchERC20(
-          buildCreateBatchInput(agreementsCount).transactionInput,
+          buildCreateBatchERC20Input(agreementsCount),
           {
             value: creationFee * agreementsCount,
           },
         ),
       ).to.not.be.reverted;
 
-      agreementsCount = 41n;
+      agreementsCount = 49n;
 
       await expect(
         agreementFactory.createBatchERC20(
-          buildCreateBatchInput(agreementsCount).transactionInput,
+          buildCreateBatchERC20Input(agreementsCount),
           {
             value: creationFee * agreementsCount,
           },
@@ -128,8 +130,7 @@ describe('AgreementFactory.createBatch', function () {
       const inputSize = 3n;
       const { agreementFactory } = initialSetup;
 
-      const { transactionInput, expectedRevenueStreamUris } =
-        buildCreateBatchInput(inputSize);
+      const transactionInput = buildCreateBatchERC1155Input(inputSize);
 
       const tx = await agreementFactory.createBatchERC1155(transactionInput, {
         value: creationFee * inputSize,
@@ -139,22 +140,22 @@ describe('AgreementFactory.createBatch', function () {
 
       if (!receipt) throw new Error('No receipt found');
 
-      const createdAgreements = readAddressesAndUrisFromReceipt(receipt);
+      const createdAgreements = readAddressesFromReceipt(receipt);
 
-      for (let i = 0; i < expectedRevenueStreamUris.length; i++) {
-        const expectedUri = expectedRevenueStreamUris[i];
-        expect(
-          createdAgreements.find(
-            (agreement) => agreement.revenueStreamURI === expectedUri,
-          ),
-        ).not.to.equal(undefined);
+      for (let i = 0; i < createdAgreements.length; i++) {
+        const agreementContract = await ethers.getContractAt(
+          'AgreementERC1155',
+          createdAgreements[i],
+        );
+
+        expect(await agreementContract.rwaId()).not.to.equal(undefined);
       }
     });
     it('Require creationFee for each token created', async function () {
       const inputSize = 3n;
       const { agreementFactory } = initialSetup;
 
-      const { transactionInput } = buildCreateBatchInput(inputSize);
+      const transactionInput = buildCreateBatchERC1155Input(inputSize);
 
       await expect(
         agreementFactory.createBatchERC1155(transactionInput, {
@@ -167,7 +168,7 @@ describe('AgreementFactory.createBatch', function () {
       const inputSize = 5n;
       const { agreementFactory } = initialSetup;
 
-      const { transactionInput } = buildCreateBatchInput(inputSize);
+      const transactionInput = buildCreateBatchERC1155Input(inputSize);
 
       const batchTx = await agreementFactory.createBatchERC1155(
         transactionInput,
@@ -183,10 +184,12 @@ describe('AgreementFactory.createBatch', function () {
 
       for (let i = 0; i < inputSize; i++) {
         const tx = await agreementFactory.createERC1155(
-          transactionInput[i]._dataHash,
-          transactionInput[i].holders,
-          transactionInput[i].contractURI,
-          transactionInput[i].partialRevenueStreamURIs,
+          {
+            tokenUri: transactionInput[i].tokenUri,
+            holders: transactionInput[i].holders,
+            contractURI: transactionInput[i].contractURI,
+            unassignedRwaId: transactionInput[i].unassignedRwaId,
+          },
           {
             value: creationFee,
           },
@@ -201,24 +204,24 @@ describe('AgreementFactory.createBatch', function () {
       expect(batchTxGasCost < separateTxsCumulativeGasCost).to.equal(true);
     });
 
-    it('Can create up to 41 agreements (with 3 holders) before reaching block size limit', async function () {
+    it('Can create up to 39 agreements (with 3 holders) before reaching block size limit', async function () {
       const { agreementFactory } = initialSetup;
-      let agreementsCount = 41n;
+      let agreementsCount = 39n;
 
       await expect(
         agreementFactory.createBatchERC1155(
-          buildCreateBatchInput(agreementsCount).transactionInput,
+          buildCreateBatchERC1155Input(agreementsCount),
           {
             value: creationFee * agreementsCount,
           },
         ),
       ).to.not.be.reverted;
 
-      agreementsCount = 42n;
+      agreementsCount = 40n;
 
       await expect(
         agreementFactory.createBatchERC1155(
-          buildCreateBatchInput(agreementsCount).transactionInput,
+          buildCreateBatchERC1155Input(agreementsCount),
           {
             value: creationFee * agreementsCount,
           },
@@ -228,31 +231,25 @@ describe('AgreementFactory.createBatch', function () {
   });
 });
 
-function readAddressesAndUrisFromReceipt(receipt: ContractTransactionReceipt) {
+function readAddressesFromReceipt(receipt: ContractTransactionReceipt) {
   const agreementFactoryInterface = AgreementFactory__factory.createInterface();
-  const eventFragment = agreementFactoryInterface.getEvent(
-    'InitialRevenueStreamURISet',
-  );
+  const eventFragment = agreementFactoryInterface.getEvent('AgreementCreated');
   const topic = id(eventFragment.format());
   const logs = receipt.logs.filter((log) => log.topics.includes(topic));
   const events = logs.map((log) => agreementFactoryInterface.parseLog(log));
 
   return events
     .filter((event) => !!event)
-    .map((event) => ({
-      revenueStreamURI: event.args.addedUris[0],
-      agreementAddress: event.args.agreementAddress,
-    }));
+    .map((event) => event.args.agreementAddress);
 }
 
-function buildCreateBatchInput(inputSize: bigint) {
-  const DATA_HASH = `0x${'ab'.repeat(32)}`;
-  const transactionInput: AgreementFactory.ICreateBatchERC1155Struct[] = [];
+function buildCreateBatchERC20Input(inputSize: bigint) {
+  const transactionInput: IAgreementERC20.CreateERC20ParamsStruct[] = [];
   const iterInputSize = Number(inputSize);
 
   for (let i = 0; i < iterInputSize; i++) {
     transactionInput.push({
-      _dataHash: DATA_HASH,
+      unassignedRwaId: `ISRC:${i}`,
       holders: [
         {
           account: Wallet.createRandom().address,
@@ -270,14 +267,41 @@ function buildCreateBatchInput(inputSize: bigint) {
           balance: 4000n,
         },
       ],
-      partialRevenueStreamURIs: [`ISRC:${i}`],
-      contractURI: 'abc123',
     });
   }
-  return {
-    transactionInput,
-    expectedRevenueStreamUris: transactionInput.map(
-      (input) => `${namespace}:${input.partialRevenueStreamURIs[0]}`,
-    ),
-  };
+  return transactionInput;
+}
+
+function buildCreateBatchERC1155Input(inputSize: bigint) {
+  const tokenUri = `0x${'ab'.repeat(32)}`;
+  const contractURI = `0x${'ab'.repeat(32)}`;
+
+  const transactionInput: IAgreementERC1155.CreateERC1155ParamsStruct[] = [];
+  const iterInputSize = Number(inputSize);
+
+  for (let i = 0; i < iterInputSize; i++) {
+    transactionInput.push({
+      unassignedRwaId: `ISRC:${i}`,
+      contractURI,
+      tokenUri,
+      holders: [
+        {
+          account: Wallet.createRandom().address,
+          isAdmin: true,
+          balance: 3000n,
+        },
+        {
+          account: Wallet.createRandom().address,
+          isAdmin: false,
+          balance: 3000n,
+        },
+        {
+          account: Wallet.createRandom().address,
+          isAdmin: false,
+          balance: 4000n,
+        },
+      ],
+    });
+  }
+  return transactionInput;
 }

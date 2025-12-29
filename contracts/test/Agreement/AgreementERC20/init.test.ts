@@ -5,9 +5,9 @@ import {
   deployInitialSetup,
 } from '../../helpers/deployments';
 import { getEvent } from '../../helpers/utils';
+import { TokenStandard } from '../../helpers/types';
 
 describe('AgreementERC20.initialize', () => {
-  const DATA_HASH = `0x${'ab'.repeat(32)}`;
   it('should initialize values properly', async () => {
     const [, holder1Account, holder2Account] = await ethers.getSigners();
     const holder1Balance = 600n;
@@ -29,9 +29,8 @@ describe('AgreementERC20.initialize', () => {
           wallet: holder2Account,
         },
       ],
-      dataHash: DATA_HASH,
     });
-    expect(await agreement.dataHash()).to.equal(DATA_HASH);
+
     expect(await agreement.totalSupply()).to.equal(1000n);
     expect(await agreement.balanceOf(holder1Account.address)).to.equal(600n);
     expect(await agreement.balanceOf(holder2Account.address)).to.equal(400n);
@@ -43,23 +42,26 @@ describe('AgreementERC20.initialize', () => {
     const [, holder1Account, holder2Account] = await ethers.getSigners();
     const holder1Balance = 600n;
     const holder2Balance = 400n;
+    const unassignedRwaId = 'ABC123';
+
     const { agreementFactory, feeManager } = await deployInitialSetup();
 
     const createTx = agreementFactory.createERC20(
-      DATA_HASH,
-      [
-        {
-          account: holder1Account.address,
-          balance: holder1Balance,
-          isAdmin: true,
-        },
-        {
-          account: holder2Account.address,
-          balance: holder2Balance,
-          isAdmin: false,
-        },
-      ],
-      ['ABC123'],
+      {
+        holders: [
+          {
+            account: holder1Account.address,
+            balance: holder1Balance,
+            isAdmin: true,
+          },
+          {
+            account: holder2Account.address,
+            balance: holder2Balance,
+            isAdmin: false,
+          },
+        ],
+        unassignedRwaId,
+      },
       { value: await feeManager.creationFee() },
     );
 
@@ -70,14 +72,17 @@ describe('AgreementERC20.initialize', () => {
     );
 
     const agreementAddress = event.args[0];
+    const tokenStandard = event.args[1];
+    const rwaId = event.args[2];
+
     const agreement = Agreement.attach(agreementAddress);
+
+    expect(tokenStandard).to.equal(TokenStandard.ERC20);
+    expect(rwaId).equal(`UNKNOWN:${unassignedRwaId}`);
 
     await expect(Promise.resolve(createTx))
       .to.emit(agreement, 'AdminAdded')
       .withArgs(holder1Account.address);
-    await expect(Promise.resolve(createTx))
-      .to.emit(agreement, 'DataHashChanged')
-      .withArgs(DATA_HASH);
   });
 
   it('cannot be called twice', async () => {
@@ -95,26 +100,31 @@ describe('AgreementERC20.initialize', () => {
       namespaceRegistry,
     } = initialSetup;
     await expect(
-      agreement.initialize(
-        DATA_HASH,
-        [{ account: defaultHolders[0].address, balance: 100n, isAdmin: true }],
-        await currencyManager.getAddress(),
-        await feeManager.getAddress(),
-        await agreementRelationsRegistry.getAddress(),
-        await fallbackVault.getAddress(),
-        await namespaceRegistry.getAddress(),
-        ['ABC123'],
-      ),
-    ).to.be.reverted; // InvalidInitialization()
+      agreement.initialize({
+        holders: [
+          { account: defaultHolders[0].address, balance: 100n, isAdmin: true },
+        ],
+        currencyManager: await currencyManager.getAddress(),
+        feeManager: await feeManager.getAddress(),
+        agreementRelationsRegistry:
+          await agreementRelationsRegistry.getAddress(),
+        fallbackVault: await fallbackVault.getAddress(),
+        namespaceRegistry: await namespaceRegistry.getAddress(),
+        rwaId: 'REVELATOR:ABC123',
+      }),
+    ).to.be.reverted;
   });
 
   it('fails when there are no holders', async () => {
     const { agreementFactory, feeManager } = await deployInitialSetup();
 
     await expect(
-      agreementFactory.createERC20(DATA_HASH, [], ['ABC123'], {
-        value: await feeManager.creationFee(),
-      }),
+      agreementFactory.createERC20(
+        { holders: [], unassignedRwaId: 'ABC123' },
+        {
+          value: await feeManager.creationFee(),
+        },
+      ),
     ).to.be.revertedWith('AgreementERC20: No holders');
   });
 
@@ -124,12 +134,21 @@ describe('AgreementERC20.initialize', () => {
 
     await expect(
       agreementFactory.createERC20(
-        DATA_HASH,
-        [
-          { account: defaultHolders[0].address, balance: 600n, isAdmin: false },
-          { account: defaultHolders[1].address, balance: 400n, isAdmin: false },
-        ],
-        ['ABC123'],
+        {
+          holders: [
+            {
+              account: defaultHolders[0].address,
+              balance: 600n,
+              isAdmin: false,
+            },
+            {
+              account: defaultHolders[1].address,
+              balance: 400n,
+              isAdmin: false,
+            },
+          ],
+          unassignedRwaId: 'ABC123',
+        },
         { value: await feeManager.creationFee() },
       ),
     ).to.be.revertedWith('AgreementERC20: First holder must be admin');
@@ -141,12 +160,17 @@ describe('AgreementERC20.initialize', () => {
 
     await expect(
       agreementFactory.createERC20(
-        DATA_HASH,
-        [
-          { account: defaultHolders[0].address, balance: 600n, isAdmin: true },
-          { account: defaultHolders[1].address, balance: 0n, isAdmin: false },
-        ],
-        ['ABC123'],
+        {
+          holders: [
+            {
+              account: defaultHolders[0].address,
+              balance: 600n,
+              isAdmin: true,
+            },
+            { account: defaultHolders[1].address, balance: 0n, isAdmin: false },
+          ],
+          unassignedRwaId: 'ABC123',
+        },
         { value: await feeManager.creationFee() },
       ),
     ).to.be.revertedWith('AgreementERC20: Holder balance is zero');
@@ -158,16 +182,21 @@ describe('AgreementERC20.initialize', () => {
 
     await expect(
       agreementFactory.createERC20(
-        DATA_HASH,
-        [
-          { account: defaultHolders[0].address, balance: 600n, isAdmin: true },
-          {
-            account: ethers.ZeroAddress,
-            balance: 400n,
-            isAdmin: false,
-          },
-        ],
-        ['ABC123'],
+        {
+          unassignedRwaId: 'ABC123',
+          holders: [
+            {
+              account: defaultHolders[0].address,
+              balance: 600n,
+              isAdmin: true,
+            },
+            {
+              account: ethers.ZeroAddress,
+              balance: 400n,
+              isAdmin: false,
+            },
+          ],
+        },
         { value: await feeManager.creationFee() },
       ),
     ).to.be.revertedWith('AgreementERC20: Holder account is zero');
@@ -179,16 +208,21 @@ describe('AgreementERC20.initialize', () => {
 
     await expect(
       agreementFactory.createERC20(
-        DATA_HASH,
-        [
-          { account: defaultHolders[0].address, balance: 600n, isAdmin: true },
-          {
-            account: defaultHolders[0].address,
-            balance: 400n,
-            isAdmin: false,
-          },
-        ],
-        ['ABC123'],
+        {
+          holders: [
+            {
+              account: defaultHolders[0].address,
+              balance: 600n,
+              isAdmin: true,
+            },
+            {
+              account: defaultHolders[0].address,
+              balance: 400n,
+              isAdmin: false,
+            },
+          ],
+          unassignedRwaId: 'ABC123',
+        },
         { value: await feeManager.creationFee() },
       ),
     ).to.be.revertedWith('AgreementERC20: Duplicate holder');

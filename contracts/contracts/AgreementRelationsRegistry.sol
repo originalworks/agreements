@@ -1,13 +1,10 @@
 // SPDX-License-Identifier: Unlicensed
 pragma solidity ^0.8.13;
 
-import '@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol';
+import '@openzeppelin/contracts/utils/introspection/ERC165.sol';
 import './interfaces/IAgreementRelationsRegistry.sol';
 
-contract AgreementRelationsRegistry is
-  IAgreementRelationsRegistry,
-  ERC165Upgradeable
-{
+contract AgreementRelationsRegistry is IAgreementRelationsRegistry, ERC165 {
   mapping(address => address[]) private childParentRelations;
 
   function registerChildParentRelation(address parent) external {
@@ -42,7 +39,7 @@ contract AgreementRelationsRegistry is
 
   function supportsInterface(
     bytes4 interfaceId
-  ) public view virtual override(ERC165Upgradeable) returns (bool) {
+  ) public view virtual override(ERC165) returns (bool) {
     return
       interfaceId == type(IAgreementRelationsRegistry).interfaceId ||
       super.supportsInterface(interfaceId);

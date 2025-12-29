@@ -81,7 +81,6 @@ export async function deployAgreementERC20(
   input: DeployAgreementInput,
 ): Promise<AgreementDeploymentData<AgreementERC20>> {
   const [deployer] = await ethers.getSigners();
-  const dataHash = input.dataHash || `0x${'ab'.repeat(32)}`;
   const holders = buildHolders(
     input.initialSetup.defaultHolders,
     input.shares,
@@ -91,9 +90,8 @@ export async function deployAgreementERC20(
   const tx = input.initialSetup.agreementFactory
     .connect(input.txExecutorWallet || deployer)
     .createERC20(
-      dataHash,
-      holders,
-      input.partialRevenueStreamURIs || ['ABC123'],
+      { holders, unassignedRwaId: input.unassignedRwaId || 'ABC123' },
+
       {
         value: _creationFee,
       },
@@ -107,15 +105,14 @@ export async function deployAgreementERC20(
   const agreement = input.initialSetup.AgreementERC20Factory.attach(
     agreementAddress,
   ) as AgreementERC20;
-  return { agreement, holders, dataHash };
+  return { agreement, holders };
 }
 
 export async function deployAgreementERC1155(
   input: DeployAgreementInput,
 ): Promise<AgreementDeploymentData<AgreementERC1155>> {
   const [deployer] = await ethers.getSigners();
-  const dataHash = input.dataHash || `0x${'ab'.repeat(32)}`;
-  const contractUri = 'contractUri';
+  // const contractUri = 'contractUri';
   const holders = buildHolders(
     input.initialSetup.defaultHolders,
     input.shares,
@@ -125,10 +122,15 @@ export async function deployAgreementERC1155(
   const tx = input.initialSetup.agreementFactory
     .connect(input.txExecutorWallet || deployer)
     .createERC1155(
-      dataHash,
-      holders,
-      contractUri,
-      input.partialRevenueStreamURIs || ['REVELATOR:ABC123'],
+      {
+        tokenUri: input.tokenUri || 'tokenUri',
+        contractURI: input.contractUri || 'contractURI',
+        holders,
+        unassignedRwaId:
+          input.unassignedRwaId === undefined
+            ? 'ABC123'
+            : input.unassignedRwaId,
+      },
       { value: _creationFee },
     );
   const event = await getEvent(
@@ -140,5 +142,5 @@ export async function deployAgreementERC1155(
   const agreement = input.initialSetup.AgreementERC1155Factory.attach(
     agreementAddress,
   ) as AgreementERC1155;
-  return { agreement, holders, dataHash, contractUri };
+  return { agreement, holders };
 }
