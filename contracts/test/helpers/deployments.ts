@@ -112,7 +112,7 @@ export async function deployAgreementERC1155(
   input: DeployAgreementInput,
 ): Promise<AgreementDeploymentData<AgreementERC1155>> {
   const [deployer] = await ethers.getSigners();
-  // const contractUri = 'contractUri';
+
   const holders = buildHolders(
     input.initialSetup.defaultHolders,
     input.shares,
