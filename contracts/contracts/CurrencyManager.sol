@@ -28,7 +28,7 @@ contract CurrencyManager is
     _disableInitializers();
   }
 
-  function initialize(address[] memory initialList) public initializer {
+  function initialize(address[] calldata initialList) public initializer {
     __Ownable_init(msg.sender);
     __UUPSUpgradeable_init();
     __ERC165_init();

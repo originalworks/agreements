@@ -27,7 +27,7 @@ contract AgreementFactory is
   using ERC165Checker for address;
 
   IFeeManager private feeManager;
-  address private splitCurrencyListManager;
+  address private currencyManager;
   address private agreementRelationsRegistry;
   address private agreementERC20Implementation;
   address private agreementERC1155Implementation;
@@ -36,35 +36,17 @@ contract AgreementFactory is
 
   event AgreementCreated(
     address agreementAddress,
-    address agreementImplementation
+    TokenStandard tokenStandard,
+    string rwaId
   );
   event AgreementImplementationChanged(
     address agreementImplementation,
     TokenStandard tokenStandard
   );
 
-  event InitialRevenueStreamURISet(
-    address agreementAddress,
-    string[] addedUris,
-    address addedByAccount
-  );
-
   enum TokenStandard {
     ERC20,
     ERC1155
-  }
-
-  struct ICreateBatchERC20 {
-    string _dataHash;
-    Holder[] holders;
-    string[] partialRevenueStreamURIs;
-  }
-
-  struct ICreateBatchERC1155 {
-    string _dataHash;
-    Holder[] holders;
-    string[] partialRevenueStreamURIs;
-    string contractURI;
   }
 
   /// @custom:oz-upgrades-unsafe-allow constructor
@@ -77,7 +59,7 @@ contract AgreementFactory is
     address _agreementERC1155Implementation,
     address _feeManager,
     address _agreementRelationsRegistry,
-    address _splitCurrencyListManager,
+    address _currencyManager,
     address _fallbackVault,
     address _namespaceRegistry
   ) public initializer {
@@ -92,9 +74,7 @@ contract AgreementFactory is
       'AgreementFactory: Wrong interface at AgreementRelationsRegistry address'
     );
     require(
-      _splitCurrencyListManager.supportsInterface(
-        type(ICurrencyManager).interfaceId
-      ),
+      _currencyManager.supportsInterface(type(ICurrencyManager).interfaceId),
       'AgreementFactory: Wrong interface at CurrencyManager address'
     );
     require(
@@ -119,7 +99,7 @@ contract AgreementFactory is
     );
     feeManager = IFeeManager(_feeManager);
     agreementRelationsRegistry = _agreementRelationsRegistry;
-    splitCurrencyListManager = _splitCurrencyListManager;
+    currencyManager = _currencyManager;
     fallbackVault = _fallbackVault;
     namespaceRegistry = _namespaceRegistry;
   }
@@ -157,41 +137,39 @@ contract AgreementFactory is
   }
 
   function createERC20(
-    string memory _dataHash,
-    Holder[] memory holders,
-    string[] memory partialRevenueStreamURIs
+    IAgreementERC20.CreateERC20Params calldata params
   ) public payable {
     (uint256 creationFee, , ) = feeManager.getFees();
     require(msg.value >= creationFee, 'AgreementFactory: Insufficient fee');
 
-    string[] memory revenueStreamURIs = getCompleteRevenueStreamURIs(
-      partialRevenueStreamURIs
-    );
+    string memory rwaId = getCompleteRwaId(params.unassignedRwaId);
+
+    IAgreementERC20.AgreementERC20InitParams
+      memory initializerParams = IAgreementERC20.AgreementERC20InitParams({
+        holders: params.holders,
+        currencyManager: currencyManager,
+        feeManager: address(feeManager),
+        agreementRelationsRegistry: agreementRelationsRegistry,
+        fallbackVault: fallbackVault,
+        namespaceRegistry: namespaceRegistry,
+        rwaId: rwaId
+      });
+
     bytes memory data = abi.encodeWithSelector(
       IAgreementERC20.initialize.selector,
-      _dataHash,
-      holders,
-      splitCurrencyListManager,
-      feeManager,
-      agreementRelationsRegistry,
-      fallbackVault,
-      namespaceRegistry,
-      revenueStreamURIs
+      initializerParams
     );
 
     ERC1967Proxy agreement = new ERC1967Proxy(
       agreementERC20Implementation,
       data
     );
-    emit AgreementCreated(address(agreement), agreementERC20Implementation);
-    emit InitialRevenueStreamURISet(
-      address(agreement),
-      revenueStreamURIs,
-      msg.sender
-    );
+    emit AgreementCreated(address(agreement), TokenStandard.ERC20, rwaId);
   }
 
-  function createBatchERC20(ICreateBatchERC20[] memory input) public payable {
+  function createBatchERC20(
+    IAgreementERC20.CreateERC20Params[] calldata input
+  ) public payable {
     (uint256 creationFee, , ) = feeManager.getFees();
     require(
       msg.value >= creationFee * input.length,
@@ -199,72 +177,65 @@ contract AgreementFactory is
     );
 
     for (uint i = 0; i < input.length; i++) {
-      string[] memory revenueStreamURIs = getCompleteRevenueStreamURIs(
-        input[i].partialRevenueStreamURIs
-      );
+      string memory rwaId = getCompleteRwaId(input[i].unassignedRwaId);
+
+      IAgreementERC20.AgreementERC20InitParams
+        memory initializerParams = IAgreementERC20.AgreementERC20InitParams({
+          holders: input[i].holders,
+          currencyManager: currencyManager,
+          feeManager: address(feeManager),
+          agreementRelationsRegistry: agreementRelationsRegistry,
+          fallbackVault: fallbackVault,
+          namespaceRegistry: namespaceRegistry,
+          rwaId: rwaId
+        });
+
       bytes memory data = abi.encodeWithSelector(
         IAgreementERC20.initialize.selector,
-        input[i]._dataHash,
-        input[i].holders,
-        splitCurrencyListManager,
-        feeManager,
-        agreementRelationsRegistry,
-        fallbackVault,
-        namespaceRegistry,
-        revenueStreamURIs
+        initializerParams
       );
 
       ERC1967Proxy agreement = new ERC1967Proxy(
         agreementERC20Implementation,
         data
       );
-      emit AgreementCreated(address(agreement), agreementERC20Implementation);
-      emit InitialRevenueStreamURISet(
-        address(agreement),
-        revenueStreamURIs,
-        msg.sender
-      );
+      emit AgreementCreated(address(agreement), TokenStandard.ERC20, rwaId);
     }
   }
 
   function createERC1155(
-    string memory _dataHash,
-    Holder[] memory holders,
-    string memory contractURI,
-    string[] memory partialRevenueStreamURIs
+    IAgreementERC1155.CreateERC1155Params calldata params
   ) public payable {
     (uint256 creationFee, , ) = feeManager.getFees();
     require(msg.value >= creationFee, 'AgreementFactory: Insufficient fee');
-    string[] memory revenueStreamURIs = getCompleteRevenueStreamURIs(
-      partialRevenueStreamURIs
-    );
+    string memory rwaId = getCompleteRwaId(params.unassignedRwaId);
+
+    IAgreementERC1155.AgreementERC1155InitParams
+      memory initializerParams = IAgreementERC1155.AgreementERC1155InitParams({
+        contractUri: params.contractURI,
+        tokenUri: params.tokenUri,
+        holders: params.holders,
+        currencyManager: currencyManager,
+        feeManager: address(feeManager),
+        agreementRelationsRegistry: agreementRelationsRegistry,
+        fallbackVault: fallbackVault,
+        namespaceRegistry: namespaceRegistry,
+        rwaId: rwaId
+      });
     bytes memory data = abi.encodeWithSelector(
       IAgreementERC1155.initialize.selector,
-      contractURI,
-      _dataHash,
-      holders,
-      splitCurrencyListManager,
-      feeManager,
-      agreementRelationsRegistry,
-      fallbackVault,
-      namespaceRegistry,
-      revenueStreamURIs
+      initializerParams
     );
 
     ERC1967Proxy agreement = new ERC1967Proxy(
       agreementERC1155Implementation,
       data
     );
-    emit AgreementCreated(address(agreement), agreementERC1155Implementation);
-    emit InitialRevenueStreamURISet(
-      address(agreement),
-      revenueStreamURIs,
-      msg.sender
-    );
+    emit AgreementCreated(address(agreement), TokenStandard.ERC1155, rwaId);
   }
 
   function createBatchERC1155(
-    ICreateBatchERC1155[] memory input
+    IAgreementERC1155.CreateERC1155Params[] calldata input
   ) public payable {
     (uint256 creationFee, , ) = feeManager.getFees();
     require(
@@ -273,55 +244,41 @@ contract AgreementFactory is
     );
 
     for (uint i = 0; i < input.length; i++) {
-      string[] memory revenueStreamURIs = getCompleteRevenueStreamURIs(
-        input[i].partialRevenueStreamURIs
-      );
+      string memory rwaId = getCompleteRwaId(input[i].unassignedRwaId);
+
+      IAgreementERC1155.AgreementERC1155InitParams
+        memory initializerParams = IAgreementERC1155
+          .AgreementERC1155InitParams({
+            contractUri: input[i].contractURI,
+            tokenUri: input[i].tokenUri,
+            holders: input[i].holders,
+            currencyManager: currencyManager,
+            feeManager: address(feeManager),
+            agreementRelationsRegistry: agreementRelationsRegistry,
+            fallbackVault: fallbackVault,
+            namespaceRegistry: namespaceRegistry,
+            rwaId: rwaId
+          });
       bytes memory data = abi.encodeWithSelector(
         IAgreementERC1155.initialize.selector,
-        input[i].contractURI,
-        input[i]._dataHash,
-        input[i].holders,
-        splitCurrencyListManager,
-        feeManager,
-        agreementRelationsRegistry,
-        fallbackVault,
-        namespaceRegistry,
-        revenueStreamURIs
+        initializerParams
       );
-
       ERC1967Proxy agreement = new ERC1967Proxy(
         agreementERC1155Implementation,
         data
       );
-      emit AgreementCreated(address(agreement), agreementERC1155Implementation);
-      emit InitialRevenueStreamURISet(
-        address(agreement),
-        revenueStreamURIs,
-        msg.sender
-      );
+      emit AgreementCreated(address(agreement), TokenStandard.ERC1155, rwaId);
     }
   }
 
-  function getCompleteRevenueStreamURIs(
-    string[] memory partialRevenueStreamURIs
-  ) private view returns (string[] memory) {
-    if (partialRevenueStreamURIs.length == 0) {
-      return new string[](0);
-    }
+  function getCompleteRwaId(
+    string calldata unassignedRwaId
+  ) private view returns (string memory) {
     string memory namespace = INamespaceRegistry(namespaceRegistry)
       .getNamespaceForAddress(msg.sender);
+    string memory rwaId = string.concat(namespace, unassignedRwaId);
 
-    string[] memory revenueStreamURIs = new string[](
-      partialRevenueStreamURIs.length
-    );
-    for (uint i = 0; i < partialRevenueStreamURIs.length; i++) {
-      revenueStreamURIs[i] = string.concat(
-        namespace,
-        partialRevenueStreamURIs[i]
-      );
-    }
-
-    return revenueStreamURIs;
+    return rwaId;
   }
 
   function collectFee() external {

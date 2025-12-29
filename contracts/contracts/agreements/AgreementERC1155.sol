@@ -21,7 +21,7 @@ contract AgreementERC1155 is
 {
   using SafeERC20 for IERC20;
 
-  ICurrencyManager private splitCurrencyListManager;
+  ICurrencyManager private currencyManager;
   IFeeManager private feeManager;
   IAgreementRelationsRegistry private agreementRelationsRegistry;
   IFallbackVault private fallbackVault;
@@ -39,7 +39,7 @@ contract AgreementERC1155 is
   uint256 public totalSupply;
   string public contractURI;
   INamespaceRegistry private namespaceRegistry;
-  string[] public revenueStreamURIs;
+  string public rwaId;
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -55,49 +55,42 @@ contract AgreementERC1155 is
   }
 
   function initialize(
-    string memory _contractUri,
-    string memory _uri,
-    Holder[] memory holders,
-    address _splitCurrencyListManager,
-    address _feeManager,
-    address _agreementRelationsRegistry,
-    address _fallbackVault,
-    address _namespaceRegistry,
-    string[] memory _revenueStreamURIs
+    AgreementERC1155InitParams calldata params
   ) public initializer {
-    require(holders.length > 0, 'AgreementERC1155: No holders');
-    require(holders[0].isAdmin, 'AgreementERC1155: First holder must be admin');
+    require(params.holders.length > 0, 'AgreementERC1155: No holders');
+    require(
+      params.holders[0].isAdmin,
+      'AgreementERC1155: First holder must be admin'
+    );
 
-    __ERC1155_init(_uri);
+    __ERC1155_init(params.tokenUri);
     __ERC1155Holder_init();
     __UUPSUpgradeable_init();
 
-    splitCurrencyListManager = ICurrencyManager(_splitCurrencyListManager);
-    feeManager = IFeeManager(_feeManager);
+    currencyManager = ICurrencyManager(params.currencyManager);
+    feeManager = IFeeManager(params.feeManager);
     agreementRelationsRegistry = IAgreementRelationsRegistry(
-      _agreementRelationsRegistry
+      params.agreementRelationsRegistry
     );
-    fallbackVault = IFallbackVault(_fallbackVault);
+    fallbackVault = IFallbackVault(params.fallbackVault);
 
-    contractURI = _contractUri;
+    contractURI = params.contractUri;
 
-    namespaceRegistry = INamespaceRegistry(_namespaceRegistry);
+    namespaceRegistry = INamespaceRegistry(params.namespaceRegistry);
 
-    revenueStreamURIs = _revenueStreamURIs;
+    rwaId = params.rwaId;
 
-    for (uint256 i = 0; i < holders.length; i++) {
-      _addHolder(holders[i]);
+    for (uint256 i = 0; i < params.holders.length; i++) {
+      _addHolder(params.holders[i]);
     }
-    emit ContractUriChanged(_contractUri);
-    emit DataHashChanged(_uri);
   }
 
-  function setContractUri(string memory newContractUri) public onlyAdmin {
+  function setContractUri(string calldata newContractUri) public onlyAdmin {
     contractURI = newContractUri;
     emit ContractUriChanged(newContractUri);
   }
 
-  function setUri(string memory newUri) public onlyAdmin {
+  function setUri(string calldata newUri) public onlyAdmin {
     _setURI(newUri);
     emit DataHashChanged(newUri);
   }
@@ -116,7 +109,7 @@ contract AgreementERC1155 is
 
   function claimHolderFunds(address holder, address currency) public override {
     require(
-      splitCurrencyListManager.currencyMap(currency) == true,
+      currencyManager.currencyMap(currency) == true,
       'AgreementERC1155: Currency not supported'
     );
     uint256 currentFee;
@@ -227,7 +220,7 @@ contract AgreementERC1155 is
     address holder
   ) public view override returns (uint256 claimableAmount, uint256 fee) {
     require(
-      splitCurrencyListManager.currencyMap(currency) == true,
+      currencyManager.currencyMap(currency) == true,
       'AgreementERC20: Currency not supported'
     );
     uint256 currentFee;
@@ -245,40 +238,6 @@ contract AgreementERC1155 is
         currentFee,
         paymentFeeDenominator
       );
-  }
-
-  function addRevenueStreamURI(string memory partialRevenueStreamURI) public {
-    string memory namespace = namespaceRegistry.getNamespaceForAddress(
-      msg.sender
-    );
-
-    require(
-      keccak256(abi.encodePacked(namespace)) !=
-        keccak256(abi.encodePacked('UNKNOWN:')),
-      'NamespaceRegistry: you are not allowed to add this URI'
-    );
-
-    string memory uriToAdd = string.concat(namespace, partialRevenueStreamURI);
-
-    revenueStreamURIs.push(uriToAdd);
-
-    emit RevenueStreamURIAdded(uriToAdd, msg.sender);
-  }
-
-  function removeRevenueStreamURI(uint256 uriAtIndex) public {
-    string memory uriToRemove = revenueStreamURIs[uriAtIndex];
-    require(
-      namespaceRegistry.canEditURI(uriToRemove, msg.sender),
-      'NamespaceRegistry: you are not allowed to remove this URI'
-    );
-
-    delete revenueStreamURIs[uriAtIndex];
-    revenueStreamURIs[uriAtIndex] = revenueStreamURIs[
-      revenueStreamURIs.length - 1
-    ];
-    revenueStreamURIs.pop();
-
-    emit RevenueStreamURIRemoved(uriToRemove, msg.sender);
   }
 
   function _authorizeUpgrade(address) internal override onlyAdmin {}
@@ -301,8 +260,7 @@ contract AgreementERC1155 is
         agreementRelationsRegistry.removeChildParentRelation(from);
       }
       if (from != address(0)) {
-        address[] memory currencyArray = splitCurrencyListManager
-          .getCurrencyArray();
+        address[] memory currencyArray = currencyManager.getCurrencyArray();
         for (uint ii = 0; ii < currencyArray.length; ii++) {
           claimHolderFunds(from, currencyArray[ii]);
           holderFundsCounters[currencyArray[ii]][from] = receivedFunds[
@@ -311,8 +269,7 @@ contract AgreementERC1155 is
         }
       }
       if (to != address(0)) {
-        address[] memory currencyArray = splitCurrencyListManager
-          .getCurrencyArray();
+        address[] memory currencyArray = currencyManager.getCurrencyArray();
         for (uint ii = 0; ii < currencyArray.length; ii++) {
           claimHolderFunds(to, currencyArray[ii]);
           holderFundsCounters[currencyArray[ii]][to] = receivedFunds[
@@ -356,7 +313,7 @@ contract AgreementERC1155 is
     }
   }
 
-  function _addHolder(Holder memory holder) private {
+  function _addHolder(Holder calldata holder) private {
     require(
       holder.balance > 0 || holder.isAdmin,
       'AgreementERC1155: Holder balance is zero'

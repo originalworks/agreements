@@ -26,8 +26,8 @@ contract NamespaceRegistry is
   }
 
   function setNamespaceForAddresses(
-    address[] memory addressesArray,
-    string[] memory _namespaces
+    address[] calldata addressesArray,
+    string[] calldata _namespaces
   ) public onlyOwner {
     require(
       addressesArray.length == _namespaces.length && _namespaces.length > 0,
@@ -49,43 +49,6 @@ contract NamespaceRegistry is
       return 'UNKNOWN:';
     } else {
       return string.concat(namespaces[addressToCheck], ':');
-    }
-  }
-
-  function canEditURI(
-    string memory uri,
-    address sender
-  ) public view returns (bool) {
-    bytes memory bytesUri = bytes(uri);
-    uint256 namespaceLength;
-    for (uint i = 0; i < bytesUri.length; i++) {
-      if (
-        keccak256(abi.encodePacked(bytesUri[i])) ==
-        keccak256(abi.encodePacked(':'))
-      ) {
-        namespaceLength = i;
-        break;
-      }
-    }
-
-    if (namespaceLength == 0) {
-      return false;
-    }
-
-    bytes memory uriNamespaceBytes = new bytes(namespaceLength);
-    for (uint i = 0; i < namespaceLength; i++) {
-      uriNamespaceBytes[i] = bytesUri[i];
-    }
-
-    string memory uriNamespace = string(uriNamespaceBytes);
-
-    if (
-      keccak256(abi.encodePacked(uriNamespace)) ==
-      keccak256(abi.encodePacked(namespaces[sender]))
-    ) {
-      return true;
-    } else {
-      return false;
     }
   }
 
