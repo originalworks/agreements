@@ -54,7 +54,7 @@ describe('CurrencyManager.addCurrency', () => {
 
     await expect(
       currencyManager.addCurrency(await newCurrency.getAddress()),
-    ).to.be.revertedWith('CurrencyManager: currency already listed');
+    ).to.be.revertedWithCustomError(currencyManager, 'AlreadyListed');
   });
 
   it('emits CurrencyAdded event', async () => {

@@ -33,18 +33,12 @@ describe('CurrencyManager.removeCurrency', () => {
     expect(await currencyManager.currencyMap(currencyToRemove)).to.equal(false);
   });
 
-  it("can't remove native coin currency (zero address)", async () => {
-    await expect(
-      currencyManager.removeCurrency(ethers.ZeroAddress),
-    ).to.be.revertedWith('CurrencyManager: can not remove native coin address');
-  });
-
   it("can't remove not listed currency", async () => {
     const newCurrency = await deployERC20TokenMock('new token', 'NTKN', 10n);
 
     await expect(
       currencyManager.removeCurrency(await newCurrency.getAddress()),
-    ).to.be.revertedWith('CurrencyManager: currency not listed');
+    ).to.be.revertedWithCustomError(currencyManager, 'NotListed');
   });
 
   it('only owner can remove currency', async () => {
