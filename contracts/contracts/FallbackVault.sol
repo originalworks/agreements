@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.32;
 
 import '@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
@@ -16,9 +16,12 @@ contract FallbackVault is
   ERC165Upgradeable,
   UUPSUpgradeable
 {
+  event Withdrawn(address user, uint256 amount);
+  error NoFunds();
+
   mapping(address => uint256) public balances;
 
-  event Withdrawn(address _user, uint256 _amount);
+  uint256[50] private __gap;
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -29,6 +32,7 @@ contract FallbackVault is
     __ReentrancyGuard_init();
     __Ownable_init(msg.sender);
     __ERC165_init();
+    __UUPSUpgradeable_init();
   }
 
   function withdrawFor(address user, uint256 gasLimit) external {
@@ -45,7 +49,9 @@ contract FallbackVault is
     uint256 gasLimit
   ) internal nonReentrant {
     uint256 amount = balances[user];
-    require(amount > 0, 'FallbackVault: no funds to withdraw');
+    if (amount == 0) {
+      revert NoFunds();
+    }
     balances[user] = 0;
     bool success;
     bytes memory response;
