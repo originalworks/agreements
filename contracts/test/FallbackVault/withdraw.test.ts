@@ -140,7 +140,7 @@ describe('FallbackVault.withdraw', function () {
 
     await expect(
       fallbackVault.connect(user).withdraw(user.address, 0n),
-    ).to.be.revertedWith('FallbackVault: no funds to withdraw');
+    ).to.be.revertedWithCustomError(fallbackVault, 'NoFunds');
 
     expect(userBalanceAfter - userBalanceBefore).to.equal(0n);
     expect(
