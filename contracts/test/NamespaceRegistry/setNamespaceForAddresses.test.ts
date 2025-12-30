@@ -3,6 +3,7 @@ import { ethers } from 'hardhat';
 import { NamespaceRegistry } from '../../typechain';
 import { deployNamespaceRegistry } from '../../scripts/actions/deployNamespaceRegistry';
 import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
+import { Wallet } from 'ethers';
 
 describe('NamespaceRegistry.setNamespaceForAddresses', function () {
   const revelatorNamespace = 'REVELATOR';
@@ -37,6 +38,10 @@ describe('NamespaceRegistry.setNamespaceForAddresses', function () {
     expect(
       await namespaceRegistry.namespaces(revelatorNamespaceOwner.address),
     ).equal(revelatorNamespace);
+
+    expect(await namespaceRegistry.usedNamespaces(revelatorNamespace)).equal(
+      true,
+    );
   });
 
   it('Can overwrite namespace for address', async function () {
@@ -54,6 +59,8 @@ describe('NamespaceRegistry.setNamespaceForAddresses', function () {
     expect(
       await namespaceRegistry.namespaces(revelatorNamespaceOwner.address),
     ).equal(revelatorNamespace);
+
+    expect(await namespaceRegistry.usedNamespaces('PIEROGI')).equal(false);
   });
 
   it('Can set namespace for multiple addresses', async function () {
@@ -95,6 +102,33 @@ describe('NamespaceRegistry.setNamespaceForAddresses', function () {
     );
   });
 
+  it('Namespace can only be assign to one address', async () => {
+    await expect(
+      namespaceRegistry
+        .connect(contractOwner)
+        .setNamespaceForAddresses(
+          [revelatorNamespaceOwner.address, Wallet.createRandom().address],
+          [revelatorNamespace, revelatorNamespace],
+        ),
+    ).to.be.revertedWithCustomError(namespaceRegistry, 'AlreadyRegistered');
+
+    await namespaceRegistry
+      .connect(contractOwner)
+      .setNamespaceForAddresses(
+        [revelatorNamespaceOwner.address],
+        [revelatorNamespace],
+      );
+
+    await expect(
+      namespaceRegistry
+        .connect(contractOwner)
+        .setNamespaceForAddresses(
+          [Wallet.createRandom().address],
+          [revelatorNamespace],
+        ),
+    ).to.be.revertedWithCustomError(namespaceRegistry, 'AlreadyRegistered');
+  });
+
   it('Emits event when namespaces are edited', async () => {
     const addresses = [
       revelatorNamespaceOwner.address,
@@ -109,6 +143,10 @@ describe('NamespaceRegistry.setNamespaceForAddresses', function () {
         .setNamespaceForAddresses(addresses, namespaces),
     )
       .to.emit(namespaceRegistry, 'NamespaceEdited')
-      .withArgs(addresses, namespaces);
+      .withArgs(addresses[0], namespaces[0])
+      .to.emit(namespaceRegistry, 'NamespaceEdited')
+      .withArgs(addresses[1], namespaces[1])
+      .to.emit(namespaceRegistry, 'NamespaceEdited')
+      .withArgs(addresses[2], namespaces[2]);
   });
 });
