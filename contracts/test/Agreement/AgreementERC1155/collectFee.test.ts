@@ -21,7 +21,7 @@ describe('AgreementERC1155.collectFee', () => {
 
     await expect(
       feeManager.setPaymentFee(parseEther('1.1')),
-    ).to.be.revertedWith('FeeManager: Payment fee greater than 100%');
+    ).to.be.revertedWithCustomError(feeManager, 'FeeTooHigh');
   });
   it("fees in different currencies doesn't interfere with each others", async () => {
     const [owner] = await ethers.getSigners();

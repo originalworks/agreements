@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.32;
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
@@ -17,11 +17,16 @@ contract FeeManager is
 {
   using SafeERC20 for IERC20;
 
+  error FailedNativeCoinWithdrawal();
+  error FeeTooHigh();
+
   // STORAGE
 
   uint256 public creationFee;
   uint256 public paymentFee;
-  uint256 public paymentFeeDenominator;
+  uint256 public constant PAYMENT_FEE_DENOMINATOR = 1e18;
+
+  uint256[50] private __gap;
 
   // EVENTS
 
@@ -39,12 +44,11 @@ contract FeeManager is
     uint256 initialCreationFee,
     uint256 initialPaymentFee
   ) public initializer {
-    paymentFeeDenominator = 10 ** 18;
     __Ownable_init(msg.sender);
+    __ERC165_init();
+    __UUPSUpgradeable_init();
     setPaymentFee(initialPaymentFee);
     setCreationFee(initialCreationFee);
-    emit CreationFeeChanged(initialCreationFee);
-    emit PaymentFeeChanged(initialPaymentFee);
   }
 
   // GETTER
@@ -58,7 +62,7 @@ contract FeeManager is
       uint256 _paymentFeeDenominator
     )
   {
-    return (creationFee, paymentFee, paymentFeeDenominator);
+    return (creationFee, paymentFee, PAYMENT_FEE_DENOMINATOR);
   }
 
   function owner()
@@ -78,35 +82,34 @@ contract FeeManager is
   }
 
   function setPaymentFee(uint256 newFee) public onlyOwner {
-    require(
-      newFee <= paymentFeeDenominator,
-      'FeeManager: Payment fee greater than 100%'
-    );
+    if (newFee >= PAYMENT_FEE_DENOMINATOR) {
+      revert FeeTooHigh();
+    }
     paymentFee = newFee;
     emit PaymentFeeChanged(newFee);
   }
 
   // LOGIC
 
-  function collectCreationFee(ICreationFeeSource from) public onlyOwner {
+  function collectCreationFee(ICreationFeeSource from) external onlyOwner {
     from.collectFee();
   }
 
   function collectPaymentFee(
     IPaymentFeeSource from,
     address currency
-  ) public onlyOwner {
+  ) external onlyOwner {
     from.collectFee(currency);
   }
 
-  function withdrawNativeCoins(address to) public onlyOwner {
+  function withdrawNativeCoins(address to) external onlyOwner {
     (bool success, ) = to.call{value: address(this).balance}('');
     if (!success) {
-      revert('FeeManager: withdrawing native coins failed');
+      revert FailedNativeCoinWithdrawal();
     }
   }
 
-  function withdrawERC20(address payable to, IERC20 token) public onlyOwner {
+  function withdrawERC20(address to, IERC20 token) external onlyOwner {
     token.safeTransfer(to, token.balanceOf(address(this)));
   }
 
