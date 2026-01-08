@@ -14,6 +14,7 @@ contract AgreementRelationsRegistry is
   UUPSUpgradeable
 {
   error AccessDenied();
+  event AgreementFactoryAddressChanged(address previous, address current);
   mapping(address => address[]) private childParentRelations;
 
   IAgreementFactory agreementFactory;
@@ -27,7 +28,9 @@ contract AgreementRelationsRegistry is
   function setAgreementFactoryAddress(
     IAgreementFactory _agreementFactory
   ) external onlyOwner {
+    address previous = address(agreementFactory);
     agreementFactory = _agreementFactory;
+    emit AgreementFactoryAddressChanged(previous, address(agreementFactory));
   }
 
   function registerInitialRelation(address child, address parent) external {
