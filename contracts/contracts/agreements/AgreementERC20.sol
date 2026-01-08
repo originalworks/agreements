@@ -239,7 +239,7 @@ contract AgreementERC20 is
   function _authorizeUpgrade(address) internal override onlyAdmin {}
 
   function _update(address from, address to, uint256 amount) internal override {
-    if (balanceOf(to) == 0 && to.code.length > 0) {
+    if (balanceOf(to) == 0 && to.code.length > 0 && from != address(0)) {
       agreementRelationsRegistry.registerChildParentRelation(to);
     }
     if (balanceOf(from) == amount && from.code.length > 0) {

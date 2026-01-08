@@ -11,16 +11,17 @@ import '../interfaces/IFeeManager.sol';
 import '../interfaces/IAgreementRelationsRegistry.sol';
 import '../interfaces/IAgreementERC20.sol';
 import '../interfaces/IAgreementERC1155.sol';
-import '../interfaces/IHolder.sol';
 import '../interfaces/ICurrencyManager.sol';
 import '../interfaces/IFallbackVault.sol';
 import '../interfaces/ICreationFeeSource.sol';
 import '../interfaces/INamespaceRegistry.sol';
+import '../interfaces/IAgreementFactory.sol';
+import '../interfaces/IAgreementRelationsRegistry.sol';
 
 contract AgreementFactory is
+  IAgreementFactory,
   Initializable,
   OwnableUpgradeable,
-  IHolder,
   ICreationFeeSource,
   UUPSUpgradeable
 {
@@ -28,11 +29,13 @@ contract AgreementFactory is
 
   IFeeManager private feeManager;
   address private currencyManager;
-  address private agreementRelationsRegistry;
+  IAgreementRelationsRegistry private agreementRelationsRegistry;
   address private agreementERC20Implementation;
   address private agreementERC1155Implementation;
   address private fallbackVault;
   address private namespaceRegistry;
+
+  mapping(address => bool) public createdAgreements;
 
   event AgreementCreated(
     address agreementAddress,
@@ -98,7 +101,9 @@ contract AgreementFactory is
       TokenStandard.ERC1155
     );
     feeManager = IFeeManager(_feeManager);
-    agreementRelationsRegistry = _agreementRelationsRegistry;
+    agreementRelationsRegistry = IAgreementRelationsRegistry(
+      _agreementRelationsRegistry
+    );
     currencyManager = _currencyManager;
     fallbackVault = _fallbackVault;
     namespaceRegistry = _namespaceRegistry;
@@ -136,12 +141,9 @@ contract AgreementFactory is
     emit AgreementImplementationChanged(newImplementation, tokenStandard);
   }
 
-  function createERC20(
+  function _createERC20(
     IAgreementERC20.CreateERC20Params calldata params
-  ) public payable {
-    (uint256 creationFee, , ) = feeManager.getFees();
-    require(msg.value >= creationFee, 'AgreementFactory: Insufficient fee');
-
+  ) internal {
     string memory rwaId = getCompleteRwaId(params.unassignedRwaId);
 
     IAgreementERC20.AgreementERC20InitParams
@@ -149,7 +151,7 @@ contract AgreementFactory is
         holders: params.holders,
         currencyManager: currencyManager,
         feeManager: address(feeManager),
-        agreementRelationsRegistry: agreementRelationsRegistry,
+        agreementRelationsRegistry: address(agreementRelationsRegistry),
         fallbackVault: fallbackVault,
         namespaceRegistry: namespaceRegistry,
         rwaId: rwaId
@@ -164,7 +166,24 @@ contract AgreementFactory is
       agreementERC20Implementation,
       data
     );
+    createdAgreements[address(agreement)] = true;
+
+    for (uint i = 0; i < params.holders.length; i++) {
+      agreementRelationsRegistry.registerInitialRelation(
+        address(agreement),
+        params.holders[i].account
+      );
+    }
     emit AgreementCreated(address(agreement), TokenStandard.ERC20, rwaId);
+  }
+
+  function createERC20(
+    IAgreementERC20.CreateERC20Params calldata params
+  ) public payable {
+    (uint256 creationFee, , ) = feeManager.getFees();
+    require(msg.value >= creationFee, 'AgreementFactory: Insufficient fee');
+
+    _createERC20(params);
   }
 
   function createBatchERC20(
@@ -177,37 +196,13 @@ contract AgreementFactory is
     );
 
     for (uint i = 0; i < input.length; i++) {
-      string memory rwaId = getCompleteRwaId(input[i].unassignedRwaId);
-
-      IAgreementERC20.AgreementERC20InitParams
-        memory initializerParams = IAgreementERC20.AgreementERC20InitParams({
-          holders: input[i].holders,
-          currencyManager: currencyManager,
-          feeManager: address(feeManager),
-          agreementRelationsRegistry: agreementRelationsRegistry,
-          fallbackVault: fallbackVault,
-          namespaceRegistry: namespaceRegistry,
-          rwaId: rwaId
-        });
-
-      bytes memory data = abi.encodeWithSelector(
-        IAgreementERC20.initialize.selector,
-        initializerParams
-      );
-
-      ERC1967Proxy agreement = new ERC1967Proxy(
-        agreementERC20Implementation,
-        data
-      );
-      emit AgreementCreated(address(agreement), TokenStandard.ERC20, rwaId);
+      _createERC20(input[i]);
     }
   }
 
-  function createERC1155(
+  function _createERC1155(
     IAgreementERC1155.CreateERC1155Params calldata params
-  ) public payable {
-    (uint256 creationFee, , ) = feeManager.getFees();
-    require(msg.value >= creationFee, 'AgreementFactory: Insufficient fee');
+  ) internal {
     string memory rwaId = getCompleteRwaId(params.unassignedRwaId);
 
     IAgreementERC1155.AgreementERC1155InitParams
@@ -217,7 +212,7 @@ contract AgreementFactory is
         holders: params.holders,
         currencyManager: currencyManager,
         feeManager: address(feeManager),
-        agreementRelationsRegistry: agreementRelationsRegistry,
+        agreementRelationsRegistry: address(agreementRelationsRegistry),
         fallbackVault: fallbackVault,
         namespaceRegistry: namespaceRegistry,
         rwaId: rwaId
@@ -231,7 +226,22 @@ contract AgreementFactory is
       agreementERC1155Implementation,
       data
     );
+    createdAgreements[address(agreement)] = true;
+    for (uint i = 0; i < params.holders.length; i++) {
+      agreementRelationsRegistry.registerInitialRelation(
+        address(agreement),
+        params.holders[i].account
+      );
+    }
     emit AgreementCreated(address(agreement), TokenStandard.ERC1155, rwaId);
+  }
+
+  function createERC1155(
+    IAgreementERC1155.CreateERC1155Params calldata params
+  ) public payable {
+    (uint256 creationFee, , ) = feeManager.getFees();
+    require(msg.value >= creationFee, 'AgreementFactory: Insufficient fee');
+    _createERC1155(params);
   }
 
   function createBatchERC1155(
@@ -244,30 +254,7 @@ contract AgreementFactory is
     );
 
     for (uint i = 0; i < input.length; i++) {
-      string memory rwaId = getCompleteRwaId(input[i].unassignedRwaId);
-
-      IAgreementERC1155.AgreementERC1155InitParams
-        memory initializerParams = IAgreementERC1155
-          .AgreementERC1155InitParams({
-            contractUri: input[i].contractURI,
-            tokenUri: input[i].tokenUri,
-            holders: input[i].holders,
-            currencyManager: currencyManager,
-            feeManager: address(feeManager),
-            agreementRelationsRegistry: agreementRelationsRegistry,
-            fallbackVault: fallbackVault,
-            namespaceRegistry: namespaceRegistry,
-            rwaId: rwaId
-          });
-      bytes memory data = abi.encodeWithSelector(
-        IAgreementERC1155.initialize.selector,
-        initializerParams
-      );
-      ERC1967Proxy agreement = new ERC1967Proxy(
-        agreementERC1155Implementation,
-        data
-      );
-      emit AgreementCreated(address(agreement), TokenStandard.ERC1155, rwaId);
+      _createERC1155(input[i]);
     }
   }
 

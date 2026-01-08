@@ -80,6 +80,14 @@ async function main() {
   });
   console.log('agreementFactory:', await agreementFactory.getAddress());
 
+  console.log(
+    'setting agreementFactory address for agreementRelationsRegistry...',
+  );
+  const tx = await agreementRelationsRegistry.setAgreementFactoryAddress(
+    await agreementFactory.getAddress(),
+  );
+  await tx.wait();
+
   console.log('saving deployment data into /deployments');
   await saveDeploymentData({
     deployer: deployer.address,
