@@ -1,13 +1,36 @@
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
+import { deployAgreementRelationsRegistry } from '../../scripts/actions/deployAgreementRelationsRegistry';
+import { AgreementFactoryMock, AgreementRelationsRegistry } from 'typechain';
+import { deployInitialSetup } from '../../test/helpers/deployments';
 
 describe('AgreementRelationsRegistry.registerChildParentRelation', () => {
-  it('can register chained relations if not circular', async () => {
-    const AgreementRelationsRegistry = await ethers.getContractFactory(
-      'AgreementRelationsRegistry',
+  let registry: AgreementRelationsRegistry;
+  let agreementFactory: AgreementFactoryMock;
+  before(async () => {
+    const AgreementFactory = await ethers.getContractFactory(
+      'AgreementFactoryMock',
     );
-    const registry = await AgreementRelationsRegistry.deploy();
+    agreementFactory = await AgreementFactory.deploy();
+  });
+  beforeEach(async () => {
+    registry = await deployAgreementRelationsRegistry();
+    await registry.setAgreementFactoryAddress(
+      await agreementFactory.getAddress(),
+    );
+  });
+  it('only agreements can register their relations', async () => {
+    const { agreementRelationsRegistry } = await deployInitialSetup();
 
+    const [child, parent] = await ethers.getSigners();
+
+    await expect(
+      agreementRelationsRegistry
+        .connect(child)
+        .registerChildParentRelation(parent.address),
+    ).to.be.revertedWithCustomError(agreementRelationsRegistry, 'AccessDenied');
+  });
+  it('can register chained relations if not circular', async () => {
     const [child, parent, parent2, grandParent, grandGrandParent] =
       await ethers.getSigners();
 
@@ -31,10 +54,6 @@ describe('AgreementRelationsRegistry.registerChildParentRelation', () => {
   });
 
   it('Reverts if try to register first level circular relation', async () => {
-    const AgreementRelationsRegistry = await ethers.getContractFactory(
-      'AgreementRelationsRegistry',
-    );
-    const registry = await AgreementRelationsRegistry.deploy();
     const [child, parent] = await ethers.getSigners();
 
     await registry.connect(child).registerChildParentRelation(parent.address);
@@ -47,10 +66,6 @@ describe('AgreementRelationsRegistry.registerChildParentRelation', () => {
   });
 
   it('Reverts if try to register second level circular relation', async () => {
-    const AgreementRelationsRegistry = await ethers.getContractFactory(
-      'AgreementRelationsRegistry',
-    );
-    const registry = await AgreementRelationsRegistry.deploy();
     const [child, parent, grandParent] = await ethers.getSigners();
 
     await registry.connect(child).registerChildParentRelation(parent.address);
@@ -66,10 +81,6 @@ describe('AgreementRelationsRegistry.registerChildParentRelation', () => {
   });
 
   it('Reverts if try to register third level circular relation', async () => {
-    const AgreementRelationsRegistry = await ethers.getContractFactory(
-      'AgreementRelationsRegistry',
-    );
-    const registry = await AgreementRelationsRegistry.deploy();
     const [child, parent, grandParent, grandGrandParent] =
       await ethers.getSigners();
 
@@ -91,10 +102,6 @@ describe('AgreementRelationsRegistry.registerChildParentRelation', () => {
   });
 
   it('Reverts if try to register fourth level circular relation', async () => {
-    const AgreementRelationsRegistry = await ethers.getContractFactory(
-      'AgreementRelationsRegistry',
-    );
-    const registry = await AgreementRelationsRegistry.deploy();
     const [
       child,
       parent,

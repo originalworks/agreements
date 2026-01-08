@@ -60,6 +60,8 @@ export async function deployInitialSetup(
     namespaceRegistry: await namespaceRegistry.getAddress(),
   });
 
+  await agreementRelationsRegistry.setAgreementFactoryAddress(agreementFactory);
+
   return {
     feeManager,
     agreementFactory,
