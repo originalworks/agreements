@@ -57,9 +57,7 @@ describe('AgreementRelationsRegistry.removeChildParentRelation', () => {
 
     await expect(
       registry.connect(parent).registerChildParentRelation(child.address),
-    ).to.be.revertedWith(
-      'AgreementRelationsRegistry: Circular dependency not allowed',
-    );
+    ).to.be.revertedWithCustomError(registry, 'CircularDependency');
 
     await registry.connect(child).removeChildParentRelation(parent.address);
 
@@ -99,8 +97,6 @@ describe('AgreementRelationsRegistry.removeChildParentRelation', () => {
 
     await expect(
       registry.connect(grandParent2).registerChildParentRelation(child.address),
-    ).to.be.revertedWith(
-      'AgreementRelationsRegistry: Circular dependency not allowed',
-    );
+    ).to.be.revertedWithCustomError(registry, 'CircularDependency');
   });
 });
