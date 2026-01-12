@@ -26,19 +26,17 @@ describe('AgreementRelationsRegistry.registerChildParentRelation', () => {
     await registry.connect(child).registerChildParentRelation(parent.address);
 
     // read fails beacuse there is no parent at index 0
-    await expect(registry.childParentRelations(child, 0)).to.be.reverted;
+    await expect(registry.parentsOf(child, 0)).to.be.reverted;
 
     // only child is recognized as an agreement, still no effect
     await agreementFactoryMock.addAgreement(child);
     await registry.connect(child).registerChildParentRelation(parent.address);
-    await expect(registry.childParentRelations(child, 0)).to.be.reverted;
+    await expect(registry.parentsOf(child, 0)).to.be.reverted;
 
     // child and parent are recognized as agreements, relation is added
     await agreementFactoryMock.addAgreement(parent);
     await registry.connect(child).registerChildParentRelation(parent.address);
-    expect(await registry.childParentRelations(child, 0)).to.equal(
-      parent.address,
-    );
+    expect(await registry.parentsOf(child, 0)).to.equal(parent.address);
   });
   it('can register chained relations if not circular', async () => {
     const [child, parent, parent2, grandParent, grandGrandParent] =

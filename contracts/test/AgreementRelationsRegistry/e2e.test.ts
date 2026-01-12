@@ -55,13 +55,13 @@ describe('AgreementRelationsRegistry: E2E', () => {
 
     // no relation has been registered, reads fail
     await expect(
-      initialSetup.agreementRelationsRegistry.childParentRelations(
+      initialSetup.agreementRelationsRegistry.parentsOf(
         await agreementERC20Contract.getAddress(),
         0,
       ),
     ).to.be.reverted;
     await expect(
-      initialSetup.agreementRelationsRegistry.childParentRelations(
+      initialSetup.agreementRelationsRegistry.parentsOf(
         await agreementERC1155Contract.getAddress(),
         0,
       ),

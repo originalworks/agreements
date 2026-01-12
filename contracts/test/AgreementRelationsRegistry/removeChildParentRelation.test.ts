@@ -28,24 +28,18 @@ describe('AgreementRelationsRegistry.removeChildParentRelation', () => {
 
     await registry.connect(child).registerChildParentRelation(parent.address);
 
-    expect(await registry.childParentRelations(child.address, 0)).to.equal(
-      parent.address,
-    );
+    expect(await registry.parentsOf(child.address, 0)).to.equal(parent.address);
 
     // parent is no longer agreement, can't remove relation
     await agreementFactoryMock.removeAgreement(parent.address);
     // silent fail, nothing happened
     await registry.connect(child).removeChildParentRelation(parent.address);
-    expect(await registry.childParentRelations(child.address, 0)).to.equal(
-      parent.address,
-    );
+    expect(await registry.parentsOf(child.address, 0)).to.equal(parent.address);
 
     // child is no longer agreement
     await agreementFactoryMock.removeAgreement(child.address);
     await registry.connect(child).removeChildParentRelation(parent.address);
-    expect(await registry.childParentRelations(child.address, 0)).to.equal(
-      parent.address,
-    );
+    expect(await registry.parentsOf(child.address, 0)).to.equal(parent.address);
 
     // child and parent are both agreement again
     await agreementFactoryMock.addAgreement(child.address);
@@ -53,8 +47,7 @@ describe('AgreementRelationsRegistry.removeChildParentRelation', () => {
     // relation is removed
     await registry.connect(child).removeChildParentRelation(parent.address);
     // read fails because there is no relation
-    await expect(registry.childParentRelations(child.address, 0)).to.be
-      .reverted;
+    await expect(registry.parentsOf(child.address, 0)).to.be.reverted;
   });
 
   it('Can remove relation', async () => {
