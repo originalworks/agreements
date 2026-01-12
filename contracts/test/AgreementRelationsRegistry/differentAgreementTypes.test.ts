@@ -5,8 +5,80 @@ import {
   deployInitialSetup,
 } from '../helpers/deployments';
 import { fakeSignerWithAddress } from '../helpers/utils';
+import { ethers } from 'hardhat';
 
-describe('AgreementRelationsRegistry: different agreement types', () => {
+describe('AgreementRelationsRegistry: E2E', () => {
+  it('non-agreement contracts can be holders but will not be included in the registry', async () => {
+    const initialSetup = await deployInitialSetup();
+
+    const [, , , , holder] = await ethers.getSigners();
+
+    const adminHolder = {
+      wallet: holder,
+      account: holder.address,
+      balance: 5000n,
+      isAdmin: true,
+    };
+
+    const NonAgreementContractHolder =
+      await ethers.getContractFactory('NonAgreementHolder');
+
+    const nonAgreementContractHolder =
+      await NonAgreementContractHolder.deploy();
+
+    const { agreement: agreementERC20Contract } = await deployAgreementERC20({
+      initialSetup,
+      holders: [
+        adminHolder,
+        {
+          wallet: holder,
+          account: await nonAgreementContractHolder.getAddress(),
+          balance: 5000n,
+          isAdmin: false,
+        },
+      ],
+    });
+
+    const { agreement: agreementERC1155Contract } =
+      await deployAgreementERC1155({
+        initialSetup,
+        holders: [
+          adminHolder,
+          {
+            wallet: holder,
+            account: await nonAgreementContractHolder.getAddress(),
+            balance: 5000n,
+            isAdmin: false,
+          },
+        ],
+      });
+
+    // no relation has been registered, reads fail
+    await expect(
+      initialSetup.agreementRelationsRegistry.childParentRelations(
+        await agreementERC20Contract.getAddress(),
+        0,
+      ),
+    ).to.be.reverted;
+    await expect(
+      initialSetup.agreementRelationsRegistry.childParentRelations(
+        await agreementERC1155Contract.getAddress(),
+        0,
+      ),
+    ).to.be.reverted;
+
+    expect(
+      await agreementERC1155Contract.balanceOf(
+        await nonAgreementContractHolder.getAddress(),
+        1,
+      ),
+    ).to.equal(5000n);
+    expect(
+      await agreementERC20Contract.balanceOf(
+        await nonAgreementContractHolder.getAddress(),
+      ),
+    ).to.equal(5000n);
+  });
   it('allow chained relations between different types of agreements', async () => {
     const initialSetup = await deployInitialSetup();
 

@@ -169,10 +169,12 @@ contract AgreementFactory is
     createdAgreements[address(agreement)] = true;
 
     for (uint i = 0; i < params.holders.length; i++) {
-      agreementRelationsRegistry.registerInitialRelation(
-        address(agreement),
-        params.holders[i].account
-      );
+      if (createdAgreements[params.holders[i].account]) {
+        agreementRelationsRegistry.registerInitialRelation(
+          address(agreement),
+          params.holders[i].account
+        );
+      }
     }
     emit AgreementCreated(address(agreement), TokenStandard.ERC20, rwaId);
   }
@@ -228,10 +230,12 @@ contract AgreementFactory is
     );
     createdAgreements[address(agreement)] = true;
     for (uint i = 0; i < params.holders.length; i++) {
-      agreementRelationsRegistry.registerInitialRelation(
-        address(agreement),
-        params.holders[i].account
-      );
+      if (createdAgreements[params.holders[i].account]) {
+        agreementRelationsRegistry.registerInitialRelation(
+          address(agreement),
+          params.holders[i].account
+        );
+      }
     }
     emit AgreementCreated(address(agreement), TokenStandard.ERC1155, rwaId);
   }
