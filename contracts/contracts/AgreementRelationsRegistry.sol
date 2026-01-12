@@ -15,7 +15,7 @@ contract AgreementRelationsRegistry is
 {
   error AccessDenied();
   event AgreementFactoryAddressChanged(address previous, address current);
-  mapping(address => address[]) private childParentRelations;
+  mapping(address => address[]) public childParentRelations;
 
   IAgreementFactory agreementFactory;
 
@@ -42,27 +42,27 @@ contract AgreementRelationsRegistry is
   }
 
   function registerChildParentRelation(address parent) external {
-    bool senderIsAgreement = agreementFactory.createdAgreements(msg.sender);
-
-    if (senderIsAgreement == false) {
-      revert AccessDenied();
+    if (
+      agreementFactory.createdAgreements(msg.sender) &&
+      agreementFactory.createdAgreements(parent)
+    ) {
+      _checkForCircularDependency(msg.sender, parent);
+      childParentRelations[msg.sender].push(parent);
     }
-    _checkForCircularDependency(msg.sender, parent);
-    childParentRelations[msg.sender].push(parent);
   }
 
   function removeChildParentRelation(address parent) external {
-    bool senderIsAgreement = agreementFactory.createdAgreements(msg.sender);
-
-    if (senderIsAgreement == false) {
-      revert AccessDenied();
-    }
-    for (uint256 i = 0; i < childParentRelations[msg.sender].length; i++) {
-      if (childParentRelations[msg.sender][i] == parent) {
-        childParentRelations[msg.sender][i] = childParentRelations[msg.sender][
-          childParentRelations[msg.sender].length - 1
-        ];
-        childParentRelations[msg.sender].pop();
+    if (
+      agreementFactory.createdAgreements(msg.sender) &&
+      agreementFactory.createdAgreements(parent)
+    ) {
+      for (uint256 i = 0; i < childParentRelations[msg.sender].length; i++) {
+        if (childParentRelations[msg.sender][i] == parent) {
+          childParentRelations[msg.sender][i] = childParentRelations[
+            msg.sender
+          ][childParentRelations[msg.sender].length - 1];
+          childParentRelations[msg.sender].pop();
+        }
       }
     }
   }

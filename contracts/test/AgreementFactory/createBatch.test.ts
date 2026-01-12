@@ -99,10 +99,10 @@ describe('AgreementFactory.createBatch', function () {
 
       expect(batchTxGasCost < separateTxsCumulativeGasCost).to.equal(true);
     });
-    it('Can create up to 48 agreements (with 3 holders) before reaching block size limit', async function () {
+    it('Can create up to 46 agreements (with 3 holders) before reaching block size limit', async function () {
       const { agreementFactory } = initialSetup;
 
-      let agreementsCount = 40n;
+      let agreementsCount = 46n;
       await expect(
         agreementFactory.createBatchERC20(
           buildCreateBatchERC20Input(agreementsCount),
@@ -112,7 +112,7 @@ describe('AgreementFactory.createBatch', function () {
         ),
       ).to.not.be.reverted;
 
-      agreementsCount = 41n;
+      agreementsCount = 47n;
 
       await expect(
         agreementFactory.createBatchERC20(
@@ -204,9 +204,9 @@ describe('AgreementFactory.createBatch', function () {
       expect(batchTxGasCost < separateTxsCumulativeGasCost).to.equal(true);
     });
 
-    it('Can create up to 39 agreements (with 3 holders) before reaching block size limit', async function () {
+    it('Can create up to 37 agreements (with 3 holders) before reaching block size limit', async function () {
       const { agreementFactory } = initialSetup;
-      let agreementsCount = 33n;
+      let agreementsCount = 37n;
 
       await expect(
         agreementFactory.createBatchERC1155(
@@ -217,7 +217,7 @@ describe('AgreementFactory.createBatch', function () {
         ),
       ).to.not.be.reverted;
 
-      agreementsCount = 34n;
+      agreementsCount = 38n;
 
       await expect(
         agreementFactory.createBatchERC1155(

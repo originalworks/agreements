@@ -2,33 +2,43 @@ import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { deployAgreementRelationsRegistry } from '../../scripts/actions/deployAgreementRelationsRegistry';
 import { AgreementFactoryMock, AgreementRelationsRegistry } from 'typechain';
-import { deployInitialSetup } from '../../test/helpers/deployments';
 
 describe('AgreementRelationsRegistry.registerChildParentRelation', () => {
   let registry: AgreementRelationsRegistry;
-  let agreementFactory: AgreementFactoryMock;
-  before(async () => {
+  let agreementFactoryMock: AgreementFactoryMock;
+
+  beforeEach(async () => {
     const AgreementFactory = await ethers.getContractFactory(
       'AgreementFactoryMock',
     );
-    agreementFactory = await AgreementFactory.deploy();
-  });
-  beforeEach(async () => {
+    agreementFactoryMock = await AgreementFactory.deploy();
     registry = await deployAgreementRelationsRegistry();
     await registry.setAgreementFactoryAddress(
-      await agreementFactory.getAddress(),
+      await agreementFactoryMock.getAddress(),
     );
   });
-  it('only agreements can register their relations', async () => {
-    const { agreementRelationsRegistry } = await deployInitialSetup();
+  it('only agreements can register their relations (silent fail)', async () => {
+    await agreementFactoryMock.setAlwaysTrue(false);
 
     const [child, parent] = await ethers.getSigners();
 
-    await expect(
-      agreementRelationsRegistry
-        .connect(child)
-        .registerChildParentRelation(parent.address),
-    ).to.be.revertedWithCustomError(agreementRelationsRegistry, 'AccessDenied');
+    // silent fail, nothing happens
+    await registry.connect(child).registerChildParentRelation(parent.address);
+
+    // read fails beacuse there is no parent at index 0
+    await expect(registry.childParentRelations(child, 0)).to.be.reverted;
+
+    // only child is recognized as an agreement, still no effect
+    await agreementFactoryMock.addAgreement(child);
+    await registry.connect(child).registerChildParentRelation(parent.address);
+    await expect(registry.childParentRelations(child, 0)).to.be.reverted;
+
+    // child and parent are recognized as agreements, relation is added
+    await agreementFactoryMock.addAgreement(parent);
+    await registry.connect(child).registerChildParentRelation(parent.address);
+    expect(await registry.childParentRelations(child, 0)).to.equal(
+      parent.address,
+    );
   });
   it('can register chained relations if not circular', async () => {
     const [child, parent, parent2, grandParent, grandGrandParent] =

@@ -2,46 +2,59 @@ import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { deployAgreementRelationsRegistry } from '../../scripts/actions/deployAgreementRelationsRegistry';
 import { AgreementFactoryMock, AgreementRelationsRegistry } from 'typechain';
-import { deployInitialSetup } from '../../test/helpers/deployments';
 
 describe('AgreementRelationsRegistry.removeChildParentRelation', () => {
   let registry: AgreementRelationsRegistry;
-  let agreementFactory: AgreementFactoryMock;
-  before(async () => {
+  let agreementFactoryMock: AgreementFactoryMock;
+
+  beforeEach(async () => {
     const AgreementFactory = await ethers.getContractFactory(
       'AgreementFactoryMock',
     );
-    agreementFactory = await AgreementFactory.deploy();
-  });
-  beforeEach(async () => {
+    agreementFactoryMock = await AgreementFactory.deploy();
     registry = await deployAgreementRelationsRegistry();
     await registry.setAgreementFactoryAddress(
-      await agreementFactory.getAddress(),
+      await agreementFactoryMock.getAddress(),
     );
   });
 
-  it('only agreements can remove their relations', async () => {
+  it('removes only relations between agreements (silent fail)', async () => {
     const [child, parent] = await ethers.getSigners();
-    const agreementFactoryMockAddress = await agreementFactory.getAddress();
 
-    const {
-      agreementRelationsRegistry,
-      agreementFactory: realAgreementFactory,
-    } = await deployInitialSetup();
+    await agreementFactoryMock.setAlwaysTrue(false);
 
-    await agreementRelationsRegistry.setAgreementFactoryAddress(
-      agreementFactoryMockAddress,
-    );
+    await agreementFactoryMock.addAgreement(child.address);
+    await agreementFactoryMock.addAgreement(parent.address);
+
     await registry.connect(child).registerChildParentRelation(parent.address);
-    await agreementRelationsRegistry.setAgreementFactoryAddress(
-      await realAgreementFactory.getAddress(),
+
+    expect(await registry.childParentRelations(child.address, 0)).to.equal(
+      parent.address,
     );
 
-    await expect(
-      agreementRelationsRegistry
-        .connect(child)
-        .removeChildParentRelation(parent.address),
-    ).to.be.revertedWithCustomError(agreementRelationsRegistry, 'AccessDenied');
+    // parent is no longer agreement, can't remove relation
+    await agreementFactoryMock.removeAgreement(parent.address);
+    // silent fail, nothing happened
+    await registry.connect(child).removeChildParentRelation(parent.address);
+    expect(await registry.childParentRelations(child.address, 0)).to.equal(
+      parent.address,
+    );
+
+    // child is no longer agreement
+    await agreementFactoryMock.removeAgreement(child.address);
+    await registry.connect(child).removeChildParentRelation(parent.address);
+    expect(await registry.childParentRelations(child.address, 0)).to.equal(
+      parent.address,
+    );
+
+    // child and parent are both agreement again
+    await agreementFactoryMock.addAgreement(child.address);
+    await agreementFactoryMock.addAgreement(parent.address);
+    // relation is removed
+    await registry.connect(child).removeChildParentRelation(parent.address);
+    // read fails because there is no relation
+    await expect(registry.childParentRelations(child.address, 0)).to.be
+      .reverted;
   });
 
   it('Can remove relation', async () => {
