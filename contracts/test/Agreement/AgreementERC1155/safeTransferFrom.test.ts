@@ -9,6 +9,28 @@ import {
 
 describe('AgreementERC1155.safeTransferFrom', () => {
   const TOKEN_ID = 1n;
+
+  it('can not transfer shares to itself', async () => {
+    const initialSetup = await deployInitialSetup();
+
+    const { agreement, holders } = await deployAgreementERC1155({
+      initialSetup,
+      shares: [500n],
+    });
+    const holder = holders[0];
+
+    await expect(
+      agreement
+        .connect(holder.wallet)
+        .safeTransferFrom(
+          holder.account,
+          await agreement.getAddress(),
+          1,
+          10,
+          '0x00',
+        ),
+    ).to.be.revertedWithCustomError(agreement, 'SelfTransfer');
+  });
   it('can transfer to a holder', async () => {
     const initialSetup = await deployInitialSetup();
 
