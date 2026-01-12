@@ -15,7 +15,7 @@ contract AgreementRelationsRegistry is
 {
   error AccessDenied();
   event AgreementFactoryAddressChanged(address previous, address current);
-  mapping(address => address[]) public childParentRelations;
+  mapping(address => address[]) public parentsOf;
 
   IAgreementFactory agreementFactory;
 
@@ -38,7 +38,7 @@ contract AgreementRelationsRegistry is
       revert AccessDenied();
     }
     _checkForCircularDependency(child, parent);
-    childParentRelations[child].push(parent);
+    parentsOf[child].push(parent);
   }
 
   function registerChildParentRelation(address parent) external {
@@ -47,7 +47,7 @@ contract AgreementRelationsRegistry is
       agreementFactory.createdAgreements(parent)
     ) {
       _checkForCircularDependency(msg.sender, parent);
-      childParentRelations[msg.sender].push(parent);
+      parentsOf[msg.sender].push(parent);
     }
   }
 
@@ -56,12 +56,12 @@ contract AgreementRelationsRegistry is
       agreementFactory.createdAgreements(msg.sender) &&
       agreementFactory.createdAgreements(parent)
     ) {
-      for (uint256 i = 0; i < childParentRelations[msg.sender].length; i++) {
-        if (childParentRelations[msg.sender][i] == parent) {
-          childParentRelations[msg.sender][i] = childParentRelations[
-            msg.sender
-          ][childParentRelations[msg.sender].length - 1];
-          childParentRelations[msg.sender].pop();
+      for (uint256 i = 0; i < parentsOf[msg.sender].length; i++) {
+        if (parentsOf[msg.sender][i] == parent) {
+          parentsOf[msg.sender][i] = parentsOf[msg.sender][
+            parentsOf[msg.sender].length - 1
+          ];
+          parentsOf[msg.sender].pop();
         }
       }
     }
@@ -71,7 +71,7 @@ contract AgreementRelationsRegistry is
     address child,
     address parent
   ) private view {
-    address[] memory grandParents = childParentRelations[parent];
+    address[] memory grandParents = parentsOf[parent];
     for (uint256 i = 0; i < grandParents.length; i++) {
       if (grandParents[i] == child) {
         revert('AgreementRelationsRegistry: Circular dependency not allowed');
