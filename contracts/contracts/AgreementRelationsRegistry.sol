@@ -122,10 +122,6 @@ contract AgreementRelationsRegistry is
       address[] storage parents = parentsOf[current];
 
       uint256 parentCount = parents.length;
-      // if (parentCount > maxParents) {
-      //   revert MaxParentsExceeded();
-      // }
-
       uint8 parentIdx = parentIndexStack[depth];
 
       if (parentIdx < parentCount) {
