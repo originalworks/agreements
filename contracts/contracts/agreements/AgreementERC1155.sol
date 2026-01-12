@@ -248,6 +248,9 @@ contract AgreementERC1155 is
     uint256[] memory ids,
     uint256[] memory amounts
   ) internal override {
+    if (to == address(this)) {
+      revert SelfTransfer();
+    }
     for (uint256 i = 0; i < amounts.length; i++) {
       if (balanceOf(to, 1) == 0 && to.code.length > 0 && from != address(0)) {
         agreementRelationsRegistry.registerChildParentRelation(to);

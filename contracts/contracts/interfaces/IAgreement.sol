@@ -6,6 +6,8 @@ import './IHolder.sol';
 import './IPaymentFeeSource.sol';
 
 interface IAgreement is IHolder, IPaymentFeeSource {
+  error SelfTransfer();
+
   function addAdmin(address user) external;
 
   function removeAdmin(address user) external;

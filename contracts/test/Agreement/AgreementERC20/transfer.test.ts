@@ -8,6 +8,21 @@ import {
 } from '../../helpers/deployments';
 
 describe('AgreementERC20.transfer', () => {
+  it('can not transfer shares to itself', async () => {
+    const initialSetup = await deployInitialSetup();
+
+    const { agreement, holders } = await deployAgreementERC20({
+      initialSetup,
+      shares: [500n],
+    });
+    const holder = holders[0];
+
+    await expect(
+      agreement
+        .connect(holder.wallet)
+        .transfer(await agreement.getAddress(), 10),
+    ).to.be.revertedWithCustomError(agreement, 'SelfTransfer');
+  });
   it('can transfer to a holder', async () => {
     const initialSetup = await deployInitialSetup();
 
