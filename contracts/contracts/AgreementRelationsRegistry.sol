@@ -87,6 +87,7 @@ contract AgreementRelationsRegistry is
             parentsOf[msg.sender].length - 1
           ];
           parentsOf[msg.sender].pop();
+          break;
         }
       }
     }
