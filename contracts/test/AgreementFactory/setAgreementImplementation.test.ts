@@ -115,7 +115,7 @@ describe('AgreementFactory.setAgreementImplementation', () => {
         ethers.ZeroAddress,
         BigInt(TokenStandard.ERC20),
       ),
-    ).to.be.revertedWith('AgreementFactory: agreement address cannot be 0');
+    ).to.be.revertedWithCustomError(agreementFactory, 'ZeroAddressNotAllowed');
   });
 
   it('cannot be set to a non-contract', async () => {
@@ -128,8 +128,6 @@ describe('AgreementFactory.setAgreementImplementation', () => {
         otherAccount.address,
         BigInt(TokenStandard.ERC20),
       ),
-    ).to.be.revertedWith(
-      'AgreementFactory: agreement implementation must be a contract',
-    );
+    ).to.be.revertedWithCustomError(agreementFactory, 'NoCodeAddress');
   });
 });

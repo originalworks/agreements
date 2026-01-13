@@ -27,6 +27,12 @@ contract AgreementFactory is
 {
   using ERC165Checker for address;
 
+  error InvalidInterface(bytes4 expectedInterfaceId, address contractAddress);
+  error ZeroAddressNotAllowed();
+  error NoCodeAddress();
+  error IncorrectCreationFee(uint256 expected, uint256 actual);
+  error AccessDenied();
+
   IFeeManager private feeManager;
   address private currencyManager;
   IAgreementRelationsRegistry private agreementRelationsRegistry;
@@ -36,6 +42,8 @@ contract AgreementFactory is
   address private namespaceRegistry;
 
   mapping(address => bool) public createdAgreements;
+
+  uint256[50] private __gap;
 
   event AgreementCreated(
     address agreementAddress,
@@ -66,32 +74,18 @@ contract AgreementFactory is
     address _fallbackVault,
     address _namespaceRegistry
   ) public initializer {
-    require(
-      _feeManager.supportsInterface(type(IFeeManager).interfaceId),
-      'AgreementFactory: Wrong interface at FeeManager address'
-    );
-    require(
-      _agreementRelationsRegistry.supportsInterface(
-        type(IAgreementRelationsRegistry).interfaceId
-      ),
-      'AgreementFactory: Wrong interface at AgreementRelationsRegistry address'
-    );
-    require(
-      _currencyManager.supportsInterface(type(ICurrencyManager).interfaceId),
-      'AgreementFactory: Wrong interface at CurrencyManager address'
-    );
-    require(
-      _fallbackVault.supportsInterface(type(IFallbackVault).interfaceId),
-      'AgreementFactory: Wrong interface at FallbackVault address'
-    );
-    require(
-      _namespaceRegistry.supportsInterface(
-        type(INamespaceRegistry).interfaceId
-      ),
-      'AgreementFactory: Wrong interface at NamespaceRegistry address'
-    );
-
     __Ownable_init(msg.sender);
+    __UUPSUpgradeable_init();
+
+    checkInterface(type(IFeeManager).interfaceId, _feeManager);
+    checkInterface(
+      type(IAgreementRelationsRegistry).interfaceId,
+      _agreementRelationsRegistry
+    );
+    checkInterface(type(ICurrencyManager).interfaceId, _currencyManager);
+    checkInterface(type(IFallbackVault).interfaceId, _fallbackVault);
+    checkInterface(type(INamespaceRegistry).interfaceId, _namespaceRegistry);
+
     setAgreementImplementation(
       _agreementERC20Implementation,
       TokenStandard.ERC20
@@ -107,6 +101,15 @@ contract AgreementFactory is
     currencyManager = _currencyManager;
     fallbackVault = _fallbackVault;
     namespaceRegistry = _namespaceRegistry;
+  }
+
+  function checkInterface(
+    bytes4 interfaceId,
+    address contractAddress
+  ) internal view {
+    if (contractAddress.supportsInterface(interfaceId) == false) {
+      revert InvalidInterface(interfaceId, contractAddress);
+    }
   }
 
   function setNamespaceRegistryAddress(address newAddress) public onlyOwner {
@@ -125,14 +128,13 @@ contract AgreementFactory is
     address newImplementation,
     TokenStandard tokenStandard
   ) public onlyOwner {
-    require(
-      newImplementation != address(0),
-      'AgreementFactory: agreement address cannot be 0'
-    );
-    require(
-      newImplementation.code.length > 0,
-      'AgreementFactory: agreement implementation must be a contract'
-    );
+    if (newImplementation == address(0)) {
+      revert ZeroAddressNotAllowed();
+    }
+    if (newImplementation.code.length == 0) {
+      revert NoCodeAddress();
+    }
+
     if (tokenStandard == TokenStandard.ERC20) {
       agreementERC20Implementation = newImplementation;
     } else {
@@ -183,7 +185,9 @@ contract AgreementFactory is
     IAgreementERC20.CreateERC20Params calldata params
   ) public payable {
     (uint256 creationFee, , ) = feeManager.getFees();
-    require(msg.value >= creationFee, 'AgreementFactory: Insufficient fee');
+    if (msg.value != creationFee) {
+      revert IncorrectCreationFee(creationFee, msg.value);
+    }
 
     _createERC20(params);
   }
@@ -192,10 +196,9 @@ contract AgreementFactory is
     IAgreementERC20.CreateERC20Params[] calldata input
   ) public payable {
     (uint256 creationFee, , ) = feeManager.getFees();
-    require(
-      msg.value >= creationFee * input.length,
-      'AgreementFactory: Insufficient fee'
-    );
+    if (msg.value != creationFee * input.length) {
+      revert IncorrectCreationFee(creationFee * input.length, msg.value);
+    }
 
     for (uint i = 0; i < input.length; i++) {
       _createERC20(input[i]);
@@ -244,7 +247,9 @@ contract AgreementFactory is
     IAgreementERC1155.CreateERC1155Params calldata params
   ) public payable {
     (uint256 creationFee, , ) = feeManager.getFees();
-    require(msg.value >= creationFee, 'AgreementFactory: Insufficient fee');
+    if (msg.value != creationFee) {
+      revert IncorrectCreationFee(creationFee, msg.value);
+    }
     _createERC1155(params);
   }
 
@@ -252,10 +257,9 @@ contract AgreementFactory is
     IAgreementERC1155.CreateERC1155Params[] calldata input
   ) public payable {
     (uint256 creationFee, , ) = feeManager.getFees();
-    require(
-      msg.value >= creationFee * input.length,
-      'AgreementFactory: Insufficient fee'
-    );
+    if (msg.value != creationFee * input.length) {
+      revert IncorrectCreationFee(creationFee * input.length, msg.value);
+    }
 
     for (uint i = 0; i < input.length; i++) {
       _createERC1155(input[i]);
@@ -273,10 +277,9 @@ contract AgreementFactory is
   }
 
   function collectFee() external {
-    require(
-      msg.sender == address(feeManager),
-      'AgreementFactory: Only FeeManager can collect fee'
-    );
+    if (msg.sender != address(feeManager)) {
+      revert AccessDenied();
+    }
     address payable feeManagerAddr = payable(address(feeManager));
     feeManagerAddr.transfer(address(this).balance);
     emit FeeCollected(address(this).balance, address(0));
