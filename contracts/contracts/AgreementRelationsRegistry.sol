@@ -13,16 +13,41 @@ contract AgreementRelationsRegistry is
   ERC165Upgradeable,
   UUPSUpgradeable
 {
+  error CircularDependency();
+  error MaxDepthExceeded();
+  error MaxParentsExceeded();
+  error DuplicateParent();
   error AccessDenied();
+
   event AgreementFactoryAddressChanged(address previous, address current);
+  event MaxDepthIncreased(uint8 currentDepth);
+  event MaxParentsIncreased(uint8 currentDepth);
+
   mapping(address => address[]) public parentsOf;
 
   IAgreementFactory agreementFactory;
+  uint8 public maxDepth;
+  uint8 public maxParents;
 
   function initialize() public initializer {
     __Ownable_init(msg.sender);
     __UUPSUpgradeable_init();
     __ERC165_init();
+
+    maxDepth = 3;
+    maxParents = 5;
+  }
+
+  // To ensure backward compatibility only increasing
+  // the value of 'maxDepth' and 'maxParents' should be allowed
+  function increaseMaxDepth() external onlyOwner {
+    maxDepth++;
+    emit MaxDepthIncreased(maxDepth);
+  }
+
+  function increaseMaxParents() external onlyOwner {
+    maxParents++;
+    emit MaxParentsIncreased(maxParents);
   }
 
   function setAgreementFactoryAddress(
@@ -70,13 +95,44 @@ contract AgreementRelationsRegistry is
   function _checkForCircularDependency(
     address child,
     address parent
-  ) private view {
-    address[] memory grandParents = parentsOf[parent];
-    for (uint256 i = 0; i < grandParents.length; i++) {
-      if (grandParents[i] == child) {
-        revert('AgreementRelationsRegistry: Circular dependency not allowed');
+  ) internal view {
+    if (parentsOf[child].length == maxParents) {
+      revert MaxParentsExceeded();
+    }
+    address[] memory nodeStack = new address[](maxDepth + 1);
+    uint8[] memory parentIndexStack = new uint8[](maxDepth + 1);
+
+    uint256 stackSize = 1;
+    nodeStack[0] = parent;
+    parentIndexStack[0] = 0;
+
+    while (stackSize > 0) {
+      uint256 depth = stackSize - 1;
+
+      if (depth >= maxDepth) {
+        revert MaxDepthExceeded();
+      }
+
+      address current = nodeStack[depth];
+
+      if (current == child) {
+        revert CircularDependency();
+      }
+
+      address[] storage parents = parentsOf[current];
+
+      uint256 parentCount = parents.length;
+      uint8 parentIdx = parentIndexStack[depth];
+
+      if (parentIdx < parentCount) {
+        address next = parents[parentIdx];
+        parentIndexStack[depth] = parentIdx + 1;
+
+        nodeStack[stackSize] = next;
+        parentIndexStack[stackSize] = 0;
+        stackSize++;
       } else {
-        _checkForCircularDependency(child, grandParents[i]);
+        stackSize--;
       }
     }
   }

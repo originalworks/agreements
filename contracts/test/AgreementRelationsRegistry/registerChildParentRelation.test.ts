@@ -68,9 +68,7 @@ describe('AgreementRelationsRegistry.registerChildParentRelation', () => {
 
     await expect(
       registry.connect(parent).registerChildParentRelation(child.address),
-    ).to.be.revertedWith(
-      'AgreementRelationsRegistry: Circular dependency not allowed',
-    );
+    ).to.be.revertedWithCustomError(registry, 'CircularDependency');
   });
 
   it('Reverts if try to register second level circular relation', async () => {
@@ -83,58 +81,88 @@ describe('AgreementRelationsRegistry.registerChildParentRelation', () => {
 
     await expect(
       registry.connect(grandParent).registerChildParentRelation(child.address),
-    ).to.be.revertedWith(
-      'AgreementRelationsRegistry: Circular dependency not allowed',
-    );
+    ).to.be.revertedWithCustomError(registry, 'CircularDependency');
   });
 
-  it('Reverts if try to register third level circular relation', async () => {
-    const [child, parent, grandParent, grandGrandParent] =
-      await ethers.getSigners();
+  describe('Max depth limit', () => {
+    it('Reverts for four level deep relation with MaxDepthExceeded', async () => {
+      const [
+        child,
+        parent,
+        grandParent,
+        grandGrandParent,
+        grandGrandGrandParent,
+      ] = await ethers.getSigners();
 
-    await registry.connect(child).registerChildParentRelation(parent.address);
-    await registry
-      .connect(parent)
-      .registerChildParentRelation(grandParent.address);
-    await registry
-      .connect(grandParent)
-      .registerChildParentRelation(grandGrandParent.address);
-
-    await expect(
-      registry
+      await registry
+        .connect(parent)
+        .registerChildParentRelation(grandParent.address);
+      await registry
+        .connect(grandParent)
+        .registerChildParentRelation(grandGrandParent.address);
+      await registry
         .connect(grandGrandParent)
-        .registerChildParentRelation(child.address),
-    ).to.be.revertedWith(
-      'AgreementRelationsRegistry: Circular dependency not allowed',
-    );
+        .registerChildParentRelation(grandGrandGrandParent.address);
+
+      await expect(
+        registry.connect(child).registerChildParentRelation(parent.address),
+      ).to.be.revertedWithCustomError(registry, 'MaxDepthExceeded');
+    });
   });
+  describe('Max parents limit', () => {
+    it('Limits number of parents per agreement', async () => {
+      const [child, parent1, parent2, parent3, parent4, parent5, parent6] =
+        await ethers.getSigners();
 
-  it('Reverts if try to register fourth level circular relation', async () => {
-    const [
-      child,
-      parent,
-      grandParent,
-      grandGrandParent,
-      grandGrandGrandParent,
-    ] = await ethers.getSigners();
+      await registry.connect(child).registerChildParentRelation(parent1);
+      await registry.connect(child).registerChildParentRelation(parent2);
+      await registry.connect(child).registerChildParentRelation(parent3);
+      await registry.connect(child).registerChildParentRelation(parent4);
+      await registry.connect(child).registerChildParentRelation(parent5);
 
-    await registry.connect(child).registerChildParentRelation(parent.address);
-    await registry
-      .connect(parent)
-      .registerChildParentRelation(grandParent.address);
-    await registry
-      .connect(grandParent)
-      .registerChildParentRelation(grandGrandParent.address);
-    await registry
-      .connect(grandGrandParent)
-      .registerChildParentRelation(grandGrandGrandParent.address);
+      await expect(
+        registry.connect(child).registerChildParentRelation(parent6),
+      ).to.be.revertedWithCustomError(registry, 'MaxParentsExceeded');
+    });
+    it("Limit doesn't apply to non-agreement holders", async () => {
+      const [
+        child,
+        parent1,
+        parent2,
+        parent3,
+        parent4,
+        parent5,
+        parent6,
+        parent7,
+        parent8,
+        parent9,
+      ] = await ethers.getSigners();
+      await agreementFactoryMock.setAlwaysTrue(false);
+      await agreementFactoryMock.addAgreement(child);
 
-    await expect(
-      registry
-        .connect(grandGrandGrandParent)
-        .registerChildParentRelation(child.address),
-    ).to.be.revertedWith(
-      'AgreementRelationsRegistry: Circular dependency not allowed',
-    );
+      const NonAgreementContractHolder =
+        await ethers.getContractFactory('NonAgreementHolder');
+
+      const nonAgreementContractHolder =
+        await NonAgreementContractHolder.deploy();
+
+      await registry.connect(child).registerChildParentRelation(parent1);
+      await registry.connect(child).registerChildParentRelation(parent2);
+      await registry.connect(child).registerChildParentRelation(parent3);
+      await registry.connect(child).registerChildParentRelation(parent4);
+      await registry.connect(child).registerChildParentRelation(parent5);
+      await registry.connect(child).registerChildParentRelation(parent6);
+      await registry.connect(child).registerChildParentRelation(parent7);
+      await registry.connect(child).registerChildParentRelation(parent8);
+      await registry.connect(child).registerChildParentRelation(parent9);
+      await registry
+        .connect(child)
+        .registerChildParentRelation(
+          await nonAgreementContractHolder.getAddress(),
+        );
+
+      // revert for empty array of parents
+      await expect(registry.parentsOf(child, 0)).to.be.reverted;
+    });
   });
 });

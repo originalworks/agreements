@@ -70,13 +70,15 @@ describe('(FUNCTIONAL) AgreementERC20: Circular dependency', () => {
     };
   }
   it("Doesn't allow circular dependency between agreements", async () => {
-    const { agreementParent, userHolder, agreementChild } = await setup();
+    const { agreementParent, userHolder, agreementChild, initialSetup } =
+      await setup();
     await expect(
       agreementParent
         .connect(userHolder.wallet)
         .transfer(await agreementChild.getAddress(), 100n),
-    ).to.be.revertedWith(
-      'AgreementRelationsRegistry: Circular dependency not allowed',
+    ).to.be.revertedWithCustomError(
+      initialSetup.agreementRelationsRegistry,
+      'CircularDependency',
     );
   });
   it('Checks for first level of relationship', async () => {
@@ -97,11 +99,12 @@ describe('(FUNCTIONAL) AgreementERC20: Circular dependency', () => {
       agreement2
         .connect(holder.wallet)
         .transfer(await agreement1.getAddress(), 100n),
-    ).to.be.revertedWith(
-      'AgreementRelationsRegistry: Circular dependency not allowed',
+    ).to.be.revertedWithCustomError(
+      initialSetup.agreementRelationsRegistry,
+      'CircularDependency',
     );
   });
-  it('Checks for third and fourth level of relationship', async () => {
+  it('Checks for third level of relationship', async () => {
     const { agreementGrandparent, userHolder, agreementChild, initialSetup } =
       await setup();
 
@@ -109,23 +112,9 @@ describe('(FUNCTIONAL) AgreementERC20: Circular dependency', () => {
       agreementGrandparent
         .connect(userHolder.wallet)
         .transfer(await agreementChild.getAddress(), 100n),
-    ).to.be.revertedWith(
-      'AgreementRelationsRegistry: Circular dependency not allowed',
-    );
-
-    const { agreement: agreementGrandGrandParent } = await deployAgreementERC20(
-      { initialSetup, holders: [userHolder] },
-    );
-    await agreementGrandparent
-      .connect(userHolder.wallet)
-      .transfer(await agreementGrandGrandParent.getAddress(), 100n);
-
-    await expect(
-      agreementGrandGrandParent
-        .connect(userHolder.wallet)
-        .transfer(await agreementChild.getAddress(), 100n),
-    ).to.be.revertedWith(
-      'AgreementRelationsRegistry: Circular dependency not allowed',
+    ).to.be.revertedWithCustomError(
+      initialSetup.agreementRelationsRegistry,
+      'CircularDependency',
     );
   });
   it('Check for transferOwned too', async () => {
@@ -134,6 +123,7 @@ describe('(FUNCTIONAL) AgreementERC20: Circular dependency', () => {
       agreementGrandparent,
       agreementParent,
       agreementChild,
+      initialSetup,
     } = await setup();
     await expect(
       agreementGrandparent
@@ -143,14 +133,20 @@ describe('(FUNCTIONAL) AgreementERC20: Circular dependency', () => {
           await agreementChild.getAddress(),
           100n,
         ),
-    ).to.be.revertedWith(
-      'AgreementRelationsRegistry: Circular dependency not allowed',
+    ).to.be.revertedWithCustomError(
+      initialSetup.agreementRelationsRegistry,
+      'CircularDependency',
     );
   });
 
   it('Allow for transfer if receiver is no longer related to sender', async () => {
-    const { userHolder, agreementParent, agreementChild, agreementParent2 } =
-      await setup();
+    const {
+      userHolder,
+      agreementParent,
+      agreementChild,
+      agreementParent2,
+      initialSetup,
+    } = await setup();
 
     await agreementParent
       .connect(userHolder.wallet)
@@ -171,8 +167,9 @@ describe('(FUNCTIONAL) AgreementERC20: Circular dependency', () => {
       agreementParent2
         .connect(userHolder.wallet)
         .transfer(await agreementChild.getAddress(), 100n),
-    ).to.be.revertedWith(
-      'AgreementRelationsRegistry: Circular dependency not allowed',
+    ).to.be.revertedWithCustomError(
+      initialSetup.agreementRelationsRegistry,
+      'CircularDependency',
     );
   });
 });
