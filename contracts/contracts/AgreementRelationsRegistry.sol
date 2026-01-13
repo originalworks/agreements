@@ -20,7 +20,7 @@ contract AgreementRelationsRegistry is
   error AccessDenied();
 
   event AgreementFactoryAddressChanged(address previous, address current);
-  event MaxDepthIncreased(uint8 currentDepth);
+  event MaxDepthIncreased(uint8 currentMaxDepth);
   event MaxParentsIncreased(uint8 currentMaxParents);
 
   mapping(address => address[]) public parentsOf;
