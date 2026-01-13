@@ -28,6 +28,7 @@ contract AgreementRelationsRegistry is
   IAgreementFactory agreementFactory;
   uint8 public maxDepth;
   uint8 public maxParents;
+
   uint256[50] private __gap;
 
   function initialize() public initializer {
