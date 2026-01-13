@@ -21,13 +21,14 @@ contract AgreementRelationsRegistry is
 
   event AgreementFactoryAddressChanged(address previous, address current);
   event MaxDepthIncreased(uint8 currentDepth);
-  event MaxParentsIncreased(uint8 currentDepth);
+  event MaxParentsIncreased(uint8 currentMaxParents);
 
   mapping(address => address[]) public parentsOf;
 
   IAgreementFactory agreementFactory;
   uint8 public maxDepth;
   uint8 public maxParents;
+  uint256[50] private __gap;
 
   function initialize() public initializer {
     __Ownable_init(msg.sender);
