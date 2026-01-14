@@ -8,6 +8,7 @@ import '@openzeppelin/contracts/utils/introspection/ERC165Checker.sol';
 import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 import '@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol';
 import '@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol';
+import '@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol';
 import '../interfaces/IFeeManager.sol';
 import '../interfaces/IAgreementRelationsRegistry.sol';
 import '../interfaces/IAgreementERC20.sol';
@@ -25,6 +26,7 @@ contract AgreementFactory is
   OwnableUpgradeable,
   ICreationFeeSource,
   ReentrancyGuardUpgradeable,
+  ERC165Upgradeable,
   UUPSUpgradeable
 {
   using ERC165Checker for address;
@@ -79,6 +81,7 @@ contract AgreementFactory is
     __Ownable_init(msg.sender);
     __UUPSUpgradeable_init();
     __ReentrancyGuard_init();
+    __ERC165_init();
 
     checkInterface(type(IFeeManager).interfaceId, _feeManager);
     checkInterface(
@@ -286,6 +289,14 @@ contract AgreementFactory is
     address payable feeManagerAddr = payable(address(feeManager));
     feeManagerAddr.transfer(address(this).balance);
     emit FeeCollected(address(this).balance, address(0));
+  }
+
+  function supportsInterface(
+    bytes4 interfaceId
+  ) public view virtual override(ERC165Upgradeable) returns (bool) {
+    return
+      interfaceId == type(IAgreementFactory).interfaceId ||
+      super.supportsInterface(interfaceId);
   }
 
   function _authorizeUpgrade(address) internal override onlyOwner {}
