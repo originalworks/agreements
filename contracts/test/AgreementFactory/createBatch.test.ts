@@ -59,7 +59,7 @@ describe('AgreementFactory.createBatch', function () {
         agreementFactory.createBatchERC20(transactionInput, {
           value: creationFee * (inputSize - 1n),
         }),
-      ).to.be.revertedWith('AgreementFactory: Insufficient fee');
+      ).to.be.revertedWithCustomError(agreementFactory, 'IncorrectCreationFee');
     });
     it('Is cheaper than separate transactions', async function () {
       let separateTxsCumulativeGasCost = 0n;
@@ -161,7 +161,7 @@ describe('AgreementFactory.createBatch', function () {
         agreementFactory.createBatchERC1155(transactionInput, {
           value: creationFee * (inputSize - 1n),
         }),
-      ).to.be.revertedWith('AgreementFactory: Insufficient fee');
+      ).to.be.revertedWithCustomError(agreementFactory, 'IncorrectCreationFee');
     });
     it('Is cheaper than separate transactions', async function () {
       let separateTxsCumulativeGasCost = 0n;
