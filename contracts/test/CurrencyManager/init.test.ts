@@ -26,6 +26,10 @@ describe('CurrencyManager initial parameters', () => {
 
     const currencyArray = await currencyManager.getCurrencyArray();
 
+    expect(await currencyManager.maxCurrencies()).to.equal(
+      initialCurrencyList.length,
+    );
+
     expect(await currencyManager.currencyMap(ethers.ZeroAddress)).to.equal(
       true,
     );

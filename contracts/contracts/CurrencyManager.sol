@@ -14,8 +14,10 @@ contract CurrencyManager is
 {
   error AlreadyListed();
   error NotListed();
+  error MaxCurrenciesExceeded();
 
   address constant NATIVE_CURRENCY = address(0);
+  uint8 public maxCurrencies;
 
   mapping(address => bool) public currencyMap;
   address[] private currencyArray;
@@ -36,6 +38,10 @@ contract CurrencyManager is
   }
 
   function initialize(address[] calldata initialList) public initializer {
+    if (initialList.length > 50) {
+      revert MaxCurrenciesExceeded();
+    }
+    maxCurrencies = uint8(initialList.length);
     __Ownable_init(msg.sender);
     __UUPSUpgradeable_init();
     __ERC165_init();
@@ -49,6 +55,13 @@ contract CurrencyManager is
     }
   }
 
+  function setMaxCurrencies(uint8 newValue) external onlyOwner {
+    if (currencyArray.length > newValue) {
+      revert MaxCurrenciesExceeded();
+    }
+    maxCurrencies = newValue;
+  }
+
   function _addNativeCurrency() internal {
     currencyMap[NATIVE_CURRENCY] = true;
     currencyArray.push(NATIVE_CURRENCY);
@@ -60,6 +73,9 @@ contract CurrencyManager is
   }
 
   function addCurrency(address currency) public onlyOwner {
+    if (currencyArray.length == maxCurrencies) {
+      revert MaxCurrenciesExceeded();
+    }
     if (currencyMap[currency] == true) {
       revert AlreadyListed();
     }
