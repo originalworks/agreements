@@ -7,6 +7,7 @@ import '@openzeppelin/contracts/utils/Address.sol';
 import '@openzeppelin/contracts/utils/introspection/ERC165Checker.sol';
 import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 import '@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol';
+import '@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol';
 import '../interfaces/IFeeManager.sol';
 import '../interfaces/IAgreementRelationsRegistry.sol';
 import '../interfaces/IAgreementERC20.sol';
@@ -23,6 +24,7 @@ contract AgreementFactory is
   Initializable,
   OwnableUpgradeable,
   ICreationFeeSource,
+  ReentrancyGuardUpgradeable,
   UUPSUpgradeable
 {
   using ERC165Checker for address;
@@ -76,6 +78,7 @@ contract AgreementFactory is
   ) public initializer {
     __Ownable_init(msg.sender);
     __UUPSUpgradeable_init();
+    __ReentrancyGuard_init();
 
     checkInterface(type(IFeeManager).interfaceId, _feeManager);
     checkInterface(
@@ -183,7 +186,7 @@ contract AgreementFactory is
 
   function createERC20(
     IAgreementERC20.CreateERC20Params calldata params
-  ) public payable {
+  ) public payable nonReentrant {
     (uint256 creationFee, , ) = feeManager.getFees();
     if (msg.value != creationFee) {
       revert IncorrectCreationFee(creationFee, msg.value);
@@ -194,7 +197,7 @@ contract AgreementFactory is
 
   function createBatchERC20(
     IAgreementERC20.CreateERC20Params[] calldata input
-  ) public payable {
+  ) public payable nonReentrant {
     (uint256 creationFee, , ) = feeManager.getFees();
     if (msg.value != creationFee * input.length) {
       revert IncorrectCreationFee(creationFee * input.length, msg.value);
@@ -245,7 +248,7 @@ contract AgreementFactory is
 
   function createERC1155(
     IAgreementERC1155.CreateERC1155Params calldata params
-  ) public payable {
+  ) public payable nonReentrant {
     (uint256 creationFee, , ) = feeManager.getFees();
     if (msg.value != creationFee) {
       revert IncorrectCreationFee(creationFee, msg.value);
@@ -255,7 +258,7 @@ contract AgreementFactory is
 
   function createBatchERC1155(
     IAgreementERC1155.CreateERC1155Params[] calldata input
-  ) public payable {
+  ) public payable nonReentrant {
     (uint256 creationFee, , ) = feeManager.getFees();
     if (msg.value != creationFee * input.length) {
       revert IncorrectCreationFee(creationFee * input.length, msg.value);
