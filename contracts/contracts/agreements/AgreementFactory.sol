@@ -18,7 +18,6 @@ import '../interfaces/IFallbackVault.sol';
 import '../interfaces/ICreationFeeSource.sol';
 import '../interfaces/INamespaceRegistry.sol';
 import '../interfaces/IAgreementFactory.sol';
-import '../interfaces/IAgreementRelationsRegistry.sol';
 
 contract AgreementFactory is
   IAgreementFactory,
@@ -36,6 +35,7 @@ contract AgreementFactory is
   error NoCodeAddress();
   error IncorrectCreationFee(uint256 expected, uint256 actual);
   error AccessDenied();
+  error FeeCollectionFailed();
 
   IFeeManager private feeManager;
   address private currencyManager;
@@ -287,8 +287,13 @@ contract AgreementFactory is
       revert AccessDenied();
     }
     address payable feeManagerAddr = payable(address(feeManager));
-    feeManagerAddr.transfer(address(this).balance);
-    emit FeeCollected(address(this).balance, address(0));
+    uint256 amount = address(this).balance;
+    (bool ok, ) = feeManagerAddr.call{value: amount}('');
+    if (ok == false) {
+      revert FeeCollectionFailed();
+    }
+
+    emit FeeCollected(amount, address(0));
   }
 
   function supportsInterface(
