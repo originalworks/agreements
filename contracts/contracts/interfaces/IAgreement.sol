@@ -7,6 +7,7 @@ import './IPaymentFeeSource.sol';
 
 interface IAgreement is IHolder, IPaymentFeeSource {
   error SelfTransfer();
+  error BurnNotAllowed();
 
   function addAdmin(address user) external;
 

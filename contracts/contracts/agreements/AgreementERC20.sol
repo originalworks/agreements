@@ -242,6 +242,9 @@ contract AgreementERC20 is
     if (to == address(this)) {
       revert SelfTransfer();
     }
+    if (to == address(0)) {
+      revert BurnNotAllowed();
+    }
     if (balanceOf(to) == 0 && to.code.length > 0 && from != address(0)) {
       agreementRelationsRegistry.registerChildParentRelation(to);
     }
