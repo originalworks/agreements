@@ -108,10 +108,9 @@ abstract contract Agreement is
   }
 
   function collectFee(address currency) external override {
-    require(
-      msg.sender == address(feeManager),
-      'AgreementERC1155: Only FeeManager can collect fee'
-    );
+    if (msg.sender != address(feeManager)) {
+      revert OnlyFeeManagerAllowed(address(feeManager), msg.sender);
+    }
     if (_hasUnregisteredIncome(currency)) {
       _registerIncome(currency);
     }
@@ -170,7 +169,7 @@ abstract contract Agreement is
 
   function _addAdmin(address user) internal {
     if (admins[user] == true) {
-      revert AlreadyAdmin();
+      revert AlreadyExist();
     }
     admins[user] = true;
     adminCount++;

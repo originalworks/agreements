@@ -4,10 +4,16 @@ pragma solidity ^0.8.13;
 interface IAgreement {
   error SelfTransfer();
   error BurnNotAllowed();
-  error AlreadyAdmin();
+  error AlreadyExist();
   error NotAdmin();
   error OnlyAdminAllowed();
   error LastAdminRemovalNotAllowed();
+  error OnlyFeeManagerAllowed(address expected, address actual);
+  error EmptyHoldersInput();
+  error FirstHolderMustBeAdmin();
+  error CurrencyNotSupported();
+  error ZeroAddressNotAllowed();
+  error ZeroBalanceHolder();
 
   event AdminAdded(address account);
   event AdminRemoved(address account);
