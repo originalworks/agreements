@@ -20,11 +20,12 @@ contract AgreementERC20 is
   function initialize(
     AgreementERC20InitParams calldata params
   ) public initializer {
-    require(params.holders.length > 0, 'AgreementERC20: No holders');
-    require(
-      params.holders[0].isAdmin,
-      'AgreementERC20: First holder must be admin'
-    );
+    if (params.holders.length == 0) {
+      revert EmptyHoldersInput();
+    }
+    if (params.holders[0].isAdmin == false) {
+      revert FirstHolderMustBeAdmin();
+    }
 
     __ERC20_init('OW Agreement', 'share');
     __ERC1155Holder_init();
@@ -50,10 +51,9 @@ contract AgreementERC20 is
     address holder,
     address currency
   ) public override nonReentrant {
-    require(
-      currencyManager.currencyMap(currency) == true,
-      'AgreementERC20: Currency not supported'
-    );
+    if (currencyManager.currencyMap(currency) == false) {
+      revert CurrencyNotSupported();
+    }
     uint256 currentFee;
     uint256 paymentFeeDenominator;
 
@@ -92,10 +92,9 @@ contract AgreementERC20 is
     address currency,
     address holder
   ) external view override returns (uint256 claimableAmount, uint256 fee) {
-    require(
-      currencyManager.currencyMap(currency) == true,
-      'AgreementERC20: Currency not supported'
-    );
+    if (currencyManager.currencyMap(currency) == false) {
+      revert CurrencyNotSupported();
+    }
     uint256 currentFee;
     uint256 paymentFeeDenominator;
 
@@ -136,15 +135,15 @@ contract AgreementERC20 is
   }
 
   function _addHolder(Holder calldata holder) private {
-    require(
-      holder.balance > 0 || holder.isAdmin,
-      'AgreementERC20: Holder balance is zero'
-    );
-    require(
-      holder.account != address(0),
-      'AgreementERC20: Holder account is zero'
-    );
-    require(balanceOf(holder.account) == 0, 'AgreementERC20: Duplicate holder');
+    if (holder.balance == 0 && holder.isAdmin == false) {
+      revert ZeroBalanceHolder();
+    }
+    if (holder.account == address(0)) {
+      revert ZeroAddressNotAllowed();
+    }
+    if (balanceOf(holder.account) != 0) {
+      revert AlreadyExist();
+    }
     _mint(holder.account, holder.balance);
     if (holder.isAdmin) {
       _addAdmin(holder.account);
