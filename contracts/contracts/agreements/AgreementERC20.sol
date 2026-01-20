@@ -66,7 +66,7 @@ contract AgreementERC20 is
     uint256 currentFee;
     uint256 paymentFeeDenominator;
 
-    (, currentFee, paymentFeeDenominator) = feeManager.getFees();
+    (, currentFee, , paymentFeeDenominator) = feeManager.getFees();
     uint256 _receivedFunds = withdrawnFunds[currency] +
       _getContractBalance(currency);
 

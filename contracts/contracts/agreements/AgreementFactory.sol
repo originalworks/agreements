@@ -190,7 +190,7 @@ contract AgreementFactory is
   function createERC20(
     IAgreementERC20.CreateERC20Params calldata params
   ) public payable nonReentrant {
-    (uint256 creationFee, , ) = feeManager.getFees();
+    uint256 creationFee = feeManager.creationFee();
     if (msg.value != creationFee) {
       revert IncorrectCreationFee(creationFee, msg.value);
     }
@@ -201,7 +201,7 @@ contract AgreementFactory is
   function createBatchERC20(
     IAgreementERC20.CreateERC20Params[] calldata input
   ) public payable nonReentrant {
-    (uint256 creationFee, , ) = feeManager.getFees();
+    uint256 creationFee = feeManager.creationFee();
     if (msg.value != creationFee * input.length) {
       revert IncorrectCreationFee(creationFee * input.length, msg.value);
     }
@@ -252,7 +252,7 @@ contract AgreementFactory is
   function createERC1155(
     IAgreementERC1155.CreateERC1155Params calldata params
   ) public payable nonReentrant {
-    (uint256 creationFee, , ) = feeManager.getFees();
+    uint256 creationFee = feeManager.creationFee();
     if (msg.value != creationFee) {
       revert IncorrectCreationFee(creationFee, msg.value);
     }
@@ -262,7 +262,7 @@ contract AgreementFactory is
   function createBatchERC1155(
     IAgreementERC1155.CreateERC1155Params[] calldata input
   ) public payable nonReentrant {
-    (uint256 creationFee, , ) = feeManager.getFees();
+    uint256 creationFee = feeManager.creationFee();
     if (msg.value != creationFee * input.length) {
       revert IncorrectCreationFee(creationFee * input.length, msg.value);
     }

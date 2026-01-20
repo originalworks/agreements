@@ -16,6 +16,7 @@ import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 
 export interface InitialSetupOptions {
   paymentFee?: bigint;
+  relayerFee?: bigint;
   creationFee?: bigint;
 }
 

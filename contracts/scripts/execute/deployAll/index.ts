@@ -14,6 +14,7 @@ import { parseEther } from 'ethers';
 // populate ./constant.ts file before using this script !!!
 
 const CREATION_FEE = parseEther('0');
+const RELAYER_FEE = parseEther('0');
 const PAYMENT_FEE = parseEther('0.01');
 
 const DEPLOY_NEW_CURRENCIES =
@@ -30,7 +31,11 @@ async function main() {
   const splitCurrencies = await prepareSplitCurrencies(DEPLOY_NEW_CURRENCIES);
 
   console.log('deploying FeeManager...');
-  const feeManager = await deployFeeManager(CREATION_FEE, PAYMENT_FEE);
+  const feeManager = await deployFeeManager(
+    CREATION_FEE,
+    RELAYER_FEE,
+    PAYMENT_FEE,
+  );
   console.log('feeManager:', await feeManager.getAddress());
 
   console.log('deploying AgreementERC20 implementation...');
