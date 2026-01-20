@@ -67,42 +67,9 @@ contract AgreementERC1155 is
     address holder,
     address currency
   ) public override nonReentrant {
-    if (currencyManager.currencyMap(currency) == false) {
-      revert CurrencyNotSupported();
-    }
-    uint256 currentFee;
-    uint256 paymentFeeDenominator;
+    uint256 holderShares = balanceOf(holder, 1);
 
-    if (_hasUnregisteredIncome(currency)) {
-      (currentFee, paymentFeeDenominator) = _registerIncome(currency);
-    } else {
-      (, currentFee, paymentFeeDenominator) = feeManager.getFees();
-    }
-    if (holderFundsCounters[currency][holder] != receivedFunds[currency]) {
-      uint256 amount;
-      (amount, ) = _calculateClaimableAmount(
-        receivedFunds[currency],
-        currency,
-        holder,
-        currentFee,
-        paymentFeeDenominator
-      );
-      if (amount > 0) {
-        holderFundsCounters[currency][holder] = receivedFunds[currency];
-        withdrawnFunds[currency] += amount;
-        if (currency == address(0)) {
-          (bool holderWasPaid, ) = holder.call{value: amount}('');
-
-          if (holderWasPaid == false) {
-            fallbackVault.registerIncomingFunds{value: amount}(holder);
-          }
-        } else {
-          IERC20(currency).safeTransfer(holder, amount);
-        }
-
-        emit HolderFundsClaimed(holder, amount, currency);
-      }
-    }
+    _claimHolderFunds(currency, holder, holderShares, totalSupply);
   }
 
   function getClaimableAmount(
@@ -118,6 +85,7 @@ contract AgreementERC1155 is
     (, currentFee, paymentFeeDenominator) = feeManager.getFees();
     uint256 _receivedFunds = withdrawnFunds[currency] +
       _getContractBalance(currency);
+    uint256 holderShares = balanceOf(holder, 1);
 
     return
       _calculateClaimableAmount(
@@ -125,7 +93,9 @@ contract AgreementERC1155 is
         currency,
         holder,
         currentFee,
-        paymentFeeDenominator
+        paymentFeeDenominator,
+        holderShares,
+        totalSupply
       );
   }
 
@@ -151,20 +121,6 @@ contract AgreementERC1155 is
     if (holder.isAdmin) {
       _addAdmin(holder.account);
     }
-  }
-
-  function _calculateClaimableAmount(
-    uint256 _receivedFunds,
-    address currency,
-    address holder,
-    uint256 currentFee,
-    uint256 paymentFeeDenominator
-  ) private view returns (uint256 claimableAmount, uint256 fee) {
-    uint256 amount = ((_receivedFunds - holderFundsCounters[currency][holder]) *
-      balanceOf(holder, 1)) / totalSupply;
-    fee = ((amount * currentFee) / paymentFeeDenominator);
-    claimableAmount = amount - ((amount * currentFee) / paymentFeeDenominator);
-    return (claimableAmount, fee);
   }
 
   function _update(
