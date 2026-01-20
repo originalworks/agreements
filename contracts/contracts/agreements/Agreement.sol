@@ -232,6 +232,67 @@ abstract contract Agreement is
     return (paymentFee, paymentFeeDenominator);
   }
 
+  function _claimHolderFunds(
+    address currency,
+    address holder,
+    uint256 holderShares,
+    uint256 totalSupply
+  ) internal {
+    if (currencyManager.currencyMap(currency) == false) {
+      revert CurrencyNotSupported();
+    }
+    uint256 currentFee;
+    uint256 paymentFeeDenominator;
+
+    if (_hasUnregisteredIncome(currency)) {
+      (currentFee, paymentFeeDenominator) = _registerIncome(currency);
+    } else {
+      (, currentFee, paymentFeeDenominator) = feeManager.getFees();
+    }
+    if (holderFundsCounters[currency][holder] != receivedFunds[currency]) {
+      uint256 amount;
+      (amount, ) = _calculateClaimableAmount(
+        receivedFunds[currency],
+        currency,
+        holder,
+        currentFee,
+        paymentFeeDenominator,
+        holderShares,
+        totalSupply
+      );
+      if (amount > 0) {
+        holderFundsCounters[currency][holder] = receivedFunds[currency];
+        withdrawnFunds[currency] += amount;
+        if (currency == address(0)) {
+          (bool holderWasPaid, ) = holder.call{value: amount}('');
+
+          if (holderWasPaid == false) {
+            fallbackVault.registerIncomingFunds{value: amount}(holder);
+          }
+        } else {
+          IERC20(currency).safeTransfer(holder, amount);
+        }
+        emit HolderFundsClaimed(holder, amount, currency);
+      }
+    }
+  }
+
+  function _calculateClaimableAmount(
+    uint256 _receivedFunds,
+    address currency,
+    address holder,
+    uint256 currentFee,
+    uint256 paymentFeeDenominator,
+    uint256 holderShares,
+    uint256 totalSupply
+  ) internal view returns (uint256 claimableAmount, uint256 fee) {
+    uint256 amount = ((_receivedFunds - holderFundsCounters[currency][holder]) *
+      holderShares) / totalSupply;
+    fee = ((amount * currentFee) / paymentFeeDenominator);
+    claimableAmount = amount - ((amount * currentFee) / paymentFeeDenominator);
+    return (claimableAmount, fee);
+  }
+
   function _authorizeUpgrade(address) internal override onlyAdmin {}
 
   receive() external payable {

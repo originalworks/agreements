@@ -51,41 +51,9 @@ contract AgreementERC20 is
     address holder,
     address currency
   ) public override nonReentrant {
-    if (currencyManager.currencyMap(currency) == false) {
-      revert CurrencyNotSupported();
-    }
-    uint256 currentFee;
-    uint256 paymentFeeDenominator;
+    uint256 holderShares = balanceOf(holder);
 
-    if (_hasUnregisteredIncome(currency)) {
-      (currentFee, paymentFeeDenominator) = _registerIncome(currency);
-    } else {
-      (, currentFee, paymentFeeDenominator) = feeManager.getFees();
-    }
-    if (holderFundsCounters[currency][holder] != receivedFunds[currency]) {
-      uint256 amount;
-      (amount, ) = _calculateClaimableAmount(
-        receivedFunds[currency],
-        currency,
-        holder,
-        currentFee,
-        paymentFeeDenominator
-      );
-      if (amount > 0) {
-        holderFundsCounters[currency][holder] = receivedFunds[currency];
-        withdrawnFunds[currency] += amount;
-        if (currency == address(0)) {
-          (bool holderWasPaid, ) = holder.call{value: amount}('');
-
-          if (holderWasPaid == false) {
-            fallbackVault.registerIncomingFunds{value: amount}(holder);
-          }
-        } else {
-          IERC20(currency).safeTransfer(holder, amount);
-        }
-        emit HolderFundsClaimed(holder, amount, currency);
-      }
-    }
+    _claimHolderFunds(currency, holder, holderShares, totalSupply());
   }
 
   function getClaimableAmount(
@@ -102,13 +70,17 @@ contract AgreementERC20 is
     uint256 _receivedFunds = withdrawnFunds[currency] +
       _getContractBalance(currency);
 
+    uint256 holderShares = balanceOf(holder);
+
     return
       _calculateClaimableAmount(
         _receivedFunds,
         currency,
         holder,
         currentFee,
-        paymentFeeDenominator
+        paymentFeeDenominator,
+        holderShares,
+        totalSupply()
       );
   }
 
@@ -118,20 +90,6 @@ contract AgreementERC20 is
     return
       interfaceId == type(IAgreementERC20).interfaceId ||
       super.supportsInterface(interfaceId);
-  }
-
-  function _calculateClaimableAmount(
-    uint256 _receivedFunds,
-    address currency,
-    address holder,
-    uint256 currentFee,
-    uint256 paymentFeeDenominator
-  ) private view returns (uint256 claimableAmount, uint256 fee) {
-    uint256 amount = ((_receivedFunds - holderFundsCounters[currency][holder]) *
-      balanceOf(holder)) / totalSupply();
-    fee = ((amount * currentFee) / paymentFeeDenominator);
-    claimableAmount = amount - ((amount * currentFee) / paymentFeeDenominator);
-    return (claimableAmount, fee);
   }
 
   function _addHolder(Holder calldata holder) private {
