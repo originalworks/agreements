@@ -4,8 +4,6 @@ pragma solidity ^0.8.13;
 import './IAgreement.sol';
 
 interface IAgreementERC20 is IAgreement {
-  function initialize(AgreementERC20InitParams calldata params) external;
-
   struct CreateERC20Params {
     Holder[] holders;
     string unassignedRwaId;
@@ -20,4 +18,6 @@ interface IAgreementERC20 is IAgreement {
     address namespaceRegistry;
     string rwaId;
   }
+
+  function initialize(AgreementERC20InitParams calldata params) external;
 }
