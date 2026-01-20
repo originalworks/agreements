@@ -192,20 +192,26 @@ contract AgreementERC1155 is
       }
       if (from != address(0)) {
         address[] memory currencyArray = currencyManager.getCurrencyArray();
-        for (uint ii = 0; ii < currencyArray.length; ii++) {
-          claimHolderFunds(from, currencyArray[ii]);
-          holderFundsCounters[currencyArray[ii]][from] = receivedFunds[
-            currencyArray[ii]
-          ];
+        uint256 len = currencyArray.length;
+        for (uint ii = 0; ii < len; ) {
+          address currency = currencyArray[ii];
+          claimHolderFunds(from, currency);
+          holderFundsCounters[currency][from] = receivedFunds[currency];
+          unchecked {
+            ++ii;
+          }
         }
       }
       if (to != address(0)) {
         address[] memory currencyArray = currencyManager.getCurrencyArray();
-        for (uint ii = 0; ii < currencyArray.length; ii++) {
-          claimHolderFunds(to, currencyArray[ii]);
-          holderFundsCounters[currencyArray[ii]][to] = receivedFunds[
-            currencyArray[ii]
-          ];
+        uint256 len = currencyArray.length;
+        for (uint ii = 0; ii < len; ) {
+          address currency = currencyArray[ii];
+          claimHolderFunds(to, currency);
+          holderFundsCounters[currency][to] = receivedFunds[currency];
+          unchecked {
+            ++ii;
+          }
         }
       }
 
