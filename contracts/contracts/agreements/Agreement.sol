@@ -29,8 +29,8 @@ abstract contract Agreement is
 
   mapping(address => uint256) public receivedFunds;
   mapping(address => uint256) public withdrawnFunds;
-  mapping(address => uint256) public fees;
-  mapping(address => uint256) public feesCollected;
+  mapping(address => uint256) private fees;
+  mapping(address => uint256) private feesCollected;
   mapping(address => mapping(address => uint256)) public holderFundsCounters;
   mapping(address => bool) private admins;
 
@@ -93,7 +93,7 @@ abstract contract Agreement is
   function getAvailableFee(
     address currency
   ) external view override returns (uint256) {
-    (, uint256 paymentFee, uint256 paymentFeeDenominator) = feeManager
+    (, uint256 paymentFee, , uint256 paymentFeeDenominator) = feeManager
       .getFees();
     uint256 availableFee = fees[currency] - feesCollected[currency];
 
@@ -214,7 +214,7 @@ abstract contract Agreement is
   }
 
   function _updateFee(address currency) private returns (uint256, uint256) {
-    (, uint paymentFee, uint256 paymentFeeDenominator) = feeManager.getFees();
+    (, uint paymentFee, , uint256 paymentFeeDenominator) = feeManager.getFees();
 
     uint256 newIncome;
     if (currency == address(0)) {
@@ -241,13 +241,13 @@ abstract contract Agreement is
     if (currencyManager.currencyMap(currency) == false) {
       revert CurrencyNotSupported();
     }
-    uint256 currentFee;
+    uint256 paymentFee;
     uint256 paymentFeeDenominator;
 
     if (_hasUnregisteredIncome(currency)) {
-      (currentFee, paymentFeeDenominator) = _registerIncome(currency);
+      (paymentFee, paymentFeeDenominator) = _registerIncome(currency);
     } else {
-      (, currentFee, paymentFeeDenominator) = feeManager.getFees();
+      (, paymentFee, , paymentFeeDenominator) = feeManager.getFees();
     }
     if (holderFundsCounters[currency][holder] != receivedFunds[currency]) {
       uint256 amount;
@@ -255,7 +255,7 @@ abstract contract Agreement is
         receivedFunds[currency],
         currency,
         holder,
-        currentFee,
+        paymentFee,
         paymentFeeDenominator,
         holderShares,
         totalSupply
@@ -281,15 +281,15 @@ abstract contract Agreement is
     uint256 _receivedFunds,
     address currency,
     address holder,
-    uint256 currentFee,
+    uint256 paymentFee,
     uint256 paymentFeeDenominator,
     uint256 holderShares,
     uint256 totalSupply
   ) internal view returns (uint256 claimableAmount, uint256 fee) {
     uint256 amount = ((_receivedFunds - holderFundsCounters[currency][holder]) *
       holderShares) / totalSupply;
-    fee = ((amount * currentFee) / paymentFeeDenominator);
-    claimableAmount = amount - ((amount * currentFee) / paymentFeeDenominator);
+    fee = ((amount * paymentFee) / paymentFeeDenominator);
+    claimableAmount = amount - fee;
     return (claimableAmount, fee);
   }
 

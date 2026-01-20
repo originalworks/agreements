@@ -31,6 +31,7 @@ export async function deployInitialSetup(
 
   const feeManager = await deployFeeManager(
     options?.creationFee ?? parseEther('0.01'),
+    options?.relayerFee ?? parseEther('0'),
     options?.paymentFee ?? parseEther('0.02'),
   );
 

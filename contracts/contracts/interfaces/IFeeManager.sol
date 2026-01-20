@@ -2,7 +2,17 @@
 pragma solidity ^0.8.13;
 
 interface IFeeManager {
-  function getFees() external view returns (uint256, uint256, uint256);
+  function creationFee() external view returns (uint256);
+
+  function getFees()
+    external
+    view
+    returns (
+      uint256 creationFee,
+      uint256 paymentFee,
+      uint relayerFee,
+      uint256 paymentFeeDenominator
+    );
 
   function owner() external view returns (address);
 }

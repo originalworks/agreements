@@ -79,10 +79,10 @@ contract AgreementERC1155 is
     if (currencyManager.currencyMap(currency) == false) {
       revert CurrencyNotSupported();
     }
-    uint256 currentFee;
+    uint256 paymentFee;
     uint256 paymentFeeDenominator;
 
-    (, currentFee, paymentFeeDenominator) = feeManager.getFees();
+    (, paymentFee, , paymentFeeDenominator) = feeManager.getFees();
     uint256 _receivedFunds = withdrawnFunds[currency] +
       _getContractBalance(currency);
     uint256 holderShares = balanceOf(holder, 1);
@@ -92,7 +92,7 @@ contract AgreementERC1155 is
         _receivedFunds,
         currency,
         holder,
-        currentFee,
+        paymentFee,
         paymentFeeDenominator,
         holderShares,
         totalSupply
