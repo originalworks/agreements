@@ -165,20 +165,26 @@ contract AgreementERC20 is
     }
     if (from != address(0)) {
       address[] memory currencyArray = currencyManager.getCurrencyArray();
-      for (uint i = 0; i < currencyArray.length; i++) {
-        claimHolderFunds(from, currencyArray[i]);
-        holderFundsCounters[currencyArray[i]][from] = receivedFunds[
-          currencyArray[i]
-        ];
+      uint256 len = currencyArray.length;
+      for (uint i = 0; i < len; ) {
+        address currency = currencyArray[i];
+        claimHolderFunds(from, currency);
+        holderFundsCounters[currency][from] = receivedFunds[currency];
+        unchecked {
+          ++i;
+        }
       }
     }
     if (to != address(0)) {
       address[] memory currencyArray = currencyManager.getCurrencyArray();
-      for (uint i = 0; i < currencyArray.length; i++) {
-        claimHolderFunds(to, currencyArray[i]);
-        holderFundsCounters[currencyArray[i]][to] = receivedFunds[
-          currencyArray[i]
-        ];
+      uint256 len = currencyArray.length;
+      for (uint i = 0; i < len; ) {
+        address currency = currencyArray[i];
+        claimHolderFunds(to, currency);
+        holderFundsCounters[currency][to] = receivedFunds[currency];
+        unchecked {
+          ++i;
+        }
       }
     }
     super._update(from, to, amount);
