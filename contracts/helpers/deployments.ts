@@ -1,4 +1,4 @@
-import hre from 'hardhat';
+import { ethers } from 'hardhat';
 import { AgreementERC20, AgreementERC1155 } from '../typechain';
 import { deployCurrencyManager } from '../scripts/actions/deployCurrencyManager';
 import { deployFallbackVault } from '../scripts/actions/deployFallbackVault';
@@ -18,8 +18,6 @@ import {
 } from './types';
 import { splitCurrencyDefinitions } from './splitCurrenciesDefinitions';
 import { parseEther } from 'ethers';
-
-const { ethers } = hre;
 
 export async function deployInitialSetup(
   options?: InitialSetupOptions,
