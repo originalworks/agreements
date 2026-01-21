@@ -63,10 +63,8 @@ contract AgreementERC20 is
     if (currencyManager.currencyMap(currency) == false) {
       revert CurrencyNotSupported();
     }
-    uint256 currentFee;
-    uint256 paymentFeeDenominator;
 
-    (, currentFee, , paymentFeeDenominator) = feeManager.getFees();
+    Fees memory fees = feeManager.getFees();
     uint256 _receivedFunds = withdrawnFunds[currency] +
       _getContractBalance(currency);
 
@@ -77,10 +75,9 @@ contract AgreementERC20 is
         _receivedFunds,
         currency,
         holder,
-        currentFee,
-        paymentFeeDenominator,
         holderShares,
-        totalSupply()
+        totalSupply(),
+        fees
       );
   }
 

@@ -25,7 +25,7 @@ contract FeeManager is
   uint256 public creationFee;
   uint256 public paymentFee;
   uint256 public relayerFee;
-  uint256 public constant PAYMENT_FEE_DENOMINATOR = 1e18;
+  uint256 public constant FEE_DENOMINATOR = 1e18;
 
   uint256[50] private __gap;
 
@@ -57,17 +57,14 @@ contract FeeManager is
 
   // GETTER
 
-  function getFees()
-    external
-    view
-    returns (
-      uint256 _creationFee,
-      uint256 _paymentFee,
-      uint256 _relayerFee,
-      uint256 _paymentFeeDenominator
-    )
-  {
-    return (creationFee, paymentFee, relayerFee, PAYMENT_FEE_DENOMINATOR);
+  function getFees() external view returns (Fees memory fees) {
+    return
+      Fees({
+        creationFee: creationFee,
+        paymentFee: paymentFee,
+        relayerFee: relayerFee,
+        feeDenominator: FEE_DENOMINATOR
+      });
   }
 
   function owner()
@@ -87,7 +84,7 @@ contract FeeManager is
   }
 
   function setPaymentFee(uint256 newFee) public onlyOwner {
-    if (newFee >= PAYMENT_FEE_DENOMINATOR) {
+    if (newFee >= FEE_DENOMINATOR) {
       revert FeeTooHigh();
     }
     paymentFee = newFee;
@@ -95,7 +92,7 @@ contract FeeManager is
   }
 
   function setRelayerFee(uint256 newFee) public onlyOwner {
-    if (newFee >= PAYMENT_FEE_DENOMINATOR) {
+    if (newFee >= FEE_DENOMINATOR) {
       revert FeeTooHigh();
     }
     relayerFee = newFee;
