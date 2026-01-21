@@ -13,8 +13,6 @@ interface IAgreementERC1155 is IAgreement {
     string unassignedRwaId;
   }
 
-  function initialize(AgreementERC1155InitParams calldata params) external;
-
   struct AgreementERC1155InitParams {
     string tokenUri;
     string contractUri;
@@ -26,4 +24,10 @@ interface IAgreementERC1155 is IAgreement {
     address namespaceRegistry;
     string rwaId;
   }
+
+  function initialize(AgreementERC1155InitParams calldata params) external;
+
+  function setContractUri(string calldata newContractUri) external;
+
+  function setUri(string calldata newUri) external;
 }

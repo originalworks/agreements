@@ -59,7 +59,7 @@ describe('AgreementFactory.createBatch', function () {
         agreementFactory.createBatchERC20(transactionInput, {
           value: creationFee * (inputSize - 1n),
         }),
-      ).to.be.revertedWith('AgreementFactory: Insufficient fee');
+      ).to.be.revertedWithCustomError(agreementFactory, 'IncorrectCreationFee');
     });
     it('Is cheaper than separate transactions', async function () {
       let separateTxsCumulativeGasCost = 0n;
@@ -99,10 +99,10 @@ describe('AgreementFactory.createBatch', function () {
 
       expect(batchTxGasCost < separateTxsCumulativeGasCost).to.equal(true);
     });
-    it('Can create up to 46 agreements (with 3 holders) before reaching block size limit', async function () {
+    it('Can create up to 43 agreements (with 3 holders) before reaching block size limit', async function () {
       const { agreementFactory } = initialSetup;
 
-      let agreementsCount = 46n;
+      let agreementsCount = 43n;
       await expect(
         agreementFactory.createBatchERC20(
           buildCreateBatchERC20Input(agreementsCount),
@@ -112,7 +112,7 @@ describe('AgreementFactory.createBatch', function () {
         ),
       ).to.not.be.reverted;
 
-      agreementsCount = 47n;
+      agreementsCount = 44n;
 
       await expect(
         agreementFactory.createBatchERC20(
@@ -161,7 +161,7 @@ describe('AgreementFactory.createBatch', function () {
         agreementFactory.createBatchERC1155(transactionInput, {
           value: creationFee * (inputSize - 1n),
         }),
-      ).to.be.revertedWith('AgreementFactory: Insufficient fee');
+      ).to.be.revertedWithCustomError(agreementFactory, 'IncorrectCreationFee');
     });
     it('Is cheaper than separate transactions', async function () {
       let separateTxsCumulativeGasCost = 0n;
@@ -204,9 +204,9 @@ describe('AgreementFactory.createBatch', function () {
       expect(batchTxGasCost < separateTxsCumulativeGasCost).to.equal(true);
     });
 
-    it('Can create up to 37 agreements (with 3 holders) before reaching block size limit', async function () {
+    it('Can create up to 36 agreements (with 3 holders) before reaching block size limit', async function () {
       const { agreementFactory } = initialSetup;
-      let agreementsCount = 37n;
+      let agreementsCount = 36n;
 
       await expect(
         agreementFactory.createBatchERC1155(
@@ -217,7 +217,7 @@ describe('AgreementFactory.createBatch', function () {
         ),
       ).to.not.be.reverted;
 
-      agreementsCount = 38n;
+      agreementsCount = 37n;
 
       await expect(
         agreementFactory.createBatchERC1155(

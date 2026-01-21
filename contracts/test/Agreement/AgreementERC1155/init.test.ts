@@ -6,11 +6,17 @@ import {
 } from '../../../helpers/deployments';
 import { getEvent } from '../../../helpers/utils';
 import { TokenStandard } from '../../../helpers/types';
+import { Interface } from 'ethers';
 
 describe('AgreementERC1155.initialize', () => {
   const CONTRACT_URI = 'contract_uri';
   const TOKEN_URI = `ipfs://${'ab'.repeat(32)}`;
   const TOKEN_ID = 1;
+  let agreementInterface: { interface: Interface };
+
+  before(async () => {
+    agreementInterface = await ethers.getContractFactory('AgreementERC1155');
+  });
   it('should initialize values properly', async () => {
     const [, holder1Account, holder2Account] = await ethers.getSigners();
     const holder1Balance = 600n;
@@ -139,7 +145,7 @@ describe('AgreementERC1155.initialize', () => {
           value: await feeManager.creationFee(),
         },
       ),
-    ).to.be.revertedWith('AgreementERC1155: No holders');
+    ).to.be.revertedWithCustomError(agreementInterface, 'EmptyHoldersInput');
   });
 
   it('fails if first holder is not an admin', async () => {
@@ -167,7 +173,10 @@ describe('AgreementERC1155.initialize', () => {
         },
         { value: await feeManager.creationFee() },
       ),
-    ).to.be.revertedWith('AgreementERC1155: First holder must be admin');
+    ).to.be.revertedWithCustomError(
+      agreementInterface,
+      'FirstHolderMustBeAdmin',
+    );
   });
 
   it('fails if holders balance is zero', async () => {
@@ -191,7 +200,7 @@ describe('AgreementERC1155.initialize', () => {
         },
         { value: await feeManager.creationFee() },
       ),
-    ).to.be.revertedWith('AgreementERC1155: Holder balance is zero');
+    ).to.be.revertedWithCustomError(agreementInterface, 'ZeroBalanceHolder');
   });
 
   it('fails if the a holder has a zero address', async () => {
@@ -219,7 +228,10 @@ describe('AgreementERC1155.initialize', () => {
         },
         { value: await feeManager.creationFee() },
       ),
-    ).to.be.revertedWith('AgreementERC1155: Holder account is zero');
+    ).to.be.revertedWithCustomError(
+      agreementInterface,
+      'ZeroAddressNotAllowed',
+    );
   });
 
   it('fails if any of the holders is duplicated', async () => {
@@ -247,6 +259,6 @@ describe('AgreementERC1155.initialize', () => {
         },
         { value: await feeManager.creationFee() },
       ),
-    ).to.be.revertedWith('AgreementERC1155: Duplicate holder');
+    ).to.be.revertedWithCustomError(agreementInterface, 'AlreadyExist');
   });
 });

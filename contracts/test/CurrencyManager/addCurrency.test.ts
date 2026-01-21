@@ -33,6 +33,10 @@ describe('CurrencyManager.addCurrency', () => {
       await currencyManager.currencyMap(await newCurrency.getAddress()),
     ).to.equal(false);
 
+    await currencyManager.setMaxCurrencies(
+      (await currencyManager.maxCurrencies()) + 1n,
+    );
+
     await currencyManager.addCurrency(await newCurrency.getAddress());
 
     const updatedCurrencyArray = await currencyManager.getCurrencyArray();
@@ -50,6 +54,9 @@ describe('CurrencyManager.addCurrency', () => {
 
   it("doesn't add new currency if it's already listed", async () => {
     const newCurrency = await deployERC20TokenMock('new token', 'NTKN', 10n);
+    await currencyManager.setMaxCurrencies(
+      (await currencyManager.maxCurrencies()) + 2n,
+    );
     await currencyManager.addCurrency(await newCurrency.getAddress());
 
     await expect(
@@ -63,6 +70,10 @@ describe('CurrencyManager.addCurrency', () => {
     const decimals = 10n;
     const newCurrency = await deployERC20TokenMock(name, symbol, decimals);
 
+    await currencyManager.setMaxCurrencies(
+      (await currencyManager.maxCurrencies()) + 1n,
+    );
+
     const tx = await currencyManager.addCurrency(
       await newCurrency.getAddress(),
     );
@@ -75,6 +86,10 @@ describe('CurrencyManager.addCurrency', () => {
   it('only owner can add currency', async () => {
     const [, , , , , , nonOwner] = await ethers.getSigners();
     const newCurrency = await deployERC20TokenMock('new token', 'NTKN', 10n);
+
+    await currencyManager.setMaxCurrencies(
+      (await currencyManager.maxCurrencies()) + 1n,
+    );
 
     await expect(
       currencyManager
@@ -103,6 +118,10 @@ describe('CurrencyManager.addCurrency', () => {
     const holderBBalanceBefore = await newCurrency.balanceOf(holderB.account);
 
     await newCurrency.mintTo(await agreement.getAddress(), amount);
+
+    await currencyManager.setMaxCurrencies(
+      (await currencyManager.maxCurrencies()) + 1n,
+    );
 
     await currencyManager.addCurrency(await newCurrency.getAddress());
 
@@ -137,6 +156,10 @@ describe('CurrencyManager.addCurrency', () => {
     const holderBBalanceBefore = await newCurrency.balanceOf(holderB.account);
 
     await newCurrency.mintTo(await agreement.getAddress(), amount);
+
+    await currencyManager.setMaxCurrencies(
+      (await currencyManager.maxCurrencies()) + 1n,
+    );
 
     await currencyManager.addCurrency(await newCurrency.getAddress());
 

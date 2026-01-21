@@ -7,6 +7,8 @@ import '@openzeppelin/contracts/utils/Address.sol';
 import '@openzeppelin/contracts/utils/introspection/ERC165Checker.sol';
 import '@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol';
 import '@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol';
+import '@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol';
+import '@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol';
 import '../interfaces/IFeeManager.sol';
 import '../interfaces/IAgreementRelationsRegistry.sol';
 import '../interfaces/IAgreementERC20.sol';
@@ -16,16 +18,24 @@ import '../interfaces/IFallbackVault.sol';
 import '../interfaces/ICreationFeeSource.sol';
 import '../interfaces/INamespaceRegistry.sol';
 import '../interfaces/IAgreementFactory.sol';
-import '../interfaces/IAgreementRelationsRegistry.sol';
 
 contract AgreementFactory is
   IAgreementFactory,
   Initializable,
   OwnableUpgradeable,
   ICreationFeeSource,
+  ReentrancyGuardUpgradeable,
+  ERC165Upgradeable,
   UUPSUpgradeable
 {
   using ERC165Checker for address;
+
+  error InvalidInterface(bytes4 expectedInterfaceId, address contractAddress);
+  error ZeroAddressNotAllowed();
+  error NoCodeAddress();
+  error IncorrectCreationFee(uint256 expected, uint256 actual);
+  error AccessDenied();
+  error FeeCollectionFailed();
 
   IFeeManager private feeManager;
   address private currencyManager;
@@ -36,6 +46,8 @@ contract AgreementFactory is
   address private namespaceRegistry;
 
   mapping(address => bool) public createdAgreements;
+
+  uint256[50] private __gap;
 
   event AgreementCreated(
     address agreementAddress,
@@ -66,32 +78,20 @@ contract AgreementFactory is
     address _fallbackVault,
     address _namespaceRegistry
   ) public initializer {
-    require(
-      _feeManager.supportsInterface(type(IFeeManager).interfaceId),
-      'AgreementFactory: Wrong interface at FeeManager address'
-    );
-    require(
-      _agreementRelationsRegistry.supportsInterface(
-        type(IAgreementRelationsRegistry).interfaceId
-      ),
-      'AgreementFactory: Wrong interface at AgreementRelationsRegistry address'
-    );
-    require(
-      _currencyManager.supportsInterface(type(ICurrencyManager).interfaceId),
-      'AgreementFactory: Wrong interface at CurrencyManager address'
-    );
-    require(
-      _fallbackVault.supportsInterface(type(IFallbackVault).interfaceId),
-      'AgreementFactory: Wrong interface at FallbackVault address'
-    );
-    require(
-      _namespaceRegistry.supportsInterface(
-        type(INamespaceRegistry).interfaceId
-      ),
-      'AgreementFactory: Wrong interface at NamespaceRegistry address'
-    );
-
     __Ownable_init(msg.sender);
+    __UUPSUpgradeable_init();
+    __ReentrancyGuard_init();
+    __ERC165_init();
+
+    checkInterface(type(IFeeManager).interfaceId, _feeManager);
+    checkInterface(
+      type(IAgreementRelationsRegistry).interfaceId,
+      _agreementRelationsRegistry
+    );
+    checkInterface(type(ICurrencyManager).interfaceId, _currencyManager);
+    checkInterface(type(IFallbackVault).interfaceId, _fallbackVault);
+    checkInterface(type(INamespaceRegistry).interfaceId, _namespaceRegistry);
+
     setAgreementImplementation(
       _agreementERC20Implementation,
       TokenStandard.ERC20
@@ -107,6 +107,15 @@ contract AgreementFactory is
     currencyManager = _currencyManager;
     fallbackVault = _fallbackVault;
     namespaceRegistry = _namespaceRegistry;
+  }
+
+  function checkInterface(
+    bytes4 interfaceId,
+    address contractAddress
+  ) internal view {
+    if (contractAddress.supportsInterface(interfaceId) == false) {
+      revert InvalidInterface(interfaceId, contractAddress);
+    }
   }
 
   function setNamespaceRegistryAddress(address newAddress) public onlyOwner {
@@ -125,14 +134,13 @@ contract AgreementFactory is
     address newImplementation,
     TokenStandard tokenStandard
   ) public onlyOwner {
-    require(
-      newImplementation != address(0),
-      'AgreementFactory: agreement address cannot be 0'
-    );
-    require(
-      newImplementation.code.length > 0,
-      'AgreementFactory: agreement implementation must be a contract'
-    );
+    if (newImplementation == address(0)) {
+      revert ZeroAddressNotAllowed();
+    }
+    if (newImplementation.code.length == 0) {
+      revert NoCodeAddress();
+    }
+
     if (tokenStandard == TokenStandard.ERC20) {
       agreementERC20Implementation = newImplementation;
     } else {
@@ -181,21 +189,22 @@ contract AgreementFactory is
 
   function createERC20(
     IAgreementERC20.CreateERC20Params calldata params
-  ) public payable {
-    (uint256 creationFee, , ) = feeManager.getFees();
-    require(msg.value >= creationFee, 'AgreementFactory: Insufficient fee');
+  ) public payable nonReentrant {
+    uint256 creationFee = feeManager.creationFee();
+    if (msg.value != creationFee) {
+      revert IncorrectCreationFee(creationFee, msg.value);
+    }
 
     _createERC20(params);
   }
 
   function createBatchERC20(
     IAgreementERC20.CreateERC20Params[] calldata input
-  ) public payable {
-    (uint256 creationFee, , ) = feeManager.getFees();
-    require(
-      msg.value >= creationFee * input.length,
-      'AgreementFactory: Insufficient fee'
-    );
+  ) public payable nonReentrant {
+    uint256 creationFee = feeManager.creationFee();
+    if (msg.value != creationFee * input.length) {
+      revert IncorrectCreationFee(creationFee * input.length, msg.value);
+    }
 
     for (uint i = 0; i < input.length; i++) {
       _createERC20(input[i]);
@@ -242,20 +251,21 @@ contract AgreementFactory is
 
   function createERC1155(
     IAgreementERC1155.CreateERC1155Params calldata params
-  ) public payable {
-    (uint256 creationFee, , ) = feeManager.getFees();
-    require(msg.value >= creationFee, 'AgreementFactory: Insufficient fee');
+  ) public payable nonReentrant {
+    uint256 creationFee = feeManager.creationFee();
+    if (msg.value != creationFee) {
+      revert IncorrectCreationFee(creationFee, msg.value);
+    }
     _createERC1155(params);
   }
 
   function createBatchERC1155(
     IAgreementERC1155.CreateERC1155Params[] calldata input
-  ) public payable {
-    (uint256 creationFee, , ) = feeManager.getFees();
-    require(
-      msg.value >= creationFee * input.length,
-      'AgreementFactory: Insufficient fee'
-    );
+  ) public payable nonReentrant {
+    uint256 creationFee = feeManager.creationFee();
+    if (msg.value != creationFee * input.length) {
+      revert IncorrectCreationFee(creationFee * input.length, msg.value);
+    }
 
     for (uint i = 0; i < input.length; i++) {
       _createERC1155(input[i]);
@@ -273,13 +283,25 @@ contract AgreementFactory is
   }
 
   function collectFee() external {
-    require(
-      msg.sender == address(feeManager),
-      'AgreementFactory: Only FeeManager can collect fee'
-    );
+    if (msg.sender != address(feeManager)) {
+      revert AccessDenied();
+    }
     address payable feeManagerAddr = payable(address(feeManager));
-    feeManagerAddr.transfer(address(this).balance);
-    emit FeeCollected(address(this).balance, address(0));
+    uint256 amount = address(this).balance;
+    (bool ok, ) = feeManagerAddr.call{value: amount}('');
+    if (ok == false) {
+      revert FeeCollectionFailed();
+    }
+
+    emit FeeCollected(amount, address(0));
+  }
+
+  function supportsInterface(
+    bytes4 interfaceId
+  ) public view virtual override(ERC165Upgradeable) returns (bool) {
+    return
+      interfaceId == type(IAgreementFactory).interfaceId ||
+      super.supportsInterface(interfaceId);
   }
 
   function _authorizeUpgrade(address) internal override onlyOwner {}

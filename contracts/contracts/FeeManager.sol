@@ -24,7 +24,8 @@ contract FeeManager is
 
   uint256 public creationFee;
   uint256 public paymentFee;
-  uint256 public constant PAYMENT_FEE_DENOMINATOR = 1e18;
+  uint256 public relayerFee;
+  uint256 public constant FEE_DENOMINATOR = 1e18;
 
   uint256[50] private __gap;
 
@@ -32,6 +33,7 @@ contract FeeManager is
 
   event CreationFeeChanged(uint256 creationFee);
   event PaymentFeeChanged(uint256 paymentFee);
+  event RelayerFeeChanged(uint256 relayerFee);
 
   // INIT
 
@@ -42,27 +44,27 @@ contract FeeManager is
 
   function initialize(
     uint256 initialCreationFee,
-    uint256 initialPaymentFee
+    uint256 initialPaymentFee,
+    uint256 initialRelayerFee
   ) public initializer {
     __Ownable_init(msg.sender);
     __ERC165_init();
     __UUPSUpgradeable_init();
     setPaymentFee(initialPaymentFee);
     setCreationFee(initialCreationFee);
+    setRelayerFee(initialRelayerFee);
   }
 
   // GETTER
 
-  function getFees()
-    external
-    view
-    returns (
-      uint256 _creationFee,
-      uint256 _paymentFee,
-      uint256 _paymentFeeDenominator
-    )
-  {
-    return (creationFee, paymentFee, PAYMENT_FEE_DENOMINATOR);
+  function getFees() external view returns (Fees memory fees) {
+    return
+      Fees({
+        creationFee: creationFee,
+        paymentFee: paymentFee,
+        relayerFee: relayerFee,
+        feeDenominator: FEE_DENOMINATOR
+      });
   }
 
   function owner()
@@ -82,11 +84,19 @@ contract FeeManager is
   }
 
   function setPaymentFee(uint256 newFee) public onlyOwner {
-    if (newFee >= PAYMENT_FEE_DENOMINATOR) {
+    if (newFee >= FEE_DENOMINATOR) {
       revert FeeTooHigh();
     }
     paymentFee = newFee;
     emit PaymentFeeChanged(newFee);
+  }
+
+  function setRelayerFee(uint256 newFee) public onlyOwner {
+    if (newFee >= FEE_DENOMINATOR) {
+      revert FeeTooHigh();
+    }
+    relayerFee = newFee;
+    emit RelayerFeeChanged(newFee);
   }
 
   // LOGIC

@@ -144,7 +144,10 @@ describe('AgreementFactory.initialize', () => {
         ],
         { kind: 'uups' },
       ),
-    ).to.be.revertedWith('AgreementFactory: agreement address cannot be 0');
+    ).to.be.revertedWithCustomError(
+      { interface: AgreementFactory.interface },
+      'ZeroAddressNotAllowed',
+    );
 
     await expect(
       upgrades.deployProxy(
@@ -160,7 +163,10 @@ describe('AgreementFactory.initialize', () => {
         ],
         { kind: 'uups' },
       ),
-    ).to.be.revertedWith('AgreementFactory: agreement address cannot be 0');
+    ).to.be.revertedWithCustomError(
+      { interface: AgreementFactory.interface },
+      'ZeroAddressNotAllowed',
+    );
 
     await expect(
       upgrades.deployProxy(
@@ -176,8 +182,9 @@ describe('AgreementFactory.initialize', () => {
         ],
         { kind: 'uups' },
       ),
-    ).to.be.revertedWith(
-      'AgreementFactory: Wrong interface at FeeManager address',
+    ).to.be.revertedWithCustomError(
+      { interface: AgreementFactory.interface },
+      'InvalidInterface',
     );
 
     await expect(
@@ -194,8 +201,9 @@ describe('AgreementFactory.initialize', () => {
         ],
         { kind: 'uups' },
       ),
-    ).to.be.revertedWith(
-      'AgreementFactory: Wrong interface at AgreementRelationsRegistry address',
+    ).to.be.revertedWithCustomError(
+      { interface: AgreementFactory.interface },
+      'InvalidInterface',
     );
 
     await expect(
@@ -212,8 +220,9 @@ describe('AgreementFactory.initialize', () => {
         ],
         { kind: 'uups' },
       ),
-    ).to.be.revertedWith(
-      'AgreementFactory: Wrong interface at CurrencyManager address',
+    ).to.be.revertedWithCustomError(
+      { interface: AgreementFactory.interface },
+      'InvalidInterface',
     );
 
     await expect(
@@ -230,8 +239,9 @@ describe('AgreementFactory.initialize', () => {
         ],
         { kind: 'uups' },
       ),
-    ).to.be.revertedWith(
-      'AgreementFactory: Wrong interface at FallbackVault address',
+    ).to.be.revertedWithCustomError(
+      { interface: AgreementFactory.interface },
+      'InvalidInterface',
     );
   });
   it('fails for non-contract', async () => {
@@ -252,8 +262,9 @@ describe('AgreementFactory.initialize', () => {
         ],
         { kind: 'uups' },
       ),
-    ).to.be.revertedWith(
-      'AgreementFactory: agreement implementation must be a contract',
+    ).to.be.revertedWithCustomError(
+      { interface: AgreementFactory.interface },
+      'NoCodeAddress',
     );
 
     await expect(
@@ -270,8 +281,9 @@ describe('AgreementFactory.initialize', () => {
         ],
         { kind: 'uups' },
       ),
-    ).to.be.revertedWith(
-      'AgreementFactory: agreement implementation must be a contract',
+    ).to.be.revertedWithCustomError(
+      { interface: AgreementFactory.interface },
+      'NoCodeAddress',
     );
 
     await expect(
@@ -288,8 +300,9 @@ describe('AgreementFactory.initialize', () => {
         ],
         { kind: 'uups' },
       ),
-    ).to.be.revertedWith(
-      'AgreementFactory: Wrong interface at FeeManager address',
+    ).to.be.revertedWithCustomError(
+      { interface: AgreementFactory.interface },
+      'InvalidInterface',
     );
 
     await expect(
@@ -306,8 +319,9 @@ describe('AgreementFactory.initialize', () => {
         ],
         { kind: 'uups' },
       ),
-    ).to.be.revertedWith(
-      'AgreementFactory: Wrong interface at AgreementRelationsRegistry address',
+    ).to.be.revertedWithCustomError(
+      { interface: AgreementFactory.interface },
+      'InvalidInterface',
     );
 
     await expect(
@@ -324,8 +338,9 @@ describe('AgreementFactory.initialize', () => {
         ],
         { kind: 'uups' },
       ),
-    ).to.be.revertedWith(
-      'AgreementFactory: Wrong interface at CurrencyManager address',
+    ).to.be.revertedWithCustomError(
+      { interface: AgreementFactory.interface },
+      'InvalidInterface',
     );
 
     await expect(
@@ -342,8 +357,9 @@ describe('AgreementFactory.initialize', () => {
         ],
         { kind: 'uups' },
       ),
-    ).to.be.revertedWith(
-      'AgreementFactory: Wrong interface at FallbackVault address',
+    ).to.be.revertedWithCustomError(
+      { interface: AgreementFactory.interface },
+      'InvalidInterface',
     );
   });
 });

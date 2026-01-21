@@ -15,6 +15,65 @@ describe('AgreementERC20.collectFee', () => {
   beforeEach(async () => {
     [owner] = await ethers.getSigners();
   });
+
+  it('Can collect the fee anytime', async () => {
+    const initialSetup = await deployInitialSetup();
+
+    await initialSetup.feeManager.setPaymentFee(parseEther('0.5'));
+
+    const usdc = initialSetup.splitCurrencies[0];
+    const { agreement, holders } = await deployAgreementERC20({
+      initialSetup,
+      shares: [50n, 50n],
+    });
+    // collect the fee after the claimHolderFunds
+    await usdc.contract?.mintTo(await agreement.getAddress(), 100);
+    await agreement.claimHolderFunds(holders[0].account, usdc.address);
+    await agreement.claimHolderFunds(holders[1].account, usdc.address);
+    await initialSetup.feeManager.collectPaymentFee(
+      await agreement.getAddress(),
+      usdc.address,
+    );
+
+    expect(await usdc.contract?.balanceOf(initialSetup.feeManager)).to.equal(
+      50,
+    );
+    expect(await usdc.contract?.balanceOf(holders[0].account)).to.equal(25);
+    expect(await usdc.contract?.balanceOf(holders[1].account)).to.equal(25);
+
+    // collect the fee before the claimHolderFunds
+    await usdc.contract?.mintTo(await agreement.getAddress(), 100);
+
+    await initialSetup.feeManager.collectPaymentFee(
+      await agreement.getAddress(),
+      usdc.address,
+    );
+    await agreement.claimHolderFunds(holders[0].account, usdc.address);
+    await agreement.claimHolderFunds(holders[1].account, usdc.address);
+
+    expect(await usdc.contract?.balanceOf(initialSetup.feeManager)).to.equal(
+      100,
+    );
+    expect(await usdc.contract?.balanceOf(holders[0].account)).to.equal(50);
+    expect(await usdc.contract?.balanceOf(holders[1].account)).to.equal(50);
+
+    // collect the fee in between the claimHolderFunds
+    await usdc.contract?.mintTo(await agreement.getAddress(), 100);
+
+    await agreement.claimHolderFunds(holders[0].account, usdc.address);
+    await initialSetup.feeManager.collectPaymentFee(
+      await agreement.getAddress(),
+      usdc.address,
+    );
+    await agreement.claimHolderFunds(holders[1].account, usdc.address);
+
+    expect(await usdc.contract?.balanceOf(initialSetup.feeManager)).to.equal(
+      150,
+    );
+    expect(await usdc.contract?.balanceOf(holders[0].account)).to.equal(75);
+    expect(await usdc.contract?.balanceOf(holders[1].account)).to.equal(75);
+  });
+
   it('setting the payment fee to more than 1 ether reverts transactions', async () => {
     const initialSetup = await deployInitialSetup();
     const { feeManager } = initialSetup;

@@ -6,8 +6,14 @@ import {
 } from '../../../helpers/deployments';
 import { getEvent } from '../../../helpers/utils';
 import { TokenStandard } from '../../../helpers/types';
+import { Interface } from 'ethers';
 
 describe('AgreementERC20.initialize', () => {
+  let agreementInterface: { interface: Interface };
+
+  before(async () => {
+    agreementInterface = await ethers.getContractFactory('AgreementERC20');
+  });
   it('should initialize values properly', async () => {
     const [, holder1Account, holder2Account] = await ethers.getSigners();
     const holder1Balance = 600n;
@@ -125,7 +131,7 @@ describe('AgreementERC20.initialize', () => {
           value: await feeManager.creationFee(),
         },
       ),
-    ).to.be.revertedWith('AgreementERC20: No holders');
+    ).to.be.revertedWithCustomError(agreementInterface, 'EmptyHoldersInput');
   });
 
   it('fails if first holder is not an admin', async () => {
@@ -151,7 +157,10 @@ describe('AgreementERC20.initialize', () => {
         },
         { value: await feeManager.creationFee() },
       ),
-    ).to.be.revertedWith('AgreementERC20: First holder must be admin');
+    ).to.be.revertedWithCustomError(
+      agreementInterface,
+      'FirstHolderMustBeAdmin',
+    );
   });
 
   it('fails if the a holder balance is zero', async () => {
@@ -173,7 +182,7 @@ describe('AgreementERC20.initialize', () => {
         },
         { value: await feeManager.creationFee() },
       ),
-    ).to.be.revertedWith('AgreementERC20: Holder balance is zero');
+    ).to.be.revertedWithCustomError(agreementInterface, 'ZeroBalanceHolder');
   });
 
   it('fails if holder is zero address', async () => {
@@ -199,7 +208,10 @@ describe('AgreementERC20.initialize', () => {
         },
         { value: await feeManager.creationFee() },
       ),
-    ).to.be.revertedWith('AgreementERC20: Holder account is zero');
+    ).to.be.revertedWithCustomError(
+      agreementInterface,
+      'ZeroAddressNotAllowed',
+    );
   });
 
   it('fails if holder is duplicated', async () => {
@@ -225,6 +237,6 @@ describe('AgreementERC20.initialize', () => {
         },
         { value: await feeManager.creationFee() },
       ),
-    ).to.be.revertedWith('AgreementERC20: Duplicate holder');
+    ).to.be.revertedWithCustomError(agreementInterface, 'AlreadyExist');
   });
 });

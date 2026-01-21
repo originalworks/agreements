@@ -115,7 +115,7 @@ describe('AgreementFactory.create', function () {
           value: (await feeManager.creationFee()) - 1n,
         },
       ),
-    ).to.be.revertedWith('AgreementFactory: Insufficient fee');
+    ).to.be.revertedWithCustomError(agreementFactory, 'IncorrectCreationFee');
 
     await expect(
       agreementFactory.createERC1155(
@@ -129,7 +129,7 @@ describe('AgreementFactory.create', function () {
           value: (await feeManager.creationFee()) - 1n,
         },
       ),
-    ).to.be.revertedWith('AgreementFactory: Insufficient fee');
+    ).to.be.revertedWithCustomError(agreementFactory, 'IncorrectCreationFee');
   });
 
   it('deploys with zero fee', async () => {

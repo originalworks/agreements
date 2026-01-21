@@ -19,9 +19,13 @@ describe('FeeManager.initialize', () => {
 
     const block = await ethers.provider.getBlockNumber();
     const FeeManager = await ethers.getContractFactory('FeeManager');
-    const feeManager = await upgrades.deployProxy(FeeManager, [1234n, 9000n], {
-      kind: 'uups',
-    });
+    const feeManager = await upgrades.deployProxy(
+      FeeManager,
+      [1234n, 9000n, 678n],
+      {
+        kind: 'uups',
+      },
+    );
 
     const ownershipTransferredEvent = await feeManager.queryFilter(
       feeManager.getEvent('OwnershipTransferred'),
@@ -38,6 +42,11 @@ describe('FeeManager.initialize', () => {
       block,
     );
 
+    const relayerFeeChangedEvent = await feeManager.queryFilter(
+      feeManager.getEvent('RelayerFeeChanged'),
+      block,
+    );
+
     expect(ownershipTransferredEvent[0].args.previousOwner).to.equal(
       ethers.ZeroAddress,
     );
@@ -48,15 +57,16 @@ describe('FeeManager.initialize', () => {
     expect(creationFeeChangedEvent[0].args.creationFee).to.equal(1234n);
 
     expect(paymentFeeChangedEvent[0].args.paymentFee).to.equal(9000n);
+    expect(relayerFeeChangedEvent[0].args.relayerFee).to.equal(678n);
   });
 
   it('cannot be called twice', async () => {
     const FeeManager = await ethers.getContractFactory('FeeManager');
-    const feeManager = await upgrades.deployProxy(FeeManager, [0n, 0n], {
+    const feeManager = await upgrades.deployProxy(FeeManager, [0n, 0n, 0n], {
       kind: 'uups',
     });
 
-    await expect(feeManager.initialize(1, 2)).to.be.revertedWithCustomError(
+    await expect(feeManager.initialize(1, 2, 3)).to.be.revertedWithCustomError(
       feeManager,
       'InvalidInitialization',
     );

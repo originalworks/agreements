@@ -27,7 +27,7 @@ describe('AgreementERC20.upgradeToAndCall', () => {
       agreement
         .connect(nonAdmin.wallet)
         .upgradeToAndCall(await newImplementation.getAddress(), '0x'),
-    ).to.be.revertedWith('AgreementERC20: Sender must be an admin');
+    ).to.be.revertedWithCustomError(newImplementation, 'OnlyAdminAllowed');
 
     await expect(
       agreement
