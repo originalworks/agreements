@@ -47,20 +47,22 @@ contract AgreementERC20 is
     }
   }
 
-  function claimHolderFunds(
+  function claimHolderFundsWithRelayerFee(
     address holder,
-    address currency,
-    bool collectRelayerFee
+    address currency
   ) public override nonReentrant {
     uint256 holderShares = balanceOf(holder);
 
-    _claimHolderFunds(
-      currency,
-      holder,
-      holderShares,
-      totalSupply(),
-      collectRelayerFee
-    );
+    _claimHolderFunds(currency, holder, holderShares, totalSupply(), true);
+  }
+
+  function claimHolderFunds(
+    address holder,
+    address currency
+  ) public override nonReentrant {
+    uint256 holderShares = balanceOf(holder);
+
+    _claimHolderFunds(currency, holder, holderShares, totalSupply(), false);
   }
 
   function getClaimableAmount(
@@ -144,7 +146,7 @@ contract AgreementERC20 is
       uint256 len = currencyArray.length;
       for (uint i = 0; i < len; ) {
         address currency = currencyArray[i];
-        claimHolderFunds(from, currency, false);
+        claimHolderFunds(from, currency);
         holderFundsCounters[currency][from] = receivedFunds[currency];
         unchecked {
           ++i;
@@ -156,7 +158,7 @@ contract AgreementERC20 is
       uint256 len = currencyArray.length;
       for (uint i = 0; i < len; ) {
         address currency = currencyArray[i];
-        claimHolderFunds(to, currency, false);
+        claimHolderFunds(to, currency);
         holderFundsCounters[currency][to] = receivedFunds[currency];
         unchecked {
           ++i;

@@ -61,10 +61,11 @@ interface IAgreement {
     uint256 amount
   ) external;
 
-  function claimHolderFunds(
+  function claimHolderFunds(address holder, address currency) external;
+
+  function claimHolderFundsWithRelayerFee(
     address holder,
-    address currency,
-    bool collectRelayerFee
+    address currency
   ) external;
 
   function getClaimableAmount(

@@ -38,10 +38,12 @@ describe('AgreementERC20.getClaimableAmount', () => {
     const claimableAmountHolder1 = await agreement.getClaimableAmount(
       await currencyContract.getAddress(),
       holder1.account,
+      false,
     );
     const claimableAmountHolder2 = await agreement.getClaimableAmount(
       await currencyContract.getAddress(),
       holder2.account,
+      false,
     );
 
     const availableFee = await agreement.getAvailableFee(currencyContract);
@@ -63,10 +65,10 @@ describe('AgreementERC20.getClaimableAmount', () => {
     );
 
     expect(tokenBalanceAfterHolder1 - tokenBalanceBeforeHolder1).to.equal(
-      claimableAmountHolder1,
+      claimableAmountHolder1.claimableAmount,
     );
     expect(tokenBalanceAfterHolder2 - tokenBalanceBeforeHolder2).to.equal(
-      claimableAmountHolder2,
+      claimableAmountHolder2.claimableAmount,
     );
 
     expect((incomingFunds * paymentFee) / parseEther('1')).to.equal(
