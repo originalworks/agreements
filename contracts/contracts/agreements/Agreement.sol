@@ -16,8 +16,10 @@ import '../interfaces/ICurrencyManager.sol';
 import '../interfaces/IFallbackVault.sol';
 import '../interfaces/INamespaceRegistry.sol';
 import '../interfaces/IPaymentFeeSource.sol';
+import '../interfaces/IFees.sol';
 
 abstract contract Agreement is
+  IFees,
   IAgreement,
   Initializable,
   IPaymentFeeSource,
@@ -27,12 +29,17 @@ abstract contract Agreement is
 {
   using SafeERC20 for IERC20;
 
+  mapping(address => bool) private admins;
+
   mapping(address => uint256) public receivedFunds;
   mapping(address => uint256) public withdrawnFunds;
-  mapping(address => uint256) private fees;
-  mapping(address => uint256) private feesCollected;
   mapping(address => mapping(address => uint256)) public holderFundsCounters;
-  mapping(address => bool) private admins;
+
+  mapping(address => uint256) private paymentFees;
+  mapping(address => uint256) private collectedPaymentFees;
+
+  mapping(address => uint256) private relayerFees;
+  mapping(address => uint256) private collectedRelayerFees;
 
   ICurrencyManager internal currencyManager;
   IFeeManager internal feeManager;
@@ -93,15 +100,16 @@ abstract contract Agreement is
   function getAvailableFee(
     address currency
   ) external view override returns (uint256) {
-    (, uint256 paymentFee, , uint256 paymentFeeDenominator) = feeManager
-      .getFees();
-    uint256 availableFee = fees[currency] - feesCollected[currency];
+    Fees memory fees = feeManager.getFees();
+    uint256 availableFee = paymentFees[currency] -
+      collectedPaymentFees[currency];
 
     if (_hasUnregisteredIncome(currency)) {
       uint256 currentBalance = _getContractBalance(currency);
       uint256 newTotal = withdrawnFunds[currency] + currentBalance;
       uint256 newReceived = newTotal - receivedFunds[currency];
-      return availableFee + (newReceived * paymentFee) / paymentFeeDenominator;
+      return
+        availableFee + (newReceived * fees.paymentFee) / fees.feeDenominator;
     } else {
       return availableFee;
     }
@@ -114,9 +122,10 @@ abstract contract Agreement is
     if (_hasUnregisteredIncome(currency)) {
       _registerIncome(currency);
     }
-    uint256 availableFee = fees[currency] - feesCollected[currency];
+    uint256 availableFee = paymentFees[currency] -
+      collectedPaymentFees[currency];
     withdrawnFunds[currency] += availableFee;
-    feesCollected[currency] += availableFee;
+    collectedPaymentFees[currency] += availableFee;
     if (currency == address(0)) {
       address feeCollector = payable(msg.sender);
       (bool callSucceeded, ) = feeCollector.call{value: availableFee}('');
@@ -200,8 +209,8 @@ abstract contract Agreement is
 
   function _registerIncome(
     address currency
-  ) internal returns (uint256 currentFee, uint256 paymentFeeDenominator) {
-    (currentFee, paymentFeeDenominator) = _updateFee(currency);
+  ) internal returns (Fees memory fees) {
+    fees = _updateFee(currency);
     uint256 newlyReceivedFunds;
     if (currency == address(0)) {
       newlyReceivedFunds = address(this).balance;
@@ -210,11 +219,11 @@ abstract contract Agreement is
     }
     receivedFunds[currency] = withdrawnFunds[currency] + newlyReceivedFunds;
     emit ERC20IncomeRegistered(currency, newlyReceivedFunds);
-    return (currentFee, paymentFeeDenominator);
+    return fees;
   }
 
-  function _updateFee(address currency) private returns (uint256, uint256) {
-    (, uint paymentFee, , uint256 paymentFeeDenominator) = feeManager.getFees();
+  function _updateFee(address currency) private returns (Fees memory fees) {
+    fees = feeManager.getFees();
 
     uint256 newIncome;
     if (currency == address(0)) {
@@ -226,10 +235,10 @@ abstract contract Agreement is
         (withdrawnFunds[currency] + IERC20(currency).balanceOf(address(this))) -
         receivedFunds[currency];
     }
-    uint256 newFee = (newIncome * paymentFee) / paymentFeeDenominator;
-    fees[currency] += newFee;
-    emit FeeAvailable(newFee, fees[currency], currency);
-    return (paymentFee, paymentFeeDenominator);
+    uint256 newFee = (newIncome * fees.paymentFee) / fees.feeDenominator;
+    paymentFees[currency] += newFee;
+    emit FeeAvailable(newFee, paymentFees[currency], currency);
+    return fees;
   }
 
   function _claimHolderFunds(
@@ -241,13 +250,13 @@ abstract contract Agreement is
     if (currencyManager.currencyMap(currency) == false) {
       revert CurrencyNotSupported();
     }
-    uint256 paymentFee;
-    uint256 paymentFeeDenominator;
+
+    Fees memory fees;
 
     if (_hasUnregisteredIncome(currency)) {
-      (paymentFee, paymentFeeDenominator) = _registerIncome(currency);
+      fees = _registerIncome(currency);
     } else {
-      (, paymentFee, , paymentFeeDenominator) = feeManager.getFees();
+      fees = feeManager.getFees();
     }
     if (holderFundsCounters[currency][holder] != receivedFunds[currency]) {
       uint256 amount;
@@ -255,10 +264,9 @@ abstract contract Agreement is
         receivedFunds[currency],
         currency,
         holder,
-        paymentFee,
-        paymentFeeDenominator,
         holderShares,
-        totalSupply
+        totalSupply,
+        fees
       );
       if (amount > 0) {
         holderFundsCounters[currency][holder] = receivedFunds[currency];
@@ -281,14 +289,13 @@ abstract contract Agreement is
     uint256 _receivedFunds,
     address currency,
     address holder,
-    uint256 paymentFee,
-    uint256 paymentFeeDenominator,
     uint256 holderShares,
-    uint256 totalSupply
+    uint256 totalSupply,
+    Fees memory fees
   ) internal view returns (uint256 claimableAmount, uint256 fee) {
     uint256 amount = ((_receivedFunds - holderFundsCounters[currency][holder]) *
       holderShares) / totalSupply;
-    fee = ((amount * paymentFee) / paymentFeeDenominator);
+    fee = ((amount * fees.paymentFee) / fees.feeDenominator);
     claimableAmount = amount - fee;
     return (claimableAmount, fee);
   }
