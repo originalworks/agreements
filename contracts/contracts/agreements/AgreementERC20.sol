@@ -50,7 +50,7 @@ contract AgreementERC20 is
   function claimHolderFunds(
     address holder,
     address currency,
-    bool payRelayer
+    bool collectRelayerFee
   ) public override nonReentrant {
     uint256 holderShares = balanceOf(holder);
 
@@ -59,14 +59,14 @@ contract AgreementERC20 is
       holder,
       holderShares,
       totalSupply(),
-      payRelayer
+      collectRelayerFee
     );
   }
 
   function getClaimableAmount(
     address currency,
     address holder,
-    bool payRelayer
+    bool collectRelayerFee
   )
     external
     view
@@ -91,7 +91,7 @@ contract AgreementERC20 is
       totalSupply(),
       fees
     );
-    if (payRelayer == true) {
+    if (collectRelayerFee == true) {
       relayerCut = (claimableAmount * fees.relayerFee) / fees.feeDenominator;
       if (relayerCut > fees.maxRelayerFee) {
         relayerCut = fees.maxRelayerFee;

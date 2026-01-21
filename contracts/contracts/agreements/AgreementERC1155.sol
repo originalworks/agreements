@@ -66,11 +66,17 @@ contract AgreementERC1155 is
   function claimHolderFunds(
     address holder,
     address currency,
-    bool payRelayer
+    bool collectRelayerFee
   ) public override nonReentrant {
     uint256 holderShares = balanceOf(holder, 1);
 
-    _claimHolderFunds(currency, holder, holderShares, totalSupply, payRelayer);
+    _claimHolderFunds(
+      currency,
+      holder,
+      holderShares,
+      totalSupply,
+      collectRelayerFee
+    );
   }
 
   function getClaimableAmount(

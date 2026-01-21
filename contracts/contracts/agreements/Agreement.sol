@@ -245,7 +245,7 @@ abstract contract Agreement is
     address holder,
     uint256 holderShares,
     uint256 totalSupply,
-    bool payRelayer
+    bool collectRelayerFee
   ) internal {
     if (currencyManager.currencyMap(currency) == false) {
       revert CurrencyNotSupported();
@@ -275,7 +275,7 @@ abstract contract Agreement is
         holderFundsCounters[currency][holder] = receivedFunds[currency];
         withdrawnFunds[currency] += amount;
         uint256 relayerCut = 0;
-        if (payRelayer == true) {
+        if (collectRelayerFee == true) {
           relayerCut = (amount * fees.relayerFee) / fees.feeDenominator;
           if (relayerCut > fees.maxRelayerFee) {
             relayerCut = fees.maxRelayerFee;

@@ -64,12 +64,12 @@ interface IAgreement {
   function claimHolderFunds(
     address holder,
     address currency,
-    bool payRelayer
+    bool collectRelayerFee
   ) external;
 
   function getClaimableAmount(
     address currency,
     address holder,
-    bool payRelayer
+    bool collectRelayerFee
   ) external view returns (uint256 claimableAmount, uint256 relayerCut);
 }
