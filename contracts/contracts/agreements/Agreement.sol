@@ -258,6 +258,9 @@ abstract contract Agreement is
     } else {
       fees = feeManager.getFees(currency);
     }
+    if (fees.maxRelayerFee == 0) {
+      revert ClaimWithRelayerNotSupported();
+    }
     if (holderFundsCounters[currency][holder] != receivedFunds[currency]) {
       uint256 amount = _calculateClaimableAmount(
         receivedFunds[currency],

@@ -14,6 +14,7 @@ interface IAgreement {
   error CurrencyNotSupported();
   error ZeroAddressNotAllowed();
   error ZeroBalanceHolder();
+  error ClaimWithRelayerNotSupported();
 
   event AdminAdded(address account);
   event AdminRemoved(address account);
