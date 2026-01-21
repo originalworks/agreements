@@ -289,8 +289,6 @@ abstract contract Agreement is
     uint256 _receivedFunds,
     address currency,
     address holder,
-    // uint256 paymentFee,
-    // uint256 paymentFeeDenominator,
     uint256 holderShares,
     uint256 totalSupply,
     Fees memory fees
