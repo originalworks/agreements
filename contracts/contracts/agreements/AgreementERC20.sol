@@ -67,8 +67,32 @@ contract AgreementERC20 is
 
   function getClaimableAmount(
     address currency,
-    address holder,
-    bool collectRelayerFee
+    address holder
+  ) external view override returns (uint256 claimableAmount) {
+    if (currencyManager.currencyMap(currency) == false) {
+      revert CurrencyNotSupported();
+    }
+
+    Fees memory fees = feeManager.getFees(currency);
+    uint256 _receivedFunds = withdrawnFunds[currency] +
+      _getContractBalance(currency);
+
+    uint256 holderShares = balanceOf(holder);
+
+    return
+      _calculateClaimableAmount(
+        _receivedFunds,
+        currency,
+        holder,
+        holderShares,
+        totalSupply(),
+        fees
+      );
+  }
+
+  function getClaimableAmountWithRelayerFee(
+    address currency,
+    address holder
   )
     external
     view
@@ -93,13 +117,12 @@ contract AgreementERC20 is
       totalSupply(),
       fees
     );
-    if (collectRelayerFee == true) {
-      relayerCut = (claimableAmount * fees.relayerFee) / fees.feeDenominator;
-      if (relayerCut > fees.maxRelayerFee) {
-        relayerCut = fees.maxRelayerFee;
-      }
-      claimableAmount = claimableAmount - relayerCut;
+
+    relayerCut = (claimableAmount * fees.relayerFee) / fees.feeDenominator;
+    if (relayerCut > fees.maxRelayerFee) {
+      relayerCut = fees.maxRelayerFee;
     }
+    claimableAmount = claimableAmount - relayerCut;
 
     return (claimableAmount, relayerCut);
   }

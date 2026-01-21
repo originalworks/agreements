@@ -6,11 +6,11 @@ import {
 import { parseEther } from 'ethers';
 
 describe('AgreementERC20.getClaimableAmount', () => {
-  it('Return amount available for claim and the applied fee', async () => {
+  it('Return amount available for claim', async () => {
     const incomingFunds = 100000n;
     const initialSetup = await deployInitialSetup();
-    const { splitCurrencies, feeManager } = initialSetup;
-    const paymentFee = await feeManager.paymentFee();
+    const { splitCurrencies } = initialSetup;
+
     const holder1Shares = 600n;
     const holder2Shares = 400n;
 
@@ -38,15 +38,11 @@ describe('AgreementERC20.getClaimableAmount', () => {
     const claimableAmountHolder1 = await agreement.getClaimableAmount(
       await currencyContract.getAddress(),
       holder1.account,
-      false,
     );
     const claimableAmountHolder2 = await agreement.getClaimableAmount(
       await currencyContract.getAddress(),
       holder2.account,
-      false,
     );
-
-    const availableFee = await agreement.getAvailableFee(currencyContract);
 
     await agreement.claimHolderFunds(
       holder1.account,
@@ -65,14 +61,10 @@ describe('AgreementERC20.getClaimableAmount', () => {
     );
 
     expect(tokenBalanceAfterHolder1 - tokenBalanceBeforeHolder1).to.equal(
-      claimableAmountHolder1.claimableAmount,
+      claimableAmountHolder1,
     );
     expect(tokenBalanceAfterHolder2 - tokenBalanceBeforeHolder2).to.equal(
-      claimableAmountHolder2.claimableAmount,
-    );
-
-    expect((incomingFunds * paymentFee) / parseEther('1')).to.equal(
-      availableFee,
+      claimableAmountHolder2,
     );
   });
 });
