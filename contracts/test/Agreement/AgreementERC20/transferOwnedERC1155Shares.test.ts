@@ -4,8 +4,8 @@ import {
   deployAgreementERC1155,
   deployAgreementERC20,
   deployInitialSetup,
-} from '../../helpers/deployments';
-import { fakeSignerWithAddress } from '../../helpers/utils';
+} from '../../../helpers/deployments';
+import { fakeSignerWithAddress } from '../../../helpers/utils';
 
 describe('AgreementERC20.transferOwnedERC1155Shares', () => {
   const TOKEN_ID = 1n;

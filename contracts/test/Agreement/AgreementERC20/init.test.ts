@@ -3,9 +3,9 @@ import { ethers } from 'hardhat';
 import {
   deployAgreementERC20,
   deployInitialSetup,
-} from '../../helpers/deployments';
-import { getEvent } from '../../helpers/utils';
-import { TokenStandard } from '../../helpers/types';
+} from '../../../helpers/deployments';
+import { getEvent } from '../../../helpers/utils';
+import { TokenStandard } from '../../../helpers/types';
 
 describe('AgreementERC20.initialize', () => {
   it('should initialize values properly', async () => {

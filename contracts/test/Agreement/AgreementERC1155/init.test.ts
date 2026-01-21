@@ -3,9 +3,9 @@ import { ethers } from 'hardhat';
 import {
   deployAgreementERC1155,
   deployInitialSetup,
-} from '../../helpers/deployments';
-import { getEvent } from '../../helpers/utils';
-import { TokenStandard } from '../../helpers/types';
+} from '../../../helpers/deployments';
+import { getEvent } from '../../../helpers/utils';
+import { TokenStandard } from '../../../helpers/types';
 
 describe('AgreementERC1155.initialize', () => {
   const CONTRACT_URI = 'contract_uri';

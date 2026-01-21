@@ -1,5 +1,5 @@
 import { Signer } from 'ethers';
-import { SplitCurrency } from '../../scripts/types';
+import { SplitCurrency } from '../scripts/types';
 import {
   AgreementERC1155,
   AgreementERC1155__factory,
@@ -11,7 +11,7 @@ import {
   FeeManager,
   NamespaceRegistry,
   CurrencyManager,
-} from '../../typechain';
+} from '../typechain';
 import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 
 export interface InitialSetupOptions {

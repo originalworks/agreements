@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import { Wallet } from 'ethers';
 import { ethers, upgrades } from 'hardhat';
-import { deployInitialSetup } from '../helpers/deployments';
-import { InitialSetup, TokenStandard } from '../helpers/types';
+import { deployInitialSetup } from '../../helpers/deployments';
+import { InitialSetup, TokenStandard } from '../../helpers/types';
 import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 
 describe('AgreementFactory.initialize', () => {

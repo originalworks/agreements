@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import {
   deployAgreementERC1155,
   deployInitialSetup,
-} from '../../helpers/deployments';
+} from '../../../helpers/deployments';
 import { parseEther } from 'ethers';
 
 describe('AgreementERC1155.getClaimableAmount', () => {
