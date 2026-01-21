@@ -6,6 +6,7 @@ interface IFees {
     uint256 creationFee;
     uint256 paymentFee;
     uint256 relayerFee;
+    uint256 maxRelayerFee;
     uint256 feeDenominator;
   }
 }

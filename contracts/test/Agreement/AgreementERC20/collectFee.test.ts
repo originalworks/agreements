@@ -297,7 +297,7 @@ describe('AgreementERC20.collectFee', () => {
 
               await expect(Promise.resolve(tx))
                 .to.emit(agreement, 'FeeAvailable')
-                .withArgs(expectedFee, expectedFee, _currencyAddress)
+                .withArgs(expectedFee, _currencyAddress)
                 .and.to.emit(agreement, 'FeeCollected')
                 .withArgs(expectedFee, _currencyAddress);
 
