@@ -47,7 +47,9 @@ interface IAgreement {
 
   function removeAdmin(address user) external;
 
-  function getAvailableFee(address currency) external view returns (uint256);
+  function getAvailablePaymentFee(
+    address currency
+  ) external view returns (uint256);
 
   function transferOwnedERC20Shares(
     address agreement,

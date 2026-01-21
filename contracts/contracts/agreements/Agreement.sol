@@ -94,7 +94,7 @@ abstract contract Agreement is
     emit AdminRemoved(user);
   }
 
-  function getAvailableFee(
+  function getAvailablePaymentFee(
     address currency
   ) external view override returns (uint256) {
     Fees memory fees = feeManager.getFees(currency);

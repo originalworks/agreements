@@ -260,9 +260,9 @@ describe('AgreementERC20.claimHolderFundsWithRelayerFee', () => {
         }
 
         expect(expectedRelayerReward).to.equal(balanceDifference);
-        expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
-          incomingFunds - incomingFundsAfterPaymentFee,
-        );
+        expect(
+          await agreement.getAvailablePaymentFee(_currencyAddress),
+        ).to.equal(incomingFunds - incomingFundsAfterPaymentFee);
       });
     });
   }
