@@ -25,7 +25,6 @@ describe('AgreementERC1155.getClaimableAmount', () => {
     });
     const holder1 = holders[0];
     const holder2 = holders[1];
-    const agreementTotalSupply = await agreement.totalSupply();
 
     const tokenBalanceBeforeHolder1 = await currencyContract.balanceOf(
       holder1.account,
@@ -45,6 +44,8 @@ describe('AgreementERC1155.getClaimableAmount', () => {
       holder2.account,
     );
 
+    const availableFee = await agreement.getAvailableFee(currencyContract);
+
     await agreement.claimHolderFunds(
       holder1.account,
       await currencyContract.getAddress(),
@@ -62,20 +63,14 @@ describe('AgreementERC1155.getClaimableAmount', () => {
     );
 
     expect(tokenBalanceAfterHolder1 - tokenBalanceBeforeHolder1).to.equal(
-      claimableAmountHolder1.claimableAmount,
+      claimableAmountHolder1,
     );
     expect(tokenBalanceAfterHolder2 - tokenBalanceBeforeHolder2).to.equal(
-      claimableAmountHolder2.claimableAmount,
+      claimableAmountHolder2,
     );
 
-    expect(
-      (((incomingFunds * holder1Shares) / agreementTotalSupply) * paymentFee) /
-        parseEther('1'),
-    ).to.equal(claimableAmountHolder1.fee);
-
-    expect(
-      (((incomingFunds * holder2Shares) / agreementTotalSupply) * paymentFee) /
-        parseEther('1'),
-    ).to.equal(claimableAmountHolder2.fee);
+    expect((incomingFunds * paymentFee) / parseEther('1')).to.equal(
+      availableFee,
+    );
   });
 });

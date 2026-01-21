@@ -18,7 +18,7 @@ interface IAgreement {
   event AdminAdded(address account);
   event AdminRemoved(address account);
   event DataHashChanged(string dataHash);
-  event FeeAvailable(uint256 newFee, uint256 totalFee, address currency);
+  event FeeAvailable(uint256 amount, address currency);
   event HolderFundsClaimed(address account, uint256 value, address currency);
   event NativeCoinReceived(address from, uint256 amount);
   event ERC20IncomeRegistered(address currency, uint256 amount);
@@ -60,10 +60,15 @@ interface IAgreement {
     uint256 amount
   ) external;
 
-  function claimHolderFunds(address holder, address currency) external;
+  function claimHolderFunds(
+    address holder,
+    address currency,
+    bool payRelayer
+  ) external;
 
   function getClaimableAmount(
     address currency,
-    address holder
-  ) external view returns (uint256 claimableAmount, uint256 fee);
+    address holder,
+    bool payRelayer
+  ) external view returns (uint256 claimableAmount, uint256 relayerCut);
 }

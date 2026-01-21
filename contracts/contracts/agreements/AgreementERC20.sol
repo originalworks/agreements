@@ -49,36 +49,57 @@ contract AgreementERC20 is
 
   function claimHolderFunds(
     address holder,
-    address currency
+    address currency,
+    bool payRelayer
   ) public override nonReentrant {
     uint256 holderShares = balanceOf(holder);
 
-    _claimHolderFunds(currency, holder, holderShares, totalSupply());
+    _claimHolderFunds(
+      currency,
+      holder,
+      holderShares,
+      totalSupply(),
+      payRelayer
+    );
   }
 
   function getClaimableAmount(
     address currency,
-    address holder
-  ) external view override returns (uint256 claimableAmount, uint256 fee) {
+    address holder,
+    bool payRelayer
+  )
+    external
+    view
+    override
+    returns (uint256 claimableAmount, uint256 relayerCut)
+  {
     if (currencyManager.currencyMap(currency) == false) {
       revert CurrencyNotSupported();
     }
 
-    Fees memory fees = feeManager.getFees();
+    Fees memory fees = feeManager.getFees(currency);
     uint256 _receivedFunds = withdrawnFunds[currency] +
       _getContractBalance(currency);
 
     uint256 holderShares = balanceOf(holder);
 
-    return
-      _calculateClaimableAmount(
-        _receivedFunds,
-        currency,
-        holder,
-        holderShares,
-        totalSupply(),
-        fees
-      );
+    claimableAmount = _calculateClaimableAmount(
+      _receivedFunds,
+      currency,
+      holder,
+      holderShares,
+      totalSupply(),
+      fees
+    );
+    if (payRelayer == true) {
+      relayerCut = (claimableAmount * fees.relayerFee) / fees.feeDenominator;
+      if (relayerCut > fees.maxRelayerFee) {
+        relayerCut = fees.maxRelayerFee;
+      }
+      claimableAmount = claimableAmount - relayerCut;
+    }
+
+    return (claimableAmount, relayerCut);
   }
 
   function supportsInterface(
@@ -123,7 +144,7 @@ contract AgreementERC20 is
       uint256 len = currencyArray.length;
       for (uint i = 0; i < len; ) {
         address currency = currencyArray[i];
-        claimHolderFunds(from, currency);
+        claimHolderFunds(from, currency, false);
         holderFundsCounters[currency][from] = receivedFunds[currency];
         unchecked {
           ++i;
@@ -135,7 +156,7 @@ contract AgreementERC20 is
       uint256 len = currencyArray.length;
       for (uint i = 0; i < len; ) {
         address currency = currencyArray[i];
-        claimHolderFunds(to, currency);
+        claimHolderFunds(to, currency, false);
         holderFundsCounters[currency][to] = receivedFunds[currency];
         unchecked {
           ++i;

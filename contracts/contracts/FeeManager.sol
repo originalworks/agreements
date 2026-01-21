@@ -22,10 +22,11 @@ contract FeeManager is
 
   // STORAGE
 
+  uint256 public constant FEE_DENOMINATOR = 1e18;
   uint256 public creationFee;
   uint256 public paymentFee;
   uint256 public relayerFee;
-  uint256 public constant FEE_DENOMINATOR = 1e18;
+  mapping(address => uint256) public maxRelayerFees;
 
   uint256[50] private __gap;
 
@@ -34,6 +35,7 @@ contract FeeManager is
   event CreationFeeChanged(uint256 creationFee);
   event PaymentFeeChanged(uint256 paymentFee);
   event RelayerFeeChanged(uint256 relayerFee);
+  event MaxRelayerFeeChanged(address currency, uint256 maxRelayerFee);
 
   // INIT
 
@@ -57,12 +59,13 @@ contract FeeManager is
 
   // GETTER
 
-  function getFees() external view returns (Fees memory fees) {
+  function getFees(address currency) external view returns (Fees memory fees) {
     return
       Fees({
         creationFee: creationFee,
         paymentFee: paymentFee,
         relayerFee: relayerFee,
+        maxRelayerFee: maxRelayerFees[currency],
         feeDenominator: FEE_DENOMINATOR
       });
   }
@@ -97,6 +100,11 @@ contract FeeManager is
     }
     relayerFee = newFee;
     emit RelayerFeeChanged(newFee);
+  }
+
+  function setMaxRelayerFee(address currency, uint256 newFee) public onlyOwner {
+    maxRelayerFees[currency] = newFee;
+    emit MaxRelayerFeeChanged(currency, newFee);
   }
 
   // LOGIC
