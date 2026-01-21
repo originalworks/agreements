@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { ethers, upgrades } from 'hardhat';
-import { deployInitialSetup } from '../helpers/deployments';
+import { deployInitialSetup } from '../../helpers/deployments';
 
 describe('FeeManager.initialize', () => {
   it('correctly initializes values', async () => {

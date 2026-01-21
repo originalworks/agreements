@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { parseEther, Wallet } from 'ethers';
 import { ethers } from 'hardhat';
-import { deployInitialSetup } from '../helpers/deployments';
+import { deployInitialSetup } from '../../helpers/deployments';
 
 describe('FeeManager getters and setters', () => {
   describe('get & set owner', () => {

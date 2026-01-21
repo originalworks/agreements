@@ -4,9 +4,9 @@ import { ethers } from 'hardhat';
 import {
   deployAgreementERC1155,
   deployInitialSetup,
-} from '../../helpers/deployments';
-import { splitCurrencyDefinitions } from '../../helpers/splitCurrenciesDefinitions';
-import { InitialSetup } from '../../helpers/types';
+} from '../../../helpers/deployments';
+import { splitCurrencyDefinitions } from '../../../helpers/splitCurrenciesDefinitions';
+import { InitialSetup } from '../../../helpers/types';
 import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 
 describe('AgreementERC1155.claimHolderFunds', () => {

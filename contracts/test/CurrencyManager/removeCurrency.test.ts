@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { deployERC20TokenMock } from '../../scripts/actions/deployERC20TokenMock';
 import { CurrencyManager } from '../../typechain';
-import { deployInitialSetup } from '../helpers/deployments';
+import { deployInitialSetup } from '../../helpers/deployments';
 
 describe('CurrencyManager.removeCurrency', () => {
   let currencyManager: CurrencyManager;

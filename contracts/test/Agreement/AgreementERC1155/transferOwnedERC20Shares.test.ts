@@ -4,8 +4,8 @@ import {
   deployAgreementERC1155,
   deployAgreementERC20,
   deployInitialSetup,
-} from '../../helpers/deployments';
-import { fakeSignerWithAddress } from '../../helpers/utils';
+} from '../../../helpers/deployments';
+import { fakeSignerWithAddress } from '../../../helpers/utils';
 
 describe('AgreementERC1155.transferOwnedERC20Shares', () => {
   async function setup() {

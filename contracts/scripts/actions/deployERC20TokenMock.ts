@@ -1,8 +1,20 @@
 import { ethers } from 'hardhat';
 import { ERC20TokenMock } from '../../typechain';
-import { getRunnerAddress } from '../../tests-deployment-scripts';
-import { parseUnits } from 'ethers';
-import { deployProxy } from '@royalty-loans/contracts-shared';
+import { BaseContract, ContractFactory, parseUnits } from 'ethers';
+import { deployProxy } from './deployProxy';
+
+const getRunnerAddress = async (factory: ContractFactory | BaseContract) => {
+  if (
+    factory.runner &&
+    'getAddress' in factory.runner &&
+    typeof factory.runner.getAddress === 'function'
+  ) {
+    const address = await factory.runner.getAddress();
+    return address;
+  }
+
+  throw new Error('Unable to get runner address');
+};
 
 export async function deployERC20TokenMock(
   name: string,

@@ -1,11 +1,11 @@
 import { ethers } from 'hardhat';
 import { ContractTransactionReceipt, id, Wallet } from 'ethers';
 import { expect } from 'chai';
-import { deployInitialSetup } from '../helpers/deployments';
+import { deployInitialSetup } from '../../helpers/deployments';
 import { AgreementFactory__factory } from '../../typechain';
 import { IAgreementERC20 } from '../../typechain/contracts/agreements/AgreementFactory';
 import { IAgreementERC1155 } from '../../typechain/contracts/agreements/AgreementFactory';
-import { InitialSetup } from '../helpers/types';
+import { InitialSetup } from '../../helpers/types';
 
 const namespace = 'REVELATOR';
 

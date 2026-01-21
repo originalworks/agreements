@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import {
   deployAgreementERC1155,
   deployInitialSetup,
-} from '../../helpers/deployments';
+} from '../../../helpers/deployments';
 
 describe('AgreementERC1155.setUri', () => {
   it('fails if sender is not an admin', async () => {

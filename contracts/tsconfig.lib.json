@@ -7,14 +7,14 @@
     "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
     "forceConsistentCasingInFileNames": true,
     "types": [
-      "node"
-    ]
+      "node",
+    ],
   },
   "include": [
     "**/*.ts",
     "test",
     "scripts",
-    "./tests-deployment-scripts"
+    "helpers",
   ],
   "references": []
 }

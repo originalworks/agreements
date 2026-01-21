@@ -1,10 +1,10 @@
-import { SplitCurrencyDefinition } from '../../scripts/types';
+import { SplitCurrencyDefinition } from '../scripts/types';
 
 export const splitCurrencyDefinitions: SplitCurrencyDefinition[] = [
   {
     name: 'TOKEN_A',
-    symbol: 'BUSD',
-    decimals: 15n,
+    symbol: 'USDC',
+    decimals: 6n,
     nativeCoin: false,
   },
   {

@@ -3,8 +3,8 @@ import { ethers } from 'hardhat';
 import {
   deployAgreementERC20,
   deployInitialSetup,
-} from '../../helpers/deployments';
-import { fakeSignerWithAddress } from '../../helpers/utils';
+} from '../../../helpers/deployments';
+import { fakeSignerWithAddress } from '../../../helpers/utils';
 
 describe('(FUNCTIONAL) AgreementERC20: Circular dependency', () => {
   async function setup() {

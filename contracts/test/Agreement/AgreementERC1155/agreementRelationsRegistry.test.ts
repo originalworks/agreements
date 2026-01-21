@@ -3,8 +3,8 @@ import { ethers } from 'hardhat';
 import {
   deployAgreementERC1155,
   deployInitialSetup,
-} from '../../helpers/deployments';
-import { fakeSignerWithAddress } from '../../helpers/utils';
+} from '../../../helpers/deployments';
+import { fakeSignerWithAddress } from '../../../helpers/utils';
 
 describe('(FUNCTIONAL) AgreementERC1155: Circular dependency', () => {
   const TOKEN_ID = 1n;

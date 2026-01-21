@@ -1,14 +1,14 @@
 import { ethers } from 'hardhat';
-import { AgreementERC20, AgreementERC1155 } from '../../typechain';
-import { deployCurrencyManager } from '../../scripts/actions/deployCurrencyManager';
-import { deployFallbackVault } from '../../scripts/actions/deployFallbackVault';
-import { deployAgreementRelationsRegistry } from '../../scripts/actions/deployAgreementRelationsRegistry';
-import { deployAgreementFactory } from '../../scripts/actions/deployAgreementFactory';
-import { deployAgreementERC1155Implementation } from '../../scripts/actions/deployAgreementERC1155Implementation';
-import { deployAgreementERC20Implementation } from '../../scripts/actions/deployAgreementERC20Implementation';
-import { deploySplitCurrencies } from '../../scripts/actions/deploySplitCurrencies';
-import { deployFeeManager } from '../../scripts/actions/deployFeeManager';
-import { deployNamespaceRegistry } from '../../scripts/actions/deployNamespaceRegistry';
+import { AgreementERC20, AgreementERC1155 } from '../typechain';
+import { deployCurrencyManager } from '../scripts/actions/deployCurrencyManager';
+import { deployFallbackVault } from '../scripts/actions/deployFallbackVault';
+import { deployAgreementRelationsRegistry } from '../scripts/actions/deployAgreementRelationsRegistry';
+import { deployAgreementFactory } from '../scripts/actions/deployAgreementFactory';
+import { deployAgreementERC1155Implementation } from '../scripts/actions/deployAgreementERC1155Implementation';
+import { deployAgreementERC20Implementation } from '../scripts/actions/deployAgreementERC20Implementation';
+import { deploySplitCurrencies } from '../scripts/actions/deploySplitCurrencies';
+import { deployFeeManager } from '../scripts/actions/deployFeeManager';
+import { deployNamespaceRegistry } from '../scripts/actions/deployNamespaceRegistry';
 import { buildHolders, getEvent } from './utils';
 import {
   AgreementDeploymentData,
