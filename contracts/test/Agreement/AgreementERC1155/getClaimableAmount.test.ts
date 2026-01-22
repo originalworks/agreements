@@ -3,7 +3,6 @@ import {
   deployAgreementERC1155,
   deployInitialSetup,
 } from '../../helpers/deployments';
-import { parseEther } from 'ethers';
 
 describe('AgreementERC1155.getClaimableAmount', () => {
   it('Return amount available for claim', async () => {
