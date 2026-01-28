@@ -2,11 +2,11 @@ import { expect } from 'chai';
 import {
   deployAgreementERC1155,
   deployInitialSetup,
-} from '../../helpers/deployments';
+} from '../../../helpers/deployments';
 import { parseEther, parseUnits } from 'ethers';
 import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 import { ethers } from 'hardhat';
-import { HolderWithWallet } from '../../../test/helpers/types';
+import { HolderWithWallet } from '../../../helpers/types';
 
 describe('AgreementERC1155.getClaimableAmountWithRelayerFee', () => {
   let owner: SignerWithAddress;

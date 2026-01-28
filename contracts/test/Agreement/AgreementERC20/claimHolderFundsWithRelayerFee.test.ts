@@ -4,9 +4,9 @@ import { ethers } from 'hardhat';
 import {
   deployAgreementERC20,
   deployInitialSetup,
-} from '../../helpers/deployments';
-import { splitCurrencyDefinitions } from '../../helpers/splitCurrenciesDefinitions';
-import { InitialSetup } from '../../helpers/types';
+} from '../../../helpers/deployments';
+import { splitCurrencyDefinitions } from '../../../helpers/splitCurrenciesDefinitions';
+import { InitialSetup } from '../../../helpers/types';
 import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 import { AgreementERC20 } from 'typechain';
 
