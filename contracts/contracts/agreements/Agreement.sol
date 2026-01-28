@@ -31,15 +31,12 @@ abstract contract Agreement is
 
   mapping(address => bool) private admins;
 
-  mapping(address => uint256) public receivedFunds;
-  mapping(address => uint256) public withdrawnFunds;
-  mapping(address => mapping(address => uint256)) public holderFundsCounters;
+  mapping(address => uint256) internal receivedFunds;
+  mapping(address => uint256) internal withdrawnFunds;
+  mapping(address => mapping(address => uint256)) internal holderFundsCounters;
 
   mapping(address => uint256) private paymentFees;
   mapping(address => uint256) private collectedPaymentFees;
-
-  mapping(address => uint256) private relayerFees;
-  mapping(address => uint256) private collectedRelayerFees;
 
   ICurrencyManager internal currencyManager;
   IFeeManager internal feeManager;
@@ -97,10 +94,10 @@ abstract contract Agreement is
     emit AdminRemoved(user);
   }
 
-  function getAvailableFee(
+  function getAvailablePaymentFee(
     address currency
   ) external view override returns (uint256) {
-    Fees memory fees = feeManager.getFees();
+    Fees memory fees = feeManager.getFees(currency);
     uint256 availableFee = paymentFees[currency] -
       collectedPaymentFees[currency];
 
@@ -210,7 +207,7 @@ abstract contract Agreement is
   function _registerIncome(
     address currency
   ) internal returns (Fees memory fees) {
-    fees = _updateFee(currency);
+    fees = _updatePaymentFeeCounter(currency);
     uint256 newlyReceivedFunds;
     if (currency == address(0)) {
       newlyReceivedFunds = address(this).balance;
@@ -222,8 +219,10 @@ abstract contract Agreement is
     return fees;
   }
 
-  function _updateFee(address currency) private returns (Fees memory fees) {
-    fees = feeManager.getFees();
+  function _updatePaymentFeeCounter(
+    address currency
+  ) private returns (Fees memory fees) {
+    fees = feeManager.getFees(currency);
 
     uint256 newIncome;
     if (currency == address(0)) {
@@ -235,9 +234,9 @@ abstract contract Agreement is
         (withdrawnFunds[currency] + IERC20(currency).balanceOf(address(this))) -
         receivedFunds[currency];
     }
-    uint256 newFee = (newIncome * fees.paymentFee) / fees.feeDenominator;
-    paymentFees[currency] += newFee;
-    emit FeeAvailable(newFee, paymentFees[currency], currency);
+    uint256 newPaymentFee = (newIncome * fees.paymentFee) / fees.feeDenominator;
+    paymentFees[currency] += newPaymentFee;
+    emit FeeAvailable(newPaymentFee, currency);
     return fees;
   }
 
@@ -245,7 +244,8 @@ abstract contract Agreement is
     address currency,
     address holder,
     uint256 holderShares,
-    uint256 totalSupply
+    uint256 totalSupply,
+    bool collectRelayerFee
   ) internal {
     if (currencyManager.currencyMap(currency) == false) {
       revert CurrencyNotSupported();
@@ -256,11 +256,13 @@ abstract contract Agreement is
     if (_hasUnregisteredIncome(currency)) {
       fees = _registerIncome(currency);
     } else {
-      fees = feeManager.getFees();
+      fees = feeManager.getFees(currency);
+    }
+    if (collectRelayerFee && fees.maxRelayerFee == 0) {
+      revert ClaimWithRelayerNotSupported();
     }
     if (holderFundsCounters[currency][holder] != receivedFunds[currency]) {
-      uint256 amount;
-      (amount, ) = _calculateClaimableAmount(
+      uint256 amount = _calculateClaimableAmount(
         receivedFunds[currency],
         currency,
         holder,
@@ -268,20 +270,38 @@ abstract contract Agreement is
         totalSupply,
         fees
       );
+
       if (amount > 0) {
         holderFundsCounters[currency][holder] = receivedFunds[currency];
         withdrawnFunds[currency] += amount;
-        if (currency == address(0)) {
-          (bool holderWasPaid, ) = holder.call{value: amount}('');
-
-          if (holderWasPaid == false) {
-            fallbackVault.registerIncomingFunds{value: amount}(holder);
+        uint256 relayerCut = 0;
+        if (collectRelayerFee == true) {
+          relayerCut = (amount * fees.relayerFee) / fees.feeDenominator;
+          if (relayerCut > fees.maxRelayerFee) {
+            relayerCut = fees.maxRelayerFee;
           }
-        } else {
-          IERC20(currency).safeTransfer(holder, amount);
+          amount = amount - relayerCut;
+          _transferFunds(currency, msg.sender, relayerCut);
         }
+        _transferFunds(currency, holder, amount);
         emit HolderFundsClaimed(holder, amount, currency);
       }
+    }
+  }
+
+  function _transferFunds(
+    address currency,
+    address receiver,
+    uint256 amount
+  ) private {
+    if (currency == address(0)) {
+      (bool success, ) = receiver.call{value: amount}('');
+
+      if (success == false) {
+        fallbackVault.registerIncomingFunds{value: amount}(receiver);
+      }
+    } else {
+      IERC20(currency).safeTransfer(receiver, amount);
     }
   }
 
@@ -292,12 +312,12 @@ abstract contract Agreement is
     uint256 holderShares,
     uint256 totalSupply,
     Fees memory fees
-  ) internal view returns (uint256 claimableAmount, uint256 fee) {
+  ) internal view returns (uint256 claimableAmount) {
     uint256 amount = ((_receivedFunds - holderFundsCounters[currency][holder]) *
       holderShares) / totalSupply;
-    fee = ((amount * fees.paymentFee) / fees.feeDenominator);
-    claimableAmount = amount - fee;
-    return (claimableAmount, fee);
+    uint256 paymentFee = ((amount * fees.paymentFee) / fees.feeDenominator);
+    claimableAmount = amount - paymentFee;
+    return claimableAmount;
   }
 
   function _authorizeUpgrade(address) internal override onlyAdmin {}

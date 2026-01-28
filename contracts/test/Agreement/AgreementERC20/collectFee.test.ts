@@ -126,13 +126,13 @@ describe('AgreementERC20.collectFee', () => {
       to: await agreement.getAddress(),
     });
 
-    expect(await agreement.getAvailableFee(tokenA.address)).to.equal(
+    expect(await agreement.getAvailablePaymentFee(tokenA.address)).to.equal(
       (incomingFundsTokenA * SCALED_FEE_LEVEL) / SCALE,
     );
-    expect(await agreement.getAvailableFee(tokenB.address)).to.equal(
+    expect(await agreement.getAvailablePaymentFee(tokenB.address)).to.equal(
       (incomingFundsTokenB * SCALED_FEE_LEVEL) / SCALE,
     );
-    expect(await agreement.getAvailableFee(ethers.ZeroAddress)).to.equal(
+    expect(await agreement.getAvailablePaymentFee(ethers.ZeroAddress)).to.equal(
       (incomingFundsNativeCoin * SCALED_FEE_LEVEL) / SCALE,
     );
 
@@ -219,9 +219,9 @@ describe('AgreementERC20.collectFee', () => {
 
           await feeManager.setPaymentFee(parseEther(feeLevel1.toString()));
           await _currencyTransfer(await agreement.getAddress(), incomingFunds);
-          expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
-            (incomingFunds * SCALED_FEE_LEVEL_1) / SCALE,
-          );
+          expect(
+            await agreement.getAvailablePaymentFee(_currencyAddress),
+          ).to.equal((incomingFunds * SCALED_FEE_LEVEL_1) / SCALE);
           await feeManager.collectPaymentFee(
             await agreement.getAddress(),
             _currencyAddress,
@@ -229,9 +229,9 @@ describe('AgreementERC20.collectFee', () => {
 
           await feeManager.setPaymentFee(parseEther(feeLevel2.toString()));
           await _currencyTransfer(await agreement.getAddress(), incomingFunds);
-          expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
-            (incomingFunds * SCALED_FEE_LEVEL_2) / SCALE,
-          );
+          expect(
+            await agreement.getAvailablePaymentFee(_currencyAddress),
+          ).to.equal((incomingFunds * SCALED_FEE_LEVEL_2) / SCALE);
           await feeManager.collectPaymentFee(
             await agreement.getAddress(),
             _currencyAddress,
@@ -239,9 +239,9 @@ describe('AgreementERC20.collectFee', () => {
 
           await feeManager.setPaymentFee(parseEther(feeLevel3.toString()));
           await _currencyTransfer(await agreement.getAddress(), incomingFunds);
-          expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
-            (incomingFunds * SCALED_FEE_LEVEL_3) / SCALE,
-          );
+          expect(
+            await agreement.getAvailablePaymentFee(_currencyAddress),
+          ).to.equal((incomingFunds * SCALED_FEE_LEVEL_3) / SCALE);
           await feeManager.collectPaymentFee(
             await agreement.getAddress(),
             _currencyAddress,
@@ -287,7 +287,7 @@ describe('AgreementERC20.collectFee', () => {
               const expectedFee = (incomingFunds * SCALED_FEE_LEVEL) / SCALE;
 
               expect(
-                await agreement.getAvailableFee(_currencyAddress),
+                await agreement.getAvailablePaymentFee(_currencyAddress),
               ).to.equal(expectedFee);
 
               const tx = await feeManager.collectPaymentFee(
@@ -297,7 +297,7 @@ describe('AgreementERC20.collectFee', () => {
 
               await expect(Promise.resolve(tx))
                 .to.emit(agreement, 'FeeAvailable')
-                .withArgs(expectedFee, expectedFee, _currencyAddress)
+                .withArgs(expectedFee, _currencyAddress)
                 .and.to.emit(agreement, 'FeeCollected')
                 .withArgs(expectedFee, _currencyAddress);
 
@@ -326,7 +326,7 @@ describe('AgreementERC20.collectFee', () => {
                 incomingFunds1,
               );
               expect(
-                await agreement.getAvailableFee(_currencyAddress),
+                await agreement.getAvailablePaymentFee(_currencyAddress),
               ).to.equal(expectedFee1);
               await feeManager.collectPaymentFee(
                 await agreement.getAddress(),
@@ -338,7 +338,7 @@ describe('AgreementERC20.collectFee', () => {
                 incomingFunds2,
               );
               expect(
-                await agreement.getAvailableFee(_currencyAddress),
+                await agreement.getAvailablePaymentFee(_currencyAddress),
               ).to.equal(expectedFee2);
               await feeManager.collectPaymentFee(
                 await agreement.getAddress(),
@@ -378,7 +378,7 @@ describe('AgreementERC20.collectFee', () => {
               );
 
               expect(
-                await agreement.getAvailableFee(_currencyAddress),
+                await agreement.getAvailablePaymentFee(_currencyAddress),
               ).to.equal((incomingFunds * SCALED_FEE_LEVEL) / SCALE);
 
               await feeManager.collectPaymentFee(
@@ -392,7 +392,7 @@ describe('AgreementERC20.collectFee', () => {
               const holder2BalanceAfter = await _currencyBalance(holder2);
 
               expect(
-                await agreement.getAvailableFee(_currencyAddress),
+                await agreement.getAvailablePaymentFee(_currencyAddress),
               ).to.equal(0n);
               expect(
                 await _currencyBalance(await feeManager.getAddress()),

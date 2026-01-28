@@ -14,11 +14,12 @@ interface IAgreement {
   error CurrencyNotSupported();
   error ZeroAddressNotAllowed();
   error ZeroBalanceHolder();
+  error ClaimWithRelayerNotSupported();
 
   event AdminAdded(address account);
   event AdminRemoved(address account);
   event DataHashChanged(string dataHash);
-  event FeeAvailable(uint256 newFee, uint256 totalFee, address currency);
+  event FeeAvailable(uint256 amount, address currency);
   event HolderFundsClaimed(address account, uint256 value, address currency);
   event NativeCoinReceived(address from, uint256 amount);
   event ERC20IncomeRegistered(address currency, uint256 amount);
@@ -46,7 +47,9 @@ interface IAgreement {
 
   function removeAdmin(address user) external;
 
-  function getAvailableFee(address currency) external view returns (uint256);
+  function getAvailablePaymentFee(
+    address currency
+  ) external view returns (uint256);
 
   function transferOwnedERC20Shares(
     address agreement,
@@ -62,8 +65,18 @@ interface IAgreement {
 
   function claimHolderFunds(address holder, address currency) external;
 
+  function claimHolderFundsWithRelayerFee(
+    address holder,
+    address currency
+  ) external;
+
   function getClaimableAmount(
     address currency,
     address holder
-  ) external view returns (uint256 claimableAmount, uint256 fee);
+  ) external view returns (uint256 claimableAmount);
+
+  function getClaimableAmountWithRelayerFee(
+    address currency,
+    address holder
+  ) external view returns (uint256 claimableAmount, uint256 relayerCut);
 }

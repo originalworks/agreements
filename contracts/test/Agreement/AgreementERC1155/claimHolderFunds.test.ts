@@ -220,7 +220,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
 
               expect(balanceAfter - balanceBefore).to.equal(0n);
               expect(
-                await agreement.getAvailableFee(_currencyAddress),
+                await agreement.getAvailablePaymentFee(_currencyAddress),
               ).to.equal((incomingFunds * SCALED_FEE_LEVEL) / SCALE);
             });
 
@@ -246,7 +246,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
                 (incomingFunds * MULTIPLIER) / SCALE,
               );
               expect(
-                await agreement.getAvailableFee(_currencyAddress),
+                await agreement.getAvailablePaymentFee(_currencyAddress),
               ).to.equal((incomingFunds * SCALED_FEE_LEVEL) / SCALE);
             });
 
@@ -285,7 +285,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
                   SCALE,
               );
               expect(
-                await agreement.getAvailableFee(_currencyAddress),
+                await agreement.getAvailablePaymentFee(_currencyAddress),
               ).to.equal((incomingFunds * SCALED_FEE_LEVEL) / SCALE);
             });
 
@@ -305,7 +305,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
               );
 
               expect(
-                await agreement.getAvailableFee(_currencyAddress),
+                await agreement.getAvailablePaymentFee(_currencyAddress),
               ).to.equal(0n);
             });
 
@@ -358,7 +358,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
                   _currencyAddress,
                 );
               expect(
-                await agreement.getAvailableFee(_currencyAddress),
+                await agreement.getAvailablePaymentFee(_currencyAddress),
               ).to.equal((incomingFunds * SCALED_FEE_LEVEL) / SCALE);
             });
 
@@ -398,7 +398,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
                 holderABalanceAfterClaim2 - holderAInitialBalance,
               ).to.equal(holderAExpectedBalanceDiff);
               expect(
-                await agreement.getAvailableFee(_currencyAddress),
+                await agreement.getAvailablePaymentFee(_currencyAddress),
               ).to.equal((incomingFunds * SCALED_FEE_LEVEL) / SCALE);
             });
 
@@ -426,7 +426,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
                 (incomingFunds1 * MULTIPLIER) / SCALE,
               );
               expect(
-                await agreement.getAvailableFee(_currencyAddress),
+                await agreement.getAvailablePaymentFee(_currencyAddress),
               ).to.equal((incomingFunds1 * SCALED_FEE_LEVEL) / SCALE);
 
               await _currencyTransfer(
@@ -441,7 +441,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
                 ((incomingFunds1 + incomingFunds2) * MULTIPLIER) / SCALE,
               );
               expect(
-                await agreement.getAvailableFee(_currencyAddress),
+                await agreement.getAvailablePaymentFee(_currencyAddress),
               ).to.equal(
                 ((incomingFunds1 + incomingFunds2) * SCALED_FEE_LEVEL) / SCALE,
               );
@@ -482,7 +482,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
               );
               expect(holderBBalanceAfter1 - holderBInitialBalance).to.equal(0n);
               expect(
-                await agreement.getAvailableFee(_currencyAddress),
+                await agreement.getAvailablePaymentFee(_currencyAddress),
               ).to.equal((incomingFunds1 * SCALED_FEE_LEVEL) / SCALE);
 
               // ROUND 2: both holders claim funds
@@ -509,7 +509,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
                   SCALE,
               );
               expect(
-                await agreement.getAvailableFee(_currencyAddress),
+                await agreement.getAvailablePaymentFee(_currencyAddress),
               ).to.equal(
                 ((incomingFunds1 + incomingFunds2) * SCALED_FEE_LEVEL) / SCALE,
               );
@@ -552,7 +552,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
               );
               expect(holderBBalanceAfter1 - holderBInitialBalance).to.equal(0n);
               expect(
-                await agreement.getAvailableFee(_currencyAddress),
+                await agreement.getAvailablePaymentFee(_currencyAddress),
               ).to.equal((incomingFunds1 * SCALED_FEE_LEVEL) / SCALE);
 
               // ROUND 2 & 3: only holder B claims funds
@@ -582,7 +582,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
                   SCALE,
               );
               expect(
-                await agreement.getAvailableFee(_currencyAddress),
+                await agreement.getAvailablePaymentFee(_currencyAddress),
               ).to.equal(
                 ((incomingFunds1 + incomingFunds2 + incomingFunds3) *
                   SCALED_FEE_LEVEL) /
@@ -621,7 +621,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
                   SCALE,
               );
               expect(
-                await agreement.getAvailableFee(_currencyAddress),
+                await agreement.getAvailablePaymentFee(_currencyAddress),
               ).to.equal(
                 ((incomingFunds1 +
                   incomingFunds2 +
@@ -676,7 +676,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
               );
               expect(holderBBalanceDiffAfter1).to.equal(0n);
               expect(
-                await agreement.getAvailableFee(_currencyAddress),
+                await agreement.getAvailablePaymentFee(_currencyAddress),
               ).to.equal((incomingFunds1 * SCALED_FEE_LEVEL) / SCALE);
               // ROUND 2: transfer of shares, no user claims funds
               await _currencyTransfer(
@@ -725,7 +725,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
                   SCALE,
               );
               expect(
-                await agreement.getAvailableFee(_currencyAddress),
+                await agreement.getAvailablePaymentFee(_currencyAddress),
               ).to.equal(
                 ((incomingFunds1 + incomingFunds2) * SCALED_FEE_LEVEL) / SCALE,
               );
@@ -780,7 +780,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
               );
 
               expect(
-                await agreement.getAvailableFee(_currencyAddress),
+                await agreement.getAvailablePaymentFee(_currencyAddress),
               ).to.equal(
                 ((incomingFunds1 + incomingFunds2 + incomingFunds3) *
                   SCALED_FEE_LEVEL) /
@@ -821,7 +821,7 @@ describe('AgreementERC1155.claimHolderFunds', () => {
                   holderBBalanceDiffAfter3,
               );
               expect(
-                await agreement.getAvailableFee(_currencyAddress),
+                await agreement.getAvailablePaymentFee(_currencyAddress),
               ).to.equal(
                 ((incomingFunds1 +
                   incomingFunds2 +
@@ -906,9 +906,9 @@ describe('AgreementERC1155.claimHolderFunds', () => {
           expect(holderBalanceAfter - holderBalanceBefore).to.equal(
             (incomingFunds * MULTIPLIER) / SCALE + incomingFunds,
           );
-          expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
-            (incomingFunds * SCALED_NEW_FEE_LEVEL) / SCALE,
-          );
+          expect(
+            await agreement.getAvailablePaymentFee(_currencyAddress),
+          ).to.equal((incomingFunds * SCALED_NEW_FEE_LEVEL) / SCALE);
         });
         it('fee set back to 0', async () => {
           const incomingFunds = 1000n;
@@ -951,9 +951,9 @@ describe('AgreementERC1155.claimHolderFunds', () => {
           expect(holderBalanceAfter - holderBalanceBefore).to.equal(
             expectedRes,
           );
-          expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
-            (incomingFunds * SCALED_NEW_FEE_LEVEL) / SCALE,
-          );
+          expect(
+            await agreement.getAvailablePaymentFee(_currencyAddress),
+          ).to.equal((incomingFunds * SCALED_NEW_FEE_LEVEL) / SCALE);
         });
         it('fee raising multiple times', async () => {
           const incomingFunds = 1000n;
@@ -1010,9 +1010,9 @@ describe('AgreementERC1155.claimHolderFunds', () => {
           first = (incomingFunds * SCALED_FIRST_FEE_LEVEL) / SCALE;
           second = (incomingFunds * SCALED_SECOND_FEE_LEVEL) / SCALE;
 
-          expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
-            first + second,
-          );
+          expect(
+            await agreement.getAvailablePaymentFee(_currencyAddress),
+          ).to.equal(first + second);
         });
         it('fee collected between transfers', async () => {
           const incomingFunds = 1000n;
@@ -1033,9 +1033,9 @@ describe('AgreementERC1155.claimHolderFunds', () => {
           await _currencyTransfer(await agreement.getAddress(), incomingFunds);
           await agreement.claimHolderFunds(holder, _currencyAddress);
 
-          expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
-            (incomingFunds * SCALED_FEE_LEVEL) / SCALE,
-          );
+          expect(
+            await agreement.getAvailablePaymentFee(_currencyAddress),
+          ).to.equal((incomingFunds * SCALED_FEE_LEVEL) / SCALE);
           await feeManager.collectPaymentFee(
             await agreement.getAddress(),
             _currencyAddress,
@@ -1043,9 +1043,9 @@ describe('AgreementERC1155.claimHolderFunds', () => {
 
           const holderBalanceAfterFirstRound = await _currencyBalance(holder);
 
-          expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
-            0n,
-          );
+          expect(
+            await agreement.getAvailablePaymentFee(_currencyAddress),
+          ).to.equal(0n);
           expect(holderBalanceAfterFirstRound - initialHolderBalance).to.equal(
             (incomingFunds * (SCALE - SCALED_FEE_LEVEL)) / SCALE,
           );
@@ -1058,9 +1058,9 @@ describe('AgreementERC1155.claimHolderFunds', () => {
           expect(holderBalanceAfterSecondRound - initialHolderBalance).to.equal(
             (incomingFunds * 2n * (SCALE - SCALED_FEE_LEVEL)) / SCALE,
           );
-          expect(await agreement.getAvailableFee(_currencyAddress)).to.equal(
-            (incomingFunds * SCALED_FEE_LEVEL) / SCALE,
-          );
+          expect(
+            await agreement.getAvailablePaymentFee(_currencyAddress),
+          ).to.equal((incomingFunds * SCALED_FEE_LEVEL) / SCALE);
         });
       });
     });

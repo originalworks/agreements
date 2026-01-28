@@ -89,7 +89,7 @@ export async function deployAgreementERC20(
     input.shares,
     input.holders,
   );
-  const { creationFee } = await input.initialSetup.feeManager.getFees();
+  const creationFee = await input.initialSetup.feeManager.creationFee();
   const tx = input.initialSetup.agreementFactory
     .connect(input.txExecutorWallet || deployer)
     .createERC20(
@@ -121,7 +121,7 @@ export async function deployAgreementERC1155(
     input.shares,
     input.holders,
   );
-  const { creationFee } = await input.initialSetup.feeManager.getFees();
+  const creationFee = await input.initialSetup.feeManager.creationFee();
   const tx = input.initialSetup.agreementFactory
     .connect(input.txExecutorWallet || deployer)
     .createERC1155(

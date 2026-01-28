@@ -47,24 +47,33 @@ contract AgreementERC20 is
     }
   }
 
+  function claimHolderFundsWithRelayerFee(
+    address holder,
+    address currency
+  ) public override nonReentrant {
+    uint256 holderShares = balanceOf(holder);
+
+    _claimHolderFunds(currency, holder, holderShares, totalSupply(), true);
+  }
+
   function claimHolderFunds(
     address holder,
     address currency
   ) public override nonReentrant {
     uint256 holderShares = balanceOf(holder);
 
-    _claimHolderFunds(currency, holder, holderShares, totalSupply());
+    _claimHolderFunds(currency, holder, holderShares, totalSupply(), false);
   }
 
   function getClaimableAmount(
     address currency,
     address holder
-  ) external view override returns (uint256 claimableAmount, uint256 fee) {
+  ) external view override returns (uint256 claimableAmount) {
     if (currencyManager.currencyMap(currency) == false) {
       revert CurrencyNotSupported();
     }
 
-    Fees memory fees = feeManager.getFees();
+    Fees memory fees = feeManager.getFees(currency);
     uint256 _receivedFunds = withdrawnFunds[currency] +
       _getContractBalance(currency);
 
@@ -79,6 +88,43 @@ contract AgreementERC20 is
         totalSupply(),
         fees
       );
+  }
+
+  function getClaimableAmountWithRelayerFee(
+    address currency,
+    address holder
+  )
+    external
+    view
+    override
+    returns (uint256 claimableAmount, uint256 relayerCut)
+  {
+    if (currencyManager.currencyMap(currency) == false) {
+      revert CurrencyNotSupported();
+    }
+
+    Fees memory fees = feeManager.getFees(currency);
+    uint256 _receivedFunds = withdrawnFunds[currency] +
+      _getContractBalance(currency);
+
+    uint256 holderShares = balanceOf(holder);
+
+    claimableAmount = _calculateClaimableAmount(
+      _receivedFunds,
+      currency,
+      holder,
+      holderShares,
+      totalSupply(),
+      fees
+    );
+
+    relayerCut = (claimableAmount * fees.relayerFee) / fees.feeDenominator;
+    if (relayerCut > fees.maxRelayerFee) {
+      relayerCut = fees.maxRelayerFee;
+    }
+    claimableAmount = claimableAmount - relayerCut;
+
+    return (claimableAmount, relayerCut);
   }
 
   function supportsInterface(
