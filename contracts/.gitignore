@@ -1,7 +1,6 @@
 cache
 artifacts
 typechain
-
+node_modules
 .openzeppelin/unknown-31337.json
 deployments/unknown__*.json
-contracts/shared
