@@ -5,7 +5,7 @@ import {
   deployAgreementERC1155,
   deployAgreementERC20,
   deployInitialSetup,
-} from '../helpers/deployments';
+} from '../../helpers/deployments';
 
 describe('FeeManager logic', () => {
   describe('collectFee', () => {

@@ -4,9 +4,9 @@ import { ethers } from 'hardhat';
 import {
   deployAgreementERC20,
   deployInitialSetup,
-} from '../../helpers/deployments';
-import { splitCurrencyDefinitions } from '../../helpers/splitCurrenciesDefinitions';
-import { InitialSetup } from '../../helpers/types';
+} from '../../../helpers/deployments';
+import { splitCurrencyDefinitions } from '../../../helpers/splitCurrenciesDefinitions';
+import { InitialSetup } from '../../../helpers/types';
 import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 
 describe('AgreementERC20.claimHolderFunds', () => {

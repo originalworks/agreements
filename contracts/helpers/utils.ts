@@ -1,4 +1,10 @@
-import { BaseContract, id, JsonRpcProvider, TransactionResponse } from 'ethers';
+import {
+  BaseContract,
+  ContractFactory,
+  id,
+  JsonRpcProvider,
+  TransactionResponse,
+} from 'ethers';
 import { ethers } from 'hardhat';
 import { HolderWithWallet } from './types';
 import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';

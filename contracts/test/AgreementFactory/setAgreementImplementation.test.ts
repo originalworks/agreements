@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
-import { deployInitialSetup } from '../helpers/deployments';
-import { TokenStandard } from '../helpers/types';
+import { deployInitialSetup } from '../../helpers/deployments';
+import { TokenStandard } from '../../helpers/types';
 
 describe('AgreementFactory.setAgreementImplementation', () => {
   it('can change ERC20 implementation', async () => {

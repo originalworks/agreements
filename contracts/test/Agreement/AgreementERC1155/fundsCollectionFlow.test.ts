@@ -3,7 +3,7 @@ import { ethers } from 'hardhat';
 import {
   deployAgreementERC1155,
   deployInitialSetup,
-} from '../../helpers/deployments';
+} from '../../../helpers/deployments';
 import { parseEther } from 'ethers';
 
 describe('(FUNCTIONAL) AgreementERC1155: Funds collection flow', () => {

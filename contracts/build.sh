@@ -2,10 +2,13 @@ rm -rf dist/
 rm -rf src/
 mkdir src
 cp -R ./typechain ./src/typechain
-cp -R ./tests-deployment-scripts ./src/tests-deployment-scripts
+cp -R ./helpers ./src/helpers
+cp -R ./scripts ./src/scripts
 cat <<EOT >> src/index.ts
-export * from './typechain'
-export * from './tests-deployment-scripts'
+import '@openzeppelin/hardhat-upgrades';
+
+export * from './typechain';
+export * from './helpers';
 EOT
-tsc src/index.ts --outDir dist --lib es2022 --module nodenext --declarationMap true --declaration --skipLibCheck
+tsc -p tsconfig.build.json
 rm -rf src/

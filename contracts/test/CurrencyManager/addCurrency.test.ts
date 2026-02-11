@@ -6,8 +6,8 @@ import {
   deployAgreementERC1155,
   deployAgreementERC20,
   deployInitialSetup,
-} from '../helpers/deployments';
-import { InitialSetup } from '../helpers/types';
+} from '../../helpers/deployments';
+import { InitialSetup } from '../../helpers/types';
 import { parseUnits } from 'ethers';
 
 describe('CurrencyManager.addCurrency', () => {

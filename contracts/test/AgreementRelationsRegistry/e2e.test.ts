@@ -3,8 +3,8 @@ import {
   deployAgreementERC1155,
   deployAgreementERC20,
   deployInitialSetup,
-} from '../helpers/deployments';
-import { fakeSignerWithAddress } from '../helpers/utils';
+} from '../../helpers/deployments';
+import { fakeSignerWithAddress } from '../../helpers/utils';
 import { ethers } from 'hardhat';
 
 describe('AgreementRelationsRegistry: E2E', () => {

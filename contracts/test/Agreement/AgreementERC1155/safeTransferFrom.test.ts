@@ -5,7 +5,7 @@ import {
   deployAgreementERC1155,
   deployAgreementERC20,
   deployInitialSetup,
-} from '../../helpers/deployments';
+} from '../../../helpers/deployments';
 
 describe('AgreementERC1155.safeTransferFrom', () => {
   const TOKEN_ID = 1n;

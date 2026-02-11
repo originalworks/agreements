@@ -3,7 +3,7 @@ import { ethers } from 'hardhat';
 import {
   deployAgreementERC20,
   deployInitialSetup,
-} from '../../helpers/deployments';
+} from '../../../helpers/deployments';
 
 describe('AgreementERC20.addAdmin', () => {
   it('fails if sender is not an admin', async () => {

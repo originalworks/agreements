@@ -3,7 +3,7 @@ import { ethers } from 'hardhat';
 import {
   deployAgreementERC1155,
   deployInitialSetup,
-} from '../helpers/deployments';
+} from '../../helpers/deployments';
 
 describe('NamespaceRegistry integration test', function () {
   describe('AgreementFactory', () => {

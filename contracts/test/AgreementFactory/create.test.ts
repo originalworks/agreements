@@ -4,8 +4,8 @@ import {
   deployAgreementERC1155,
   deployAgreementERC20,
   deployInitialSetup,
-} from '../helpers/deployments';
-import { Holder } from '../helpers/types';
+} from '../../helpers/deployments';
+import { Holder } from '../../helpers/types';
 
 describe('AgreementFactory.create', function () {
   let OWNER: Holder;
