@@ -1,0 +1,26 @@
+{
+    "name": "@originalworks/agreements-contracts",
+    "version": "0.0.0",
+    "files": [
+        "*.sol",
+        "agreements/",
+        "interfaces/",
+        "shared/"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/originalworks/agreements.git"
+    },
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com"
+    },
+    "scripts": {
+        "clean": "find . -mindepth 1 ! -name 'package.json' -exec rm -rf {} +",
+        "build": "npm run clean && cp -r ../../contracts/* ./",
+        "release": "npm run ../release.ts"
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": "5.3.0",
+        "@openzeppelin/contracts-upgradeable": "5.3.0"
+    }
+}
