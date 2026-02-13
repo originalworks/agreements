@@ -46,3 +46,5 @@ npx typechain --target=ethers-v6 --out-dir "$DEST_TYPECHAIN_DIR" "$DEST_ABI_DIR/
 cp -r "$SRC_HELPERS_DIR" "$SRC_SCRIPTS_DIR" "$DEST_SRC_DIR"
 
 tsc -p "$PACKAGE_DIR/tsconfig.build.json"
+
+echo "Done"

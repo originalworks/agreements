@@ -30,3 +30,5 @@ find "$SRC_ARTIFACTS_DIR/@openzeppelin/contracts" -type f -name "ERC1967Proxy.js
 
 cp -r $ROOT_DIR/contracts/* "$PACKAGE_DIR/"
 
+echo "Done"
+

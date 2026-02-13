@@ -40,3 +40,5 @@ npx typechain --target=ethers-v6 --out-dir "$DEST_TYPECHAIN_DIR" "$DEST_ABI_DIR/
 
 # Compile ts
 tsc -p "$PACKAGE_DIR/tsconfig.build.json"
+
+echo "Done"
