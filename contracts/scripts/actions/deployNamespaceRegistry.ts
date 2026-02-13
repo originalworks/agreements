@@ -6,7 +6,7 @@ export async function deployNamespaceRegistry(): Promise<NamespaceRegistry> {
     await ethers.getContractFactory('NamespaceRegistry');
   const namespaceRegistry = (await upgrades.deployProxy(NamespaceRegistry, [], {
     kind: 'uups',
-  })) as NamespaceRegistry;
+  })) as unknown as NamespaceRegistry;
 
   await namespaceRegistry.waitForDeployment();
 

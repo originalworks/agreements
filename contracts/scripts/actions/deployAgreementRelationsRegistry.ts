@@ -9,7 +9,7 @@ export async function deployAgreementRelationsRegistry(): Promise<AgreementRelat
     AgreementRelationsRegistry,
     [],
     { kind: 'uups' },
-  )) as AgreementRelationsRegistry;
+  )) as unknown as AgreementRelationsRegistry;
   await agreementRelationsRegistry.waitForDeployment();
 
   return agreementRelationsRegistry;
