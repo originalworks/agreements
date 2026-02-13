@@ -3,10 +3,12 @@
     "version": "0.0.1",
     "exports": {
         ".": {
+            "import": "./dist/helpers/index.js",
             "types": "./dist/helpers/index.d.ts",
             "require": "./dist/helpers/index.js"
         },
         "./typechain": {
+            "import": "./dist/helpers/index.js",
             "types": "./dist/typechain/index.d.ts",
             "require": "./dist/typechain/index.js"
         }
