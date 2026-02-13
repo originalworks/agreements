@@ -177,7 +177,7 @@ export const run = async () => {
     // await execAsync('npm version patch --no-git-tag-version')
     packageJson.version = nextVersion;
     await writeFile(packageJsonPath, JSON.stringify(packageJson, null, 4));
-    await execAsync(`git commit -am "Publish"`);
+    await execAsync(`git commit -am "Publish ${nextTag}"`);
     await execAsync(`git tag ${nextTag} -m ${nextTag}`);
 
     await execAsync(

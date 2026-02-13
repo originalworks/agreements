@@ -11,7 +11,7 @@ export async function deployFeeManager(
     FeeManager,
     [creationFee, paymentFee, relayerFee],
     { kind: 'uups' },
-  )) as FeeManager;
+  )) as unknown as FeeManager;
 
   await feeManager.waitForDeployment();
 

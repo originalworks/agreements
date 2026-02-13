@@ -5,7 +5,7 @@ export async function deployFallbackVault(): Promise<FallbackVault> {
   const FallbackVault = await ethers.getContractFactory('FallbackVault');
   const fallbackVault = (await upgrades.deployProxy(FallbackVault, [], {
     kind: 'uups',
-  })) as FallbackVault;
+  })) as unknown as FallbackVault;
 
   await fallbackVault.waitForDeployment();
 

@@ -18,7 +18,7 @@ export async function deployAgreementFactory(
       input.namespaceRegistry,
     ],
     { kind: 'uups' },
-  )) as AgreementFactory;
+  )) as unknown as AgreementFactory;
 
   await agreementFactory.waitForDeployment();
 

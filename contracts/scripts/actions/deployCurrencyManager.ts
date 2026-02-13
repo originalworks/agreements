@@ -10,7 +10,7 @@ export async function deployCurrencyManager(
     CurrencyManager,
     [splitCurrencies],
     { kind: 'uups' },
-  )) as CurrencyManager;
+  )) as unknown as CurrencyManager;
 
   await currencyManager.waitForDeployment();
   return currencyManager;

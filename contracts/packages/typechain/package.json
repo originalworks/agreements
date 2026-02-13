@@ -1,12 +1,10 @@
 {
-    "name": "@originalworks/agreements-contracts",
+    "name": "@originalworks/agreements-typechain",
     "version": "0.0.1",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "files": [
-        "*.sol",
-        "agreements/",
-        "interfaces/",
-        "shared/",
-        "abis/"
+        "dist/"
     ],
     "repository": {
         "type": "git",
@@ -20,7 +18,6 @@
         "release": "ts-node ../release.ts"
     },
     "dependencies": {
-        "@openzeppelin/contracts": "5.3.0",
-        "@openzeppelin/contracts-upgradeable": "5.3.0"
+        "ethers": "^6.14.3"
     }
 }

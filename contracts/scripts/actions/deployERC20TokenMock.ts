@@ -37,5 +37,5 @@ export async function deployERC20TokenMock(
     )
   ).wait();
 
-  return tokenContract;
+  return tokenContract as unknown as ERC20TokenMock;
 }
