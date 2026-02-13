@@ -5,7 +5,8 @@
     "lint": "eslint '**/*.{ts,mts}'",
     "lint:fix": "eslint '**/*.{ts,mts}' --fix",
     "typecheck": "tsc --noEmit",
-    "release:contracts": "npm --prefix packages/contracts run release"
+    "release:contracts": "npm --prefix packages/contracts run release",
+    "release:typechain": "npm --prefix packages/typechain run release"
   },
   "devDependencies": {
     "@eslint/js": "^9.8.0",
