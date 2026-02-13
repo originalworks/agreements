@@ -6,3 +6,4 @@ node_modules
 deployments/unknown__*.json
 packages/contracts/*
 !packages/contracts/package.json
+!packages/contracts/build.sh

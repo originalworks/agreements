@@ -5,7 +5,8 @@
         "*.sol",
         "agreements/",
         "interfaces/",
-        "shared/"
+        "shared/",
+        "abis/"
     ],
     "repository": {
         "type": "git",
@@ -15,8 +16,7 @@
         "registry": "https://npm.pkg.github.com"
     },
     "scripts": {
-        "clean": "find . -mindepth 1 ! -name 'package.json' -exec rm -rf {} +",
-        "build": "npm run clean && cp -r ../../contracts/* ./",
+        "build": "bash build.sh",
         "release": "ts-node ../release.ts"
     },
     "dependencies": {

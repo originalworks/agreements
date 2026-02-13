@@ -24,9 +24,13 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
           scope: '@originalworks'
 
+      - name: "Setup environment"
+        working-directory: contracts
+        run: npm ci
+
       - name: "Publish"
+        working-directory: contracts/packages/contracts
         run: |
-          cd contracts/packages/contracts
           npm run build
           npm publish
         env:
