@@ -8,7 +8,7 @@
             "require": "./dist/helpers/index.js"
         },
         "./typechain": {
-            "import": "./dist/helpers/index.js",
+            "import": "./dist/typechain/index.js",
             "types": "./dist/typechain/index.d.ts",
             "require": "./dist/typechain/index.js"
         }
