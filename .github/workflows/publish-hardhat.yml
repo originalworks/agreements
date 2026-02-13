@@ -1,4 +1,4 @@
-name: Publish contracts package
+name: Publish hardhat package
 on: 
   release:
     types: 

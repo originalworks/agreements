@@ -1,4 +1,4 @@
-name: Publish contracts package
+name: Publish typechain package
 on: 
   release:
     types: 
