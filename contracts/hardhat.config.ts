@@ -44,17 +44,17 @@ const config: HardhatUserConfig = {
   },
   networks: {
     base_sepolia: {
-      url: `https://base-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_KEY}`,
-      kmsKeyId: `${process.env.KMS_KEY_ID}`,
+      url: `https://base-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+      kmsKeyId: `${process.env.DEV_KMS_KEY_ID}`,
       minMaxPriorityFeePerGas: 1500000000,
     },
     base: {
-      url: `https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_KEY}`,
-      kmsKeyId: `${process.env.KMS_KEY_ID}`,
+      url: `https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+      kmsKeyId: `${process.env.PROD_KMS_KEY_ID}`,
     },
     polygon: {
-      url: `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_KEY}`,
-      kmsKeyId: `${process.env.KMS_KEY_ID}`,
+      url: `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+      kmsKeyId: `${process.env.PROD_KMS_KEY_ID}`,
     },
   },
   etherscan: {
