@@ -46,7 +46,6 @@ const config: HardhatUserConfig = {
     base_sepolia: {
       url: `https://base-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
       kmsKeyId: `${process.env.DEV_KMS_KEY_ID}`,
-      minMaxPriorityFeePerGas: 1500000000,
     },
     base: {
       url: `https://base-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
@@ -59,10 +58,10 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
-    enabled: false,
+    enabled: true,
   },
   sourcify: {
-    enabled: true,
+    enabled: false,
   },
   typechain: {
     outDir: 'typechain',
