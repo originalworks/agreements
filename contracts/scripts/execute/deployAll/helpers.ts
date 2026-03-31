@@ -54,7 +54,7 @@ export async function saveDeploymentData(input: DeploymentOutput) {
     splitCurrencies: input.splitCurrencies.map((currency) => ({
       name: currency.name,
       symbol: currency.symbol,
-      decimals: currency.decimals,
+      decimals: currency.decimals.toString(),
       nativeCoin: currency.nativeCoin,
       address: currency.address,
     })),

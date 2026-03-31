@@ -1,0 +1,27 @@
+{
+  "deployer": "0xE4D214ba71B36528670150CA23C4D14141ba7BCF",
+  "agreementERC20Implementation": "0x1f21cC6A4E2c003d2323f60EC05D20922AA48940",
+  "agreementERC1155Implementation": "0x938DAc02538c1944de093a6efBbe58828386BE1A",
+  "agreementRelationsRegistry": "0xE127ADcc5e01dCfA7b799124766610f8e0440de2",
+  "fallbackVault": "0xF1AAf94458EBedb37cbcaF36AA73D20e595cBa6E",
+  "currencyManager": "0x37C4e57656A933dcd65D40B359D1f2aAe819F464",
+  "feeManager": "0x7F089CB03A9Ad6e89F2a42A186059Dce29FC2360",
+  "agreementFactory": "0x0B740c8c185Ca1089Fff661F55b222a260b92565",
+  "namespaceRegistry": "0xb215518cb92b2B158E6f3160a92a0606AE76Fa10",
+  "splitCurrencies": [
+    {
+      "name": "USD Coin",
+      "symbol": "USDC",
+      "decimals": "6",
+      "nativeCoin": false,
+      "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+    },
+    {
+      "name": "native coin",
+      "symbol": "ETH",
+      "decimals": "18",
+      "nativeCoin": true,
+      "address": "0x0000000000000000000000000000000000000000"
+    }
+  ]
+}
