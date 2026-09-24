@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE tokenization.tokenization_requests\n                SET\n                    tokenization_status = 'REJECTED',\n                    status_reason = $2\n                WHERE tokenization_id = ANY($1)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "TextArray",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6437ebe45919675eb0fd55d4c17228d891d07751eff4015467f5fcd708dd183f"
+}

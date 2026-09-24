@@ -1,4 +1,39 @@
 [workspace]
 resolver = "3"
 
-members = ["rust/oward"]
+members = [
+    "rust/database/migrator",
+    "rust/e2e_test",
+    "rust/oward",
+    "rust/database/tables/tokenization_requests_db",
+    "rust/database/tables/tokenization_networks_db",
+    "rust/request",
+    "rust/contract_bindings",
+    "rust/indexers/agreements_indexer",
+    "rust/indexers/ow_registry_indexer",
+    "rust/network",
+    "rust/database/tables/tokenization_request_batches_db",
+]
+
+[workspace.dependencies]
+oward = { path = "./rust/oward" }
+request = { path = "./rust/request" }
+contract_bindings = { path = "./rust/contract_bindings" }
+migrator = { path = "./rust/database/migrator" }
+tokenization_networks_db = { path = "./rust/database/tables/tokenization_networks_db" }
+tokenization_requests_db = { path = "./rust/database/tables/tokenization_requests_db" }
+tokenization_request_batches_db = { path = "./rust/database/tables/tokenization_request_batches_db" }
+agreements_indexer = { path = "./rust/indexers/agreements_indexer" }
+ow_registry_indexer = { path = "./rust/indexers/ow_registry_indexer" }
+network = { path = "./rust/network" }
+tokio = "1.53.1"
+anyhow = "1.0.104"
+reqwest = "0.13.4"
+serde = "1.0.229"
+serde_json = "1.0.151"
+ow_wallet_adapter = "0.1.8"
+sqlx = "0.8.6"
+lambda_runtime = "1.3.0"
+uuid = "1.25.0"
+alloy = "1.8.3"
+toml = "1.1.4"

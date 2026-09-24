@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO tokenization.tokenization_networks (\n                chain_id,\n                rpc_url,\n                agreement_factory_address,\n                fee_manager_address\n            )\n            VALUES ($1, $2, $3, $4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6880ffe5cb433e5f0445ed9b23f38bc8ec252186293972c770440ba6387a35bc"
+}

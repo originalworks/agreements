@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO tokenization.tokenization_request_batches\n                    (id, chain_id, tx_value, token_standard)\n                VALUES ($1, $2, $3, $4)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8",
+        "Int8",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "dbb43fade4a2350377d1ef629e21580c14425ff554e996dc6c26b3cc710de2d9"
+}

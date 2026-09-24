@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                    INSERT INTO tokenization.tokenization_request_batch_items\n                        (id, tokenization_request_batch_id, tokenization_request_id)\n                    VALUES ($1, $2, $3)\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1eea7162c83cae9d60a474cd2d4c99b2be8fd6f3aa4ce0a18e1efe83c35c485b"
+}

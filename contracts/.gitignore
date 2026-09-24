@@ -16,3 +16,4 @@ packages/hardhat/*
 !packages/hardhat/tsconfig.build.json
 !packages/hardhat/build.sh
 .env
+e2e-test-contracts.json

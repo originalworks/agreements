@@ -1,0 +1,15 @@
+[package]
+name = "tokenization_requests_db"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+sqlx = { workspace = true, features = ["postgres", "time", "runtime-tokio"] }
+uuid = { workspace = true, features = ["serde", "v4"] }
+request.workspace = true
+anyhow.workspace = true
+time = { version = "0.3.55", features = ["serde"] }
+serde.workspace = true
+serde_json.workspace = true
+agreements_indexer.workspace = true
+alloy.workspace = true

@@ -1,0 +1,32 @@
+[package]
+name = "migrator"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sqlx = { workspace = true, features = [
+    "postgres",
+    "runtime-tokio",
+    "tls-rustls",
+    "macros",
+] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+aa_db_migrator = { package = "migrator", git = "https://github.com/originalworks/account-abstraction.git" }
+
+# aws
+lambda_runtime = { workspace = true, optional = true }
+
+
+[features]
+aws = ["dep:lambda_runtime"]
+
+[[bin]]
+name = "aws_migrator"
+path = "src/bin/aws_lambda_migrator.rs"
+
+[[bin]]
+name = "e2e_test_migrator"
+path = "src/bin/e2e_test_migrator.rs"
