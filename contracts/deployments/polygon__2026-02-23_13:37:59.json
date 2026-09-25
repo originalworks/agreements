@@ -1,0 +1,30 @@
+{
+  "deployer": "0xE4D214ba71B36528670150CA23C4D14141ba7BCF",
+  "agreementERC20Implementation": "0x604b7E2903dcfa0Ec81e35960475fC28236D471C",
+  "agreementERC1155Implementation": "0xF1AAf94458EBedb37cbcaF36AA73D20e595cBa6E",
+  "agreementRelationsRegistry": "0x37C4e57656A933dcd65D40B359D1f2aAe819F464",
+  "fallbackVault": "0x0B740c8c185Ca1089Fff661F55b222a260b92565",
+  "currencyManager": "0xECa3c4111BB4E72E22D755A7562A53300f140D7e",
+  "feeManager": "0xE127ADcc5e01dCfA7b799124766610f8e0440de2",
+  "agreementFactory": "0x82d0430358B57BA2314489E054350De2A95AD7DC",
+  "namespaceRegistry": "0x938DAc02538c1944de093a6efBbe58828386BE1A",
+  "splitCurrencies": [
+    {
+      "name": "USD Coin",
+      "symbol": "USDC",
+      "decimals": "6",
+      "nativeCoin": false,
+      "address": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359"
+    },
+    {
+      "name": "native coin",
+      "symbol": "POL",
+      "decimals": "18",
+      "nativeCoin": true,
+      "address": "0x0000000000000000000000000000000000000000"
+    }
+  ],
+  "feeManagerImplementation": "0x25322afd01788F19C6395Af3fC5c162f827d79fB",
+  "agreementFactoryImplementation": "0xca1e48DbB16e3e73c0B0b656Cf70E4Dae58d7e37",
+  "fallbackVaultImplementation": "0x43b717682D122fE25ee13864B3fDb89b7B1dEA4A"
+}
