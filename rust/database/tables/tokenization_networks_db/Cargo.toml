@@ -1,0 +1,9 @@
+[package]
+name = "tokenization_networks_db"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+sqlx = { workspace = true, features = ["postgres"] }
+anyhow.workspace = true
+network.workspace = true

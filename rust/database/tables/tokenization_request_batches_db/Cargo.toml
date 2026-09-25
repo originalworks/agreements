@@ -1,0 +1,11 @@
+[package]
+name = "tokenization_request_batches_db"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+sqlx = { workspace = true, features = ["postgres", "uuid"] }
+request.workspace = true
+anyhow.workspace = true
+uuid.workspace = true
+tokenization_requests_db.workspace = true

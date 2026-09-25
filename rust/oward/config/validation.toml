@@ -1,0 +1,7 @@
+# By default OWARD will only accept request if the submitter of DDEX is the same as the currently used private key. 
+# If you want to accept submissions from other submitters, switch the flag and add their addresses here. 
+accept_other_submitters = false
+other_submitters = []
+
+# If true, OWARD will proceed even if the ISRC has already been tokenized
+ignore_existing_agreements = false

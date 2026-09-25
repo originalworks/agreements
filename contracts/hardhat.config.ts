@@ -56,6 +56,18 @@ const config: HardhatUserConfig = {
       url: `https://polygon-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
       kmsKeyId: `${process.env.PROD_KMS_KEY_ID}`,
     },
+    anvilDocker: {
+      url: 'http://anvil:8545',
+      accounts: {
+        mnemonic: 'test test test test test test test test test test test junk',
+      },
+    },
+    anvil_localhost: {
+      url: 'http://localhost:8545',
+      accounts: {
+        mnemonic: 'test test test test test test test test test test test junk',
+      },
+    },
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE tokenization.tokenization_requests\n                SET\n                    tokenization_status = $2\n                WHERE tokenization_id = ANY($1)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "TextArray",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "adc6df8c09a1c7037c38dc4a3c1ffd3a6754b021a04bd4dcaaa3df456e6fc8b8"
+}
