@@ -1,10 +1,10 @@
 use crate::{
-    config::cli::CliConfig,
+    config::{cli::CliConfig, get_env_var},
     contract::ContractManager,
     submitter::AcceptedDdexSubmittersBuilderForCli,
     validator::{TokenizationRequestValidator, ValidatorResult},
 };
-use network::store::NetworkStore;
+use network::{TokenizationNetwork, store::NetworkStore};
 use ow_wallet_adapter::{OwWalletConfig, wallet::OwWallet};
 use request::{
     TokenizationRequest,
@@ -110,5 +110,32 @@ impl CliOrchestrator {
             );
         }
         validator_result.accepted
+    }
+
+    pub fn build_wallet_config(
+        default_network: &TokenizationNetwork,
+    ) -> anyhow::Result<OwWalletConfig> {
+        let rpc_url = default_network.rpc_url.clone();
+        let mut signer_kms_id = None;
+        let mut private_key = None;
+        let use_kms = matches!(
+            std::env::var("USE_KMS")
+                .unwrap_or_else(|_| "false".to_string())
+                .as_str(),
+            "1" | "true"
+        );
+
+        if use_kms {
+            signer_kms_id = Some(get_env_var("SIGNER_KMS_ID"));
+        } else {
+            private_key = Some(get_env_var("PRIVATE_KEY"));
+        }
+
+        Ok(OwWalletConfig {
+            use_kms,
+            rpc_url,
+            private_key,
+            signer_kms_id,
+        })
     }
 }

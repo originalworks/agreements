@@ -1,7 +1,9 @@
 #[cfg(feature = "aws")]
 pub mod aa_aws;
 
-use crate::{config::validation::ValidationConfig, parser::strings_to_addresses};
+use std::str::FromStr;
+
+use crate::config::validation::ValidationConfig;
 use alloy::primitives::Address;
 use request::TokenizationRequest;
 
@@ -54,4 +56,13 @@ impl AcceptedDdexSubmittersBuilder for AcceptedDdexSubmittersBuilderForCli {
 
         Ok(accepted_submitters)
     }
+}
+
+pub fn strings_to_addresses(input: &Vec<String>) -> Vec<Address> {
+    input
+        .iter()
+        .map(|addr_string| {
+            Address::from_str(addr_string).expect("Failed to parse address in other_submitters")
+        })
+        .collect()
 }

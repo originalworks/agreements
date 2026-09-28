@@ -1,6 +1,3 @@
-use std::str::FromStr;
-
-use alloy::primitives::Address;
 use aws_lambda_events::sqs::SqsEvent;
 use lambda_runtime::LambdaEvent;
 use request::TokenizationRequest;
@@ -31,13 +28,4 @@ pub fn parse_tokenization_requests(
     }
 
     Ok(parsed)
-}
-
-pub fn strings_to_addresses(input: &Vec<String>) -> Vec<Address> {
-    input
-        .iter()
-        .map(|addr_string| {
-            Address::from_str(addr_string).expect("Failed to parse address in other_submitters")
-        })
-        .collect()
 }

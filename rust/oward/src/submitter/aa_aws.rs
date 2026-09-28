@@ -4,8 +4,8 @@ use request::TokenizationRequest;
 use std::sync::{Arc, Mutex};
 
 use crate::{
-    config::validation::ValidationConfig, parser::strings_to_addresses,
-    submitter::AcceptedDdexSubmittersBuilder,
+    config::validation::ValidationConfig,
+    submitter::{AcceptedDdexSubmittersBuilder, strings_to_addresses},
 };
 
 #[derive(Clone)]
