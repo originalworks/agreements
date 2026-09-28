@@ -1,12 +1,15 @@
-# TODO: fill in official OWARD indexers
-[indexers.prod]
+[prod]
 registry_indexer_url = "re prod"
 agreements_indexer_url = "ag prod"
 
-[indexers.stage]
+[stage]
 registry_indexer_url = "re stage"
 agreements_indexer_url = "ag stage"
 
-[indexers.dev]
-registry_indexer_url = "re dev"
-agreements_indexer_url = "ag dev"
+[dev]
+registry_indexer_url = "https://api.studio.thegraph.com/query/9753/ddex-submitters-chiado/version/latest"
+agreements_indexer_url = "https://dev-stage-public-alb-596231104.us-east-1.elb.amazonaws.com/hasura-dev/v1/graphql"
+
+[test]
+registry_indexer_url = "re stage"
+agreements_indexer_url = "ag stage"

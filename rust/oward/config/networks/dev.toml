@@ -1,17 +1,5 @@
 [[networks]]
-chain_id = 1
-rpc_url = "https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID"
-agreement_factory_address = ""
-fee_manager_address = ""
-
-[[networks]]
-chain_id = 137
-rpc_url = "https://polygon-rpc.com"
-agreement_factory_address = ""
-fee_manager_address = ""
-
-[[networks]]
-chain_id = 56
-rpc_url = "https://bsc-dataseed.binance.org/"
-agreement_factory_address = ""
-fee_manager_address = ""
+chain_id = 84532
+rpc_url = "https://sepolia.base.org"
+agreement_factory_address = "0x27333d40af2C5a01eaa5Fd0b890181B9D525255d"
+fee_manager_address = "0xD22dEF914a36a5Df2C94166b5007f412a04De81B"
