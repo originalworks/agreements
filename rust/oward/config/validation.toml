@@ -1,6 +1,6 @@
 
-accept_other_submitters = true
-other_submitters = ["0xe43c5ce0da5861794d6d6dd8bc85e16d24e64c93"]
+accept_other_submitters = false
+other_submitters = []
 
 
 ignore_existing_agreements = true
