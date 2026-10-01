@@ -134,7 +134,7 @@ impl TokenizationRequestRepo {
                 INSERT INTO 
                     tokenization.tokenization_requests 
                     (tokenization_id, token_standard, rwa_id, tokenization_status, chain_id)
-                SELECT * FROM UNNEST($1::uuid[], $2::text[], $3::text[], $4::text[], $5::bigint[])
+                SELECT * FROM UNNEST($1::text[], $2::text[], $3::text[], $4::text[], $5::bigint[])
                 ON CONFLICT (tokenization_id) DO NOTHING
                 RETURNING 
                     sequence_id, 

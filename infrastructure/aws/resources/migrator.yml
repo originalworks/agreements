@@ -1,0 +1,64 @@
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  DatabaseName:
+    Type: String
+  DbSecretsName:
+    Type: String
+  DatabaseAccessSecurityGroup:
+    Type: String
+  PrivateSubnets:
+    Type: String
+
+Resources:
+  LambdaMigratorFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+
+  MigrationsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: provided.al2023
+      Architectures:
+        - x86_64
+      Handler: bootstrap
+      CodeUri: ../../../target/lambda/aws_migrator
+      Timeout: 30
+      Role: !GetAtt LambdaMigratorFunctionRole.Arn
+      Environment:
+        Variables:
+          DATABASE_URL: !Join
+            - ""
+            - - "postgresql://"
+              - "{{resolve:secretsmanager:"
+              - !Ref DbSecretsName
+              - ":SecretString:username}}"
+              - ":"
+              - "{{resolve:secretsmanager:"
+              - !Ref DbSecretsName
+              - ":SecretString:password}}"
+              - "@"
+              - "{{resolve:secretsmanager:"
+              - !Ref DbSecretsName
+              - ":SecretString:host}}"
+              - ":"
+              - "{{resolve:secretsmanager:"
+              - !Ref DbSecretsName
+              - ":SecretString:port}}"
+              - "/"
+              - !Ref DatabaseName
+              - "?options=-c search_path=tokenization"
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref DatabaseAccessSecurityGroup
+        SubnetIds: !Split [",", !Ref PrivateSubnets]
