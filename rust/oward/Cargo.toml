@@ -49,5 +49,5 @@ aws = [
 
 # AWS Lambda conected to the OW Account Abstraction Layer
 [[bin]]
-name = "aa_aws_lambda"
+name = "aa_aws_lambda_oward"
 path = "src/bin/aa_aws_lambda.rs"

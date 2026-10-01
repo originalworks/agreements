@@ -1,0 +1,124 @@
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  TokenizationQueueName:
+    Type: String
+  TokenizationDlqName:
+    Type: String
+  DatabaseAccessSecurityGroup:
+    Type: String
+  PrivateSubnets:
+    Type: String
+  Environment:
+    Type: String
+  AaTxRequestQueueUrl:
+    Type: String
+  AaTxRequestQueueArn:
+    Type: String
+  AaTxRequestQueueMessageGroupId:
+    Type: String
+  DatabaseName:
+    Type: String
+  DbSecretsName:
+    Type: String
+
+Resources:
+  OwardLambdaFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      Policies:
+        - PolicyName: SqsAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: SendToAaQueue
+                Effect: Allow
+                Action:
+                  - sqs:SendMessage
+                Resource:
+                  - !Ref AaTxRequestQueueArn
+              - Sid: ReceiveTokenizationQueue
+                Effect: Allow
+                Action:
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                  - sqs:ChangeMessageVisibility
+                Resource:
+                  - !GetAtt TokenizationQueue.Arn
+
+  OwardFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: provided.al2023
+      Architectures:
+        - x86_64
+      Handler: bootstrap
+      CodeUri: ../../../target/lambda/aa_aws_lambda_oward
+      Timeout: 25
+      Role: !GetAtt OwardLambdaFunctionRole.Arn
+      Environment:
+        Variables:
+          OWARD_INSTANCE_NAME: !Sub oward-${Environment}
+          AA_TX_REQUEST_QUEUE_URL: !Ref AaTxRequestQueueUrl
+          AA_TX_REQUEST_QUEUE_MESSAGE_GROUP_ID: !Ref AaTxRequestQueueMessageGroupId
+          ENVIRONMENT: !Ref Environment
+          DATABASE_URL: !Join
+            - ""
+            - - "postgresql://"
+              - "{{resolve:secretsmanager:"
+              - !Ref DbSecretsName
+              - ":SecretString:username}}"
+              - ":"
+              - "{{resolve:secretsmanager:"
+              - !Ref DbSecretsName
+              - ":SecretString:password}}"
+              - "@"
+              - "{{resolve:secretsmanager:"
+              - !Ref DbSecretsName
+              - ":SecretString:host}}"
+              - ":"
+              - "{{resolve:secretsmanager:"
+              - !Ref DbSecretsName
+              - ":SecretString:port}}"
+              - "/"
+              - !Ref DatabaseName
+
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref DatabaseAccessSecurityGroup
+        SubnetIds: !Split [",", !Ref PrivateSubnets]
+      Events:
+        OwTokenizationQueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt TokenizationQueue.Arn
+            BatchSize: 10
+
+  TokenizationQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Ref TokenizationQueueName
+      FifoQueue: true
+      ContentBasedDeduplication: true
+      VisibilityTimeout: 35
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt TokenizationDlq.Arn
+        maxReceiveCount: 5
+
+  TokenizationDlq:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Ref TokenizationDlqName
+      FifoQueue: true
+      ContentBasedDeduplication: true

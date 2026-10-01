@@ -1,0 +1,50 @@
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  TokenizationQueueName:
+    Type: String
+  TokenizationDlqName:
+    Type: String
+  DatabaseAccessSecurityGroup:
+    Type: AWS::SSM::Parameter::Value<String>
+  PrivateSubnets:
+    Type: AWS::SSM::Parameter::Value<String>
+  Environment:
+    Type: String
+  AaTxRequestQueueArn:
+    Type: AWS::SSM::Parameter::Value<String>
+  AaTxRequestQueueUrl:
+    Type: AWS::SSM::Parameter::Value<String>
+  AaTxRequestQueueMessageGroupId:
+    Type: AWS::SSM::Parameter::Value<String>
+  DatabaseName:
+    Type: String
+  DbSecretsName:
+    Type: String
+
+Resources:
+  Oward:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./resources/oward.yml
+      Parameters:
+        TokenizationQueueName: !Ref TokenizationQueueName
+        TokenizationDlqName: !Ref TokenizationDlqName
+        DatabaseAccessSecurityGroup: !Ref DatabaseAccessSecurityGroup
+        PrivateSubnets: !Ref PrivateSubnets
+        Environment: !Ref Environment
+        AaTxRequestQueueUrl: !Ref AaTxRequestQueueUrl
+        AaTxRequestQueueArn: !Ref AaTxRequestQueueArn
+        AaTxRequestQueueMessageGroupId: !Ref AaTxRequestQueueMessageGroupId
+        DatabaseName: !Ref DatabaseName
+        DbSecretsName: !Ref DbSecretsName
+
+  TokenizationMigrator:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./resources/migrator.yml
+      Parameters:
+        DbSecretsName: !Ref DbSecretsName
+        DatabaseName: !Ref DatabaseName
+        DatabaseAccessSecurityGroup: !Ref DatabaseAccessSecurityGroup
+        PrivateSubnets: !Ref PrivateSubnets
