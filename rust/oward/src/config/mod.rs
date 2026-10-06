@@ -1,11 +1,13 @@
 use std::env;
 
-pub mod aa_aws_lambda;
 pub mod cli;
 pub mod environment;
 pub mod indexers;
 pub mod networks;
 pub mod validation;
+
+#[cfg(feature = "aws")]
+pub mod aa_aws_lambda;
 
 pub struct NetworkConfigFilePaths {
     pub prod: &'static str,

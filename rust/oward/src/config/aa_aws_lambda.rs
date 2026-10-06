@@ -4,6 +4,7 @@ use crate::config::{
     indexers::{IndexersConfigTomlFile, IndexersUrls},
     validation::ValidationConfig,
 };
+use aws_secrets_manager::read_database_url_from_secrets_manager;
 
 #[derive(Debug)]
 pub struct LambdaEnvVars {
@@ -14,19 +15,19 @@ pub struct LambdaEnvVars {
 }
 
 impl LambdaEnvVars {
-    pub fn build() -> Self {
+    pub async fn build(aws_config: &aws_config::SdkConfig) -> anyhow::Result<Self> {
         let aa_tx_request_queue_url = get_env_var("AA_TX_REQUEST_QUEUE_URL");
         let aa_tx_request_queue_message_group_id: String =
             get_env_var("AA_TX_REQUEST_QUEUE_MESSAGE_GROUP_ID");
         let oward_instance_name = get_env_var("OWARD_INSTANCE_NAME");
-        let database_url = get_env_var("DATABASE_URL");
+        let database_url = read_database_url_from_secrets_manager(aws_config).await?;
 
-        Self {
+        Ok(Self {
             aa_tx_request_queue_url,
             aa_tx_request_queue_message_group_id,
             oward_instance_name,
             database_url,
-        }
+        })
     }
 }
 
@@ -38,11 +39,11 @@ pub struct AaAwsLambdaConfig {
 }
 
 impl AaAwsLambdaConfig {
-    pub fn build() -> anyhow::Result<Self> {
+    pub async fn build(aws_config: &aws_config::SdkConfig) -> anyhow::Result<Self> {
         let environment = read_environment();
         let validation_config = ValidationConfig::build()?;
         let indexers_urls = IndexersConfigTomlFile::read_indexers_urls(&environment)?;
-        let env_vars = LambdaEnvVars::build();
+        let env_vars = LambdaEnvVars::build(aws_config).await?;
 
         Ok(Self {
             validation_config,

@@ -1,0 +1,11 @@
+[package]
+name = "aws_secrets_manager"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+aws-sdk-secretsmanager = "1.119.0"
+aws-config = { workspace = true, features = ["behavior-version-latest"] }
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true

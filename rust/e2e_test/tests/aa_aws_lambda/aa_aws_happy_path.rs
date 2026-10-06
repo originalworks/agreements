@@ -55,7 +55,7 @@ pub async fn aa_aws_happy_path() -> anyhow::Result<()> {
 
     let network_tx_executor = PrivateKeySigner::random().address();
     let aws_config = build_aws_sdk_config().await?;
-    let env_vars = LambdaEnvVars::build();
+    let env_vars = LambdaEnvVars::build(&aws_config).await?;
     let contract_addresses = E2eTestContractAddresses::from_file()?;
 
     let pool = PgPool::connect(&env_vars.database_url).await?;
@@ -88,7 +88,7 @@ pub async fn aa_aws_happy_path() -> anyhow::Result<()> {
             other_submitters: None,
             ignore_existing_agreements: false,
         },
-        env_vars: LambdaEnvVars::build(),
+        env_vars: LambdaEnvVars::build(&aws_config).await?,
 
         indexers_urls: IndexersUrls {
             registry_indexer_url: graphql_server_mock.registry_endpoint(),

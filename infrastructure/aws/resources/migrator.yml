@@ -24,6 +24,17 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      Policies:
+        - PolicyName: SecretsManagerAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: ReadSecrets
+                Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${DbSecretsName}*"
 
   MigrationsFunction:
     Type: AWS::Serverless::Function
@@ -37,27 +48,8 @@ Resources:
       Role: !GetAtt LambdaMigratorFunctionRole.Arn
       Environment:
         Variables:
-          DATABASE_URL: !Join
-            - ""
-            - - "postgresql://"
-              - "{{resolve:secretsmanager:"
-              - !Ref DbSecretsName
-              - ":SecretString:username}}"
-              - ":"
-              - "{{resolve:secretsmanager:"
-              - !Ref DbSecretsName
-              - ":SecretString:password}}"
-              - "@"
-              - "{{resolve:secretsmanager:"
-              - !Ref DbSecretsName
-              - ":SecretString:host}}"
-              - ":"
-              - "{{resolve:secretsmanager:"
-              - !Ref DbSecretsName
-              - ":SecretString:port}}"
-              - "/"
-              - !Ref DatabaseName
-              - "?options=-c search_path=tokenization"
+          DATABASE_NAME: !Ref DatabaseName
+          DB_SECRETS_NAME: !Ref DbSecretsName
       VpcConfig:
         SecurityGroupIds:
           - !Ref DatabaseAccessSecurityGroup

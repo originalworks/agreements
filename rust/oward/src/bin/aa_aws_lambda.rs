@@ -16,7 +16,7 @@ async fn main() -> Result<(), lambda_runtime::Error> {
         .region(region_provider)
         .load()
         .await;
-    let aa_aws_lambda_config = AaAwsLambdaConfig::build()?;
+    let aa_aws_lambda_config = AaAwsLambdaConfig::build(&aws_config).await?;
     let pool = Pool::connect(&aa_aws_lambda_config.env_vars.database_url).await?;
     let orchestrator =
         AwsWithAaOrchestrator::build(&pool, &aws_config, &aa_aws_lambda_config).await?;
