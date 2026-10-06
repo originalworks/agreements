@@ -18,10 +18,13 @@ aa_db_migrator = { package = "migrator", git = "https://github.com/originalworks
 
 # aws
 lambda_runtime = { workspace = true, optional = true }
-
+aws_secrets_manager = { workspace = true, optional = true }
+aws-config = { workspace = true, features = [
+    "behavior-version-latest",
+], optional = true }
 
 [features]
-aws = ["dep:lambda_runtime"]
+aws = ["dep:lambda_runtime", "dep:aws_secrets_manager", "dep:aws-config"]
 
 [[bin]]
 name = "aws_migrator"

@@ -56,6 +56,16 @@ Resources:
                   - sqs:ChangeMessageVisibility
                 Resource:
                   - !GetAtt TokenizationQueue.Arn
+        - PolicyName: SecretsManagerAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: ReadSecrets
+                Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${DbSecretsName}*"
 
   OwardFunction:
     Type: AWS::Serverless::Function
@@ -73,26 +83,8 @@ Resources:
           AA_TX_REQUEST_QUEUE_URL: !Ref AaTxRequestQueueUrl
           AA_TX_REQUEST_QUEUE_MESSAGE_GROUP_ID: !Ref AaTxRequestQueueMessageGroupId
           ENVIRONMENT: !Ref Environment
-          DATABASE_URL: !Join
-            - ""
-            - - "postgresql://"
-              - "{{resolve:secretsmanager:"
-              - !Ref DbSecretsName
-              - ":SecretString:username}}"
-              - ":"
-              - "{{resolve:secretsmanager:"
-              - !Ref DbSecretsName
-              - ":SecretString:password}}"
-              - "@"
-              - "{{resolve:secretsmanager:"
-              - !Ref DbSecretsName
-              - ":SecretString:host}}"
-              - ":"
-              - "{{resolve:secretsmanager:"
-              - !Ref DbSecretsName
-              - ":SecretString:port}}"
-              - "/"
-              - !Ref DatabaseName
+          DATABASE_NAME: !Ref DatabaseName
+          DB_SECRETS_NAME: !Ref DbSecretsName
 
       VpcConfig:
         SecurityGroupIds:
